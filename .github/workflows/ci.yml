@@ -72,9 +72,12 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  # Publication conditionnée aux tests, au build et à l'analyse Trivy, mais pas au lint : la dette
+  # de formatage existante (formateur HTML de Biome incompatible avec certaines liaisons Angular)
+  # ne doit pas bloquer la livraison. Le lint reste obligatoire pour le statut global « CI ».
   docker:
     name: Image Docker
-    needs: [lint, test, build]
+    needs: [test, build]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:

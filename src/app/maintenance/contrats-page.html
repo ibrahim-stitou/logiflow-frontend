@@ -1,18 +1,12 @@
 <div class="flex flex-col gap-6">
   <app-maintenance-tabs />
-  <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-    <div>
-      <h1 class="module-page-title">Contrats d'assurance</h1>
-      <p class="mt-1 text-sm text-muted">
-        Le contrat en vigueur couvrant l'engin est rattaché automatiquement à chaque sinistre, avec
-        sa franchise.
-      </p>
-    </div>
-    <a class="btn-primary pressable" routerLink="/maintenance/contrats/nouveau">Nouveau contrat</a>
+
+  <div class="list-toolbar">
+    <app-list-toolbar-cta label="Nouveau contrat" link="/maintenance/contrats/nouveau" />
   </div>
 
   @if (contrats.isLoading() && !contrats.hasValue()) {
-  <app-list-table-skeleton label="Chargement des contrats" />
+  <app-list-table-skeleton [columns]="7" label="Chargement des contrats" />
   } @else if (contrats.error()) {
   <div class="alert-panel" role="alert">{{ erreur() }}</div>
   } @else if (contrats.hasValue() && contrats.value().content.length === 0) {
@@ -23,58 +17,81 @@
     title="Aucun contrat"
   />
   } @else if (contrats.hasValue()) {
-  <div class="list-table-panel">
-    <table class="w-full min-w-3xl text-left text-sm">
-      <thead class="list-table-head">
-        <tr>
-          <th class="px-4 py-3 font-medium" scope="col">Police</th>
-          <th class="px-4 py-3 font-medium" scope="col">Assureur</th>
-          <th class="px-4 py-3 font-medium" scope="col">Couverture</th>
-          <th class="px-4 py-3 font-medium" scope="col">Période</th>
-          <th class="px-4 py-3 text-right font-medium" scope="col">Franchise</th>
-          <th class="px-4 py-3 text-right font-medium" scope="col">Prime annuelle</th>
-          <th class="px-4 py-3 font-medium" scope="col">Statut</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (c of contrats.value().content; track c.id) {
-        <tr class="list-row border-b border-line last:border-0 hover:bg-canvas">
-          <td class="px-4 py-3">
-            <a
-              [routerLink]="['/maintenance/contrats', c.id]"
-              class="font-mono text-xs font-medium text-pine underline-offset-2 hover:underline"
-            >
-              {{ c.numeroPolice }}
-            </a>
-          </td>
-          <td class="px-4 py-3">{{ lookups.prestataireLibelle(c.assureurId) }}</td>
-          <td class="px-4 py-3">
-            <span class="text-ink">{{ libelle(c.type) }}</span>
-            <span class="block max-w-xs truncate font-mono text-xs text-muted">{{ couverture(c) }}</span>
-          </td>
-          <td class="px-4 py-3 font-mono text-xs tabular-nums text-muted">
-            {{ formatDate(c.dateEffet) }} → {{ formatDate(c.dateEcheance) }}
-          </td>
-          <td class="px-4 py-3 text-right font-mono text-xs tabular-nums">{{ formatMontant(c.franchise) }}</td>
-          <td class="px-4 py-3 text-right font-mono text-xs tabular-nums">{{ formatMontant(c.primeAnnuelle) }}</td>
-          <td class="px-4 py-3">
-            @if (c.enVigueur) {
-            <app-statut-chip label="En vigueur" tone="pine" />
-            } @else {
-            <app-statut-chip [label]="c.actif ? 'Hors période' : 'Inactif'" tone="muted" />
-            }
-          </td>
-        </tr>
-        }
-      </tbody>
-    </table>
+  <div class="list-table-stack">
+    <div class="list-table-panel">
+      <table z-table>
+        <thead z-table-header>
+          <tr z-table-row>
+            <th scope="col" z-table-head>Police</th>
+            <th scope="col" z-table-head>Assureur</th>
+            <th scope="col" z-table-head>Couverture</th>
+            <th scope="col" z-table-head>Période</th>
+            <th scope="col" z-table-head class="text-right">Franchise</th>
+            <th scope="col" z-table-head class="text-right">Prime annuelle</th>
+            <th scope="col" z-table-head>Statut</th>
+            <th scope="col" z-table-head class="text-right">
+              <span class="sr-only">Actions</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody z-table-body>
+          @for (c of contrats.value().content; track c.id) {
+          <tr class="list-row" z-table-row>
+            <td z-table-cell>
+              <a
+                [routerLink]="['/maintenance/contrats', c.id]"
+                class="list-cell-with-icon font-mono text-xs text-pine underline-offset-2 hover:underline"
+              >
+                <ng-icon
+                  aria-hidden="true"
+                  class="list-cell-with-icon__icon"
+                  name="lucideWrench"
+                />
+                <span>{{ c.numeroPolice }}</span>
+              </a>
+            </td>
+            <td z-table-cell>{{ lookups.prestataireLibelle(c.assureurId) }}</td>
+            <td z-table-cell>
+              <span class="text-ink">{{ libelle(c.type) }}</span>
+              <span class="block max-w-xs truncate font-mono text-xs text-muted">{{ couverture(c) }}</span>
+            </td>
+            <td class="font-mono text-xs tabular-nums text-muted" z-table-cell>
+              {{ formatDate(c.dateEffet) }} → {{ formatDate(c.dateEcheance) }}
+            </td>
+            <td class="text-right font-mono text-xs tabular-nums" z-table-cell>
+              {{ formatMontant(c.franchise) }}
+            </td>
+            <td class="text-right font-mono text-xs tabular-nums" z-table-cell>
+              {{ formatMontant(c.primeAnnuelle) }}
+            </td>
+            <td z-table-cell>
+              @if (c.enVigueur) {
+              <app-statut-chip label="En vigueur" tone="pine" />
+              } @else {
+              <app-statut-chip [label]="c.actif ? 'Hors période' : 'Inactif'" tone="muted" />
+              }
+            </td>
+            <td class="text-right" z-table-cell>
+              <a
+                [routerLink]="['/maintenance/contrats', c.id]"
+                class="list-row-action list-row-action--with-icon text-sm font-medium text-pine underline-offset-2 hover:underline"
+              >
+                <span>Ouvrir</span>
+                <ng-icon aria-hidden="true" name="lucideArrowRight" />
+              </a>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <app-list-pagination
+      [(page)]="page"
+      [pageSize]="20"
+      [totalElements]="contrats.value().totalElements"
+      [totalPages]="contrats.value().totalPages"
+      itemLabel="contrat"
+    />
   </div>
-  <app-list-pagination
-    [(page)]="page"
-    [pageSize]="20"
-    [totalElements]="contrats.value().totalElements"
-    [totalPages]="contrats.value().totalPages"
-    itemLabel="contrat"
-  />
   }
 </div>

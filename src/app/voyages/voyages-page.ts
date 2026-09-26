@@ -10,17 +10,10 @@ import {
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 import { NgIcon, provideIcons } from "@ng-icons/core";
 import {
-  lucideCalendarClock,
-  lucideChevronRight,
-  lucideCircleAlert,
-  lucideCircleDot,
-  lucideGlobe,
-  lucideHash,
+  lucideArrowRight,
   lucideInbox,
   lucideMap,
-  lucideMapPin,
   lucidePackage,
-  lucidePlus,
   lucideRepeat,
   lucideRoute,
   lucideShare2,
@@ -28,16 +21,6 @@ import {
   lucideX,
 } from "@ng-icons/lucide";
 import { ZardTableImports } from "@/shared/components/table/table.imports";
-import { ZardAlertComponent } from "@/shared/components/alert";
-import { ZardBadgeComponent } from "@/shared/components/badge";
-import type { ZardBadgeTypeVariants } from "@/shared/components/badge/badge.variants";
-import { ZardButtonComponent } from "@/shared/components/button";
-import {
-  ZardCardComponent,
-  ZardCardDescriptionComponent,
-  ZardCardHeaderComponent,
-  ZardCardTitleComponent,
-} from "@/shared/components/card/card.component";
 import { environment } from "../../environments/environment";
 import { httpErrorMessage } from "../core/api/http-error";
 import type { PageResponse } from "../core/api/page-response";
@@ -51,6 +34,7 @@ import {
   ListTableSkeleton,
   MapAsideSkeleton,
 } from "../shared/ui/list-table-skeleton";
+import { LIST_TABLE_ROW_ICON_PROVIDERS } from "../shared/ui/list-table-row-icons";
 import { connectListQueryState } from "../shared/ui/list-query-state";
 import {
   listKeyboardRows,
@@ -66,15 +50,15 @@ import { ListPagination } from "../shared/ui/list-pagination";
 import { ListSearchBar } from "../shared/ui/list-search-bar";
 import { ListStatutFilter } from "../shared/ui/list-statut-filter";
 import { ListToolbarCta } from "../shared/ui/list-toolbar-cta";
+import { statutIconForValue } from "../shared/ui/list-statut-filter";
+import { StatutChip } from "../shared/ui/statut-chip";
 import type { Site } from "../sites/site";
-import { apercuToneToBadgeType } from "../shared/ui/apercu-zard";
 import { voyageStatutTone } from "../tableau/apercu";
 import {
   formatInstant,
   porteeLabel,
   STATUT_VOYAGES,
   statutVoyageLabel,
-  type Portee,
   typeVoyageLabel,
   type StatutVoyage,
   type TypeVoyage,
@@ -96,13 +80,7 @@ const LOOKUP_PAGE_SIZE = 100;
   imports: [
     RouterLink,
     NgIcon,
-    ZardAlertComponent,
-    ZardBadgeComponent,
-    ZardButtonComponent,
-    ZardCardComponent,
-    ZardCardDescriptionComponent,
-    ZardCardHeaderComponent,
-    ZardCardTitleComponent,
+    StatutChip,
     ListSearchBar,
     ListStatutFilter,
     ListToolbarCta,
@@ -118,18 +96,12 @@ const LOOKUP_PAGE_SIZE = 100;
   templateUrl: "./voyages-page.html",
   styleUrl: "./voyages-page.css",
   viewProviders: [
+    LIST_TABLE_ROW_ICON_PROVIDERS,
     provideIcons({
-      lucideCalendarClock,
-      lucideChevronRight,
-      lucideCircleAlert,
-      lucideCircleDot,
-      lucideGlobe,
-      lucideHash,
+      lucideArrowRight,
       lucideInbox,
       lucideMap,
-      lucideMapPin,
       lucidePackage,
-      lucidePlus,
       lucideRepeat,
       lucideRoute,
       lucideShare2,
@@ -162,6 +134,8 @@ export class VoyagesPage {
   protected readonly statutFilter = signal<string | null>(null);
   protected readonly page = signal(0);
   protected readonly selectedVoyageId = signal<string | null>(null);
+  /** Itinerary map is on by default — core to the voyages list. */
+  protected readonly mapVisible = signal(true);
   protected readonly mapRoadPath = signal<readonly GeoMapPathPoint[]>([]);
   protected readonly mapRoadPathLoading = signal(false);
   protected readonly mapRoadPathUnavailable = signal(false);
@@ -300,6 +274,12 @@ export class VoyagesPage {
     )
   );
 
+  protected readonly listWithMapLayoutClass = computed(() =>
+    this.mapVisible()
+      ? "grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)] xl:items-start"
+      : ""
+  );
+
   constructor() {
     connectListQueryState(
       this.route,
@@ -365,8 +345,12 @@ export class VoyagesPage {
     this.page.set(0);
   }
 
-  protected statutBadgeType(statut: StatutVoyage): ZardBadgeTypeVariants {
-    return apercuToneToBadgeType(voyageStatutTone(statut));
+  protected toggleMapVisible(): void {
+    this.mapVisible.update((visible) => !visible);
+  }
+
+  protected statutChipIcon(statut: StatutVoyage): string | null {
+    return statutIconForValue(this.statutOptions, statut);
   }
 
   protected typeVoyageIcon(type: TypeVoyage): string {
@@ -388,12 +372,11 @@ export class VoyagesPage {
     }
   }
 
-  protected porteeIcon(portee: Portee): string {
-    return portee === "INTERNATIONAL" ? "lucideGlobe" : "lucideMapPin";
-  }
-
   protected selectVoyage(voyageId: string): void {
     this.selectedVoyageId.set(voyageId);
+    if (!this.mapVisible()) {
+      this.mapVisible.set(true);
+    }
   }
 
   private voyageMapLookup(): {

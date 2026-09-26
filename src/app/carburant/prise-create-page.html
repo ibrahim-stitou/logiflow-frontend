@@ -48,7 +48,7 @@
   <app-form-section title="Ticket">
     <app-form-field
       [error]="
-        showFieldError(createForm.stationId())
+        !stationCreateOpen() && showFieldError(createForm.stationId())
           ? firstFieldError(createForm.stationId().errors())
           : null
       "
@@ -56,12 +56,78 @@
       label="Station"
     >
       <app-field-select
-        [formField]="createForm.stationId"
-        [invalid]="showFieldError(createForm.stationId())"
+        (selectValueChange)="onStationSelectChange($event)"
+        [invalid]="
+          !stationCreateOpen() && showFieldError(createForm.stationId())
+        "
         [options]="stationSelectOptions()"
+        [selectValue]="stationSelectValue()"
         inputId="stationId"
         placeholder="Sélectionner une station…"
       />
+      @if (stationsLoadedEmpty() && !stationCreateOpen()) {
+      <p class="mt-1.5 text-xs text-muted">
+        Aucune station active — choisissez « Créer une nouvelle station… ».
+      </p>
+      }
+
+      @if (stationCreateOpen()) {
+      <fieldset class="fiche-inset mt-3 flex flex-col gap-3 p-4">
+        <legend class="px-1 text-xs font-medium text-muted">
+          Nouvelle station
+        </legend>
+        <app-form-field inputId="stationCode" label="Code">
+          <input
+            (input)="updateStationDraft('code', $event)"
+            [value]="stationDraft().code"
+            class="field"
+            id="stationCode"
+            type="text"
+          />
+        </app-form-field>
+        <app-form-field inputId="stationLibelle" label="Libellé">
+          <input
+            (input)="updateStationDraft('libelle', $event)"
+            [value]="stationDraft().libelle"
+            class="field"
+            id="stationLibelle"
+            type="text"
+          />
+        </app-form-field>
+        <app-form-field inputId="stationAdresse" label="Adresse">
+          <input
+            (input)="updateStationDraft('adresse', $event)"
+            [value]="stationDraft().adresse"
+            class="field"
+            id="stationAdresse"
+            type="text"
+          />
+        </app-form-field>
+        @if (stationFormError()) {
+        <div class="alert-panel" role="alert">{{ stationFormError() }}</div>
+        }
+        <div class="flex flex-wrap items-center gap-2">
+          <button
+            (click)="onCreateStation($event)"
+            [disabled]="stationSaving()"
+            class="btn-toolbar pressable"
+            type="button"
+          >
+            <ng-icon aria-hidden="true" class="btn-toolbar__icon" name="lucideCheck" />
+            <span>{{ stationSaving() ? "Création…" : "Créer et sélectionner" }}</span>
+          </button>
+          @if (!stationsLoadedEmpty()) {
+          <button
+            (click)="cancelStationCreate()"
+            class="btn-outline pressable"
+            type="button"
+          >
+            Annuler
+          </button>
+          }
+        </div>
+      </fieldset>
+      }
     </app-form-field>
 
     <app-form-field inputId="typeCarburant" label="Type">

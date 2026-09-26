@@ -5,7 +5,8 @@ import { environment } from "../../environments/environment";
 import type { Document, DocumentType, TypeEntiteDocumentable } from "./document";
 
 /**
- * Document HTTP surface: multipart POST upload, GET list by entity, DELETE.
+ * Document HTTP surface: multipart POST upload, GET list by entity, DELETE,
+ * and authenticated binary download (`/contenu`).
  */
 @Service()
 export class DocumentApi {
@@ -53,5 +54,31 @@ export class DocumentApi {
 
   supprimer(id: string): Promise<void> {
     return firstValueFrom(this.http.delete<void>(`${this.baseUrl}/${id}`));
+  }
+
+  /**
+   * Ouvre le fichier dans un nouvel onglet via un blob authentifié.
+   * Les URL stockées (`/fichiers/…`) ne sont pas routées vers le backend
+   * depuis le front (proxy/Caddy ne forwardent que `/api/*`).
+   */
+  async ouvrir(id: string): Promise<void> {
+    const blob = await firstValueFrom(
+      this.http.get(`${this.baseUrl}/${id}/contenu`, {
+        responseType: "blob",
+      })
+    );
+    const objectUrl = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = objectUrl;
+    anchor.target = "_blank";
+    anchor.rel = "noopener";
+    // Keep the name for download fallbacks (some browsers ignore inline PDFs).
+    if (blob.type && !blob.type.includes("pdf") && !blob.type.startsWith("image/")) {
+      anchor.download = "document";
+    }
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
   }
 }

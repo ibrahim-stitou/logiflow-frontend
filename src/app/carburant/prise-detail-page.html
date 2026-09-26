@@ -120,83 +120,14 @@
   </app-form-section>
   }
 
-  <app-form-section
-    description="Tickets, photos de pompe ou justificatifs liés à cette prise."
-    title="Documents"
-  >
-    @if (documents.isLoading()) {
-    <p class="fiche-load-hint" role="status">Chargement…</p>
-    } @else if (documents.error()) {
-    <app-fiche-error
-      (retry)="documents.reload()"
-      [message]="documentsLoadError()"
-    />
-    } @else if (documents.hasValue()) {
-    @if (documents.value().length === 0) {
-    <p class="fiche-meta">Aucun document.</p>
-    } @else {
-    <ul class="flex flex-col gap-2">
-      @for (document of documents.value(); track document.id) {
-      <li
-        class="fiche-inline-card flex flex-wrap items-end justify-between gap-3"
-      >
-        <div class="min-w-0 flex-1">
-          <p class="font-medium text-ink">
-            {{ documentTypeLabel(document.typeDocument) }}
-          </p>
-          <p class="mt-1 text-sm text-muted">{{ document.reference }}</p>
-          @if (document.url) {
-          <a
-            [href]="document.url"
-            class="mt-2 inline-block text-xs text-pine underline-offset-2 hover:underline"
-            rel="noopener"
-            target="_blank"
-          >
-            Ouvrir le fichier
-          </a>
-          }
-        </div>
-        @if (isEditable()) {
-        <button
-          (click)="deleteDocument(document.id)"
-          class="btn-danger-outline pressable h-10 px-3 text-xs"
-          type="button"
-        >
-          Supprimer
-        </button>
-        }
-      </li>
-      }
-    </ul>
-    }
-
-    @if (isEditable()) {
-    <details class="fiche-disclosure fiche-inset mt-4">
-      <summary class="text-sm font-medium text-ink">
-        Téléverser un document
-      </summary>
-      <form (submit)="uploadDocument($event)" class="mt-4" novalidate>
-        <app-form-field inputId="documentFichier" label="Fichier">
-          <input
-            (change)="onFileSelected($event)"
-            accept=".pdf,.png,.jpg,.jpeg,.webp"
-            class="field"
-            id="documentFichier"
-            type="file"
-          >
-        </app-form-field>
-        @if (uploadError()) {
-        <div class="alert-panel mt-3" role="alert">{{ uploadError() }}</div>
-        }
-        <button class="btn-toolbar pressable mt-4" type="submit">
-          <ng-icon aria-hidden="true" class="btn-toolbar__icon" name="lucideCheck" />
-          <span>Téléverser</span>
-        </button>
-      </form>
-    </details>
-    }
-    }
-  </app-form-section>
+  <app-documents-section
+    [description]="
+      'Tickets, photos de pompe ou justificatifs liés à cette prise.'
+    "
+    [entiteId]="id()"
+    [modifiable]="isEditable()"
+    typeEntite="PRISE_CARBURANT"
+  />
 
   @if (isEditable() && canValidate()) {
   <app-form-section title="Validation">

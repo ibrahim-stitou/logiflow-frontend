@@ -55,7 +55,6 @@ import {
 import { FileDuJourStore } from "../tableau/file-du-jour-store";
 import { CommandPaletteService } from "./command-palette.service";
 import { CopiloteBouton } from "./copilote-bouton";
-import { CopilotePanel } from "./copilote-panel";
 import { ShellBreadcrumbComponent } from "./shell-breadcrumb";
 
 @Component({
@@ -68,7 +67,6 @@ import { ShellBreadcrumbComponent } from "./shell-breadcrumb";
     ShellBreadcrumbComponent,
     ToastHost,
     CopiloteBouton,
-    CopilotePanel,
     StatutChip,
   ],
   providers: [

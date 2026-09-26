@@ -1,3 +1,4 @@
+import { OverlayContainer } from "@angular/cdk/overlay";
 import { provideHttpClient } from "@angular/common/http";
 import {
   HttpTestingController,
@@ -9,7 +10,7 @@ import { AUTH_DEMO_TEST_PROVIDERS } from "../core/auth/auth-test-providers";
 import type { EtatCopilote } from "../ia/copilote";
 import { CopiloteStore, type MessageVue } from "../ia/copilote-store";
 import { CopiloteBouton } from "./copilote-bouton";
-import { CopilotePanel } from "./copilote-panel";
+import { CopiloteSheetService } from "./copilote-sheet.service";
 
 const ETAT_OK: EtatCopilote = {
   base: "UP",
@@ -38,7 +39,7 @@ function message(partiel: Partial<MessageVue>): MessageVue {
 describe("CopilotePanel", () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CopilotePanel, CopiloteBouton],
+      imports: [CopiloteBouton],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
@@ -48,13 +49,17 @@ describe("CopilotePanel", () => {
     }).compileComponents();
   });
 
+  afterEach(() => {
+    TestBed.inject(CopiloteSheetService).fermer();
+    TestBed.inject(OverlayContainer).ngOnDestroy();
+  });
+
   async function ouvrir(etat: EtatCopilote = ETAT_OK) {
     const bouton = TestBed.createComponent(CopiloteBouton);
-    const fixture = TestBed.createComponent(CopilotePanel);
     bouton.detectChanges();
-    fixture.detectChanges();
     (bouton.nativeElement as HTMLElement).querySelector("button")?.click();
-    fixture.detectChanges();
+    bouton.detectChanges();
+    await bouton.whenStable();
 
     const http = TestBed.inject(HttpTestingController);
     http.expectOne("/api/v1/ia/copilote/conversations").flush([
@@ -66,15 +71,18 @@ describe("CopilotePanel", () => {
       },
     ]);
     http.expectOne("/api/v1/ia/copilote/etat").flush(etat);
-    await fixture.whenStable();
-    fixture.detectChanges();
-    return { compiled: fixture.nativeElement as HTMLElement, fixture, http };
+    await bouton.whenStable();
+    bouton.detectChanges();
+
+    const overlay = TestBed.inject(OverlayContainer).getContainerElement();
+    return { compiled: overlay, fixture: bouton, http };
   }
 
-  it("opens as a right-side panel with history, suggestions and service status", async () => {
+  it("opens as a right-side sheet with history, suggestions and service status", async () => {
     const { compiled, http } = await ouvrir();
 
-    expect(compiled.querySelector("aside.copilote-panneau")).not.toBeNull();
+    expect(compiled.querySelector("#app-copilote-panel")).not.toBeNull();
+    expect(compiled.querySelector("[data-slot='sheet-content']")).not.toBeNull();
     expect(
       compiled.querySelector(".copilote-historique")?.textContent
     ).toContain("Consommation carburant");
@@ -126,28 +134,38 @@ describe("CopilotePanel", () => {
     ]);
     fixture.detectChanges();
 
+    const overlay = TestBed.inject(OverlayContainer).getContainerElement();
     const statuts = [
-      ...compiled.querySelectorAll(".copilote-envoi-statut"),
+      ...overlay.querySelectorAll(".copilote-envoi-statut"),
     ].map((e) => e.textContent?.trim());
     expect(statuts).toEqual(["Envoyé", "Non envoyé"]);
-    const markdown = compiled.querySelector(".copilote-markdown");
+    const markdown = overlay.querySelector(".copilote-markdown");
     expect(markdown?.querySelector("strong")?.textContent).toBe("VOY-1");
     expect(markdown?.querySelector("script")).toBeNull();
     expect(
-      compiled.querySelector("a.copilote-source")?.getAttribute("href")
+      overlay.querySelector("a.copilote-source")?.getAttribute("href")
     ).toBe("/voyages/v1");
     expect(
-      compiled.querySelector('button[aria-label="Réponse utile"]')
+      overlay.querySelector('button[aria-label="Réponse utile"]')
     ).not.toBeNull();
   });
 
-  it("closes on Escape", async () => {
+  it("closes when the sheet close control is clicked", async () => {
     const { compiled, fixture } = await ouvrir();
+    expect(compiled.querySelector("#app-copilote-panel")).not.toBeNull();
 
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    const close = compiled.querySelector(
+      '[data-testid="z-close-header-button"]'
+    ) as HTMLButtonElement | null;
+    expect(close).not.toBeNull();
+    close?.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await new Promise((resolve) => setTimeout(resolve, 250));
     fixture.detectChanges();
 
-    expect(compiled.querySelector("aside")).toBeNull();
+    const overlay = TestBed.inject(OverlayContainer).getContainerElement();
+    expect(overlay.querySelector("#app-copilote-panel")).toBeNull();
     expect(TestBed.inject(CopiloteStore).ouvert()).toBe(false);
   });
 });

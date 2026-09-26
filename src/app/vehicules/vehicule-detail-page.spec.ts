@@ -67,7 +67,7 @@ describe("VehiculeDetailPage", () => {
     expect(compiled.textContent).toContain("Compteurs");
     expect(compiled.textContent).toContain("Score de santé");
     expect(compiled.textContent).not.toContain("Chargement impossible.");
-    expect(compiled.textContent).toContain("Aucun document.");
+    expect(compiled.textContent).toContain("Aucun document");
     http.verify();
   });
 });

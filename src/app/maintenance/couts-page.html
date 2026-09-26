@@ -1,26 +1,19 @@
 <div class="flex flex-col gap-6">
   <app-maintenance-tabs />
-  <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-    <div>
-      <h1 class="module-page-title">Coûts de maintenance</h1>
-      <p class="mt-1 text-sm text-muted">
-        Ordres de travail terminés (lignes de coût réelles) et coût net des sinistres sur la période.
-      </p>
-    </div>
-    <div class="grid grid-cols-2 gap-3 sm:w-md">
-      <app-field-select
-        (selectValueChange)="choisirPeriode($event)"
-        [options]="periodeOptions"
-        [selectValue]="periode()"
-        inputId="couts-periode"
-      />
-      <app-field-select
-        (selectValueChange)="typeEngin.set($event)"
-        [options]="typeEnginOptions"
-        [selectValue]="typeEngin() || '__none__'"
-        inputId="couts-type-engin"
-      />
-    </div>
+
+  <div class="list-toolbar">
+    <app-list-statut-filter
+      [(selected)]="periodeFilter"
+      [options]="periodeOptions"
+      allLabel="12 derniers mois"
+      ariaLabel="Filtrer par période"
+    />
+    <app-list-statut-filter
+      [(selected)]="typeEngin"
+      [options]="typeEnginOptions"
+      allLabel="Tous les engins"
+      ariaLabel="Filtrer par type d'engin"
+    />
   </div>
 
   @if (couts.isLoading() && !couts.hasValue()) {
@@ -32,38 +25,57 @@
     Du {{ formatDate(couts.value().debut) }} au {{ formatDate(couts.value().fin) }}
   </p>
 
-  <section aria-label="Indicateurs" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-    <div class="rounded-xl border border-line bg-surface p-4">
-      <p class="text-xs text-muted">Maintenance (HT)</p>
-      <p class="mt-1 font-mono text-xl tabular-nums">{{ formatMontant(couts.value().totalHt) }}</p>
-      <p class="text-xs text-muted">
-        {{ couts.value().nombreOrdres }} OT terminé(s) · {{ formatMontant(couts.value().totalTtc) }} TTC
-      </p>
-    </div>
-    <div class="rounded-xl border border-line bg-surface p-4">
-      <p class="text-xs text-muted">Écart au budget estimé</p>
-      <p
-        [class.text-brake]="(ecartBudget() ?? 0) > 0"
-        [class.text-pine]="(ecartBudget() ?? 0) <= 0"
-        class="mt-1 font-mono text-xl tabular-nums"
+  <section aria-label="Indicateurs">
+    <ul class="m-0 grid list-none gap-3 p-0 sm:grid-cols-2 lg:grid-cols-4">
+      <li
+        class="flex min-h-0 flex-col rounded-xl border border-line/80 bg-surface px-4 py-3.5 shadow-sm"
       >
-        {{ ecartLibelle() }}
-      </p>
-      <p class="text-xs text-muted">Budget : {{ formatMontant(couts.value().budgetEstime) }}</p>
-    </div>
-    <div class="rounded-xl border border-line bg-surface p-4">
-      <p class="text-xs text-muted">Sinistres</p>
-      <p class="mt-1 font-mono text-xl tabular-nums">{{ formatMontant(couts.value().coutNetSinistres) }}</p>
-      <p class="text-xs text-muted">
-        {{ couts.value().nombreSinistres }} sinistre(s) · {{ formatMontant(couts.value().indemnitesPercues) }}
-        d'indemnités
-      </p>
-    </div>
-    <div class="rounded-xl border border-pine/40 bg-pine/5 p-4">
-      <p class="text-xs text-muted">Coût global</p>
-      <p class="mt-1 font-mono text-xl font-semibold tabular-nums">{{ formatMontant(coutGlobal()) }}</p>
-      <p class="text-xs text-muted">Maintenance + coût net des sinistres</p>
-    </div>
+        <span class="text-sm font-medium text-ink">Maintenance (HT)</span>
+        <p class="mt-2 font-mono text-2xl leading-none font-medium tracking-tight tabular-nums">
+          {{ formatMontant(couts.value().totalHt) }}
+        </p>
+        <p class="mt-auto pt-1.5 text-xs text-muted">
+          {{ couts.value().nombreOrdres }} OT terminé(s) · {{ formatMontant(couts.value().totalTtc) }}
+          TTC
+        </p>
+      </li>
+      <li
+        class="flex min-h-0 flex-col rounded-xl border border-line/80 bg-surface px-4 py-3.5 shadow-sm"
+      >
+        <span class="text-sm font-medium text-ink">Écart au budget estimé</span>
+        <p
+          [class.text-brake]="(ecartBudget() ?? 0) > 0"
+          [class.text-pine]="(ecartBudget() ?? 0) <= 0"
+          class="mt-2 font-mono text-2xl leading-none font-medium tracking-tight tabular-nums"
+        >
+          {{ ecartLibelle() }}
+        </p>
+        <p class="mt-auto pt-1.5 text-xs text-muted">
+          Budget : {{ formatMontant(couts.value().budgetEstime) }}
+        </p>
+      </li>
+      <li
+        class="flex min-h-0 flex-col rounded-xl border border-line/80 bg-surface px-4 py-3.5 shadow-sm"
+      >
+        <span class="text-sm font-medium text-ink">Sinistres</span>
+        <p class="mt-2 font-mono text-2xl leading-none font-medium tracking-tight tabular-nums">
+          {{ formatMontant(couts.value().coutNetSinistres) }}
+        </p>
+        <p class="mt-auto pt-1.5 text-xs text-muted">
+          {{ couts.value().nombreSinistres }} sinistre(s) ·
+          {{ formatMontant(couts.value().indemnitesPercues) }} d'indemnités
+        </p>
+      </li>
+      <li
+        class="flex min-h-0 flex-col rounded-xl border border-pine/30 bg-pine/5 px-4 py-3.5 shadow-sm"
+      >
+        <span class="text-sm font-medium text-ink">Coût global</span>
+        <p class="mt-2 font-mono text-2xl leading-none font-semibold tracking-tight tabular-nums">
+          {{ formatMontant(coutGlobal()) }}
+        </p>
+        <p class="mt-auto pt-1.5 text-xs text-muted">Maintenance + coût net des sinistres</p>
+      </li>
+    </ul>
   </section>
 
   <div class="grid gap-6 lg:grid-cols-2">
@@ -72,8 +84,8 @@
       { titre: "Par nature", lignes: parNature() },
       { titre: "Par mois", lignes: parMois() }
     ]; track bloc.titre) {
-    <section class="rounded-xl border border-line bg-surface p-4">
-      <h2 class="font-medium text-ink">{{ bloc.titre }}</h2>
+    <section class="rounded-xl border border-line/80 bg-surface p-4 shadow-sm">
+      <h2 class="text-sm font-semibold tracking-tight text-ink">{{ bloc.titre }}</h2>
       @if (bloc.lignes.length === 0) {
       <p class="mt-2 text-sm text-muted">Aucune intervention terminée sur la période.</p>
       } @else {
@@ -94,8 +106,8 @@
     </section>
     }
 
-    <section class="rounded-xl border border-line bg-surface p-4">
-      <h2 class="font-medium text-ink">Engins les plus coûteux</h2>
+    <section class="rounded-xl border border-line/80 bg-surface p-4 shadow-sm">
+      <h2 class="text-sm font-semibold tracking-tight text-ink">Engins les plus coûteux</h2>
       @if (parEngin().length === 0) {
       <p class="mt-2 text-sm text-muted">Aucune donnée.</p>
       } @else {
@@ -106,7 +118,7 @@
             <a
               [routerLink]="['/maintenance/ordres-travail']"
               [queryParams]="{ enginId: l.cle }"
-              class="font-mono text-pine hover:underline"
+              class="font-mono text-pine underline-offset-2 hover:underline"
             >
               {{ l.libelle }}
             </a>

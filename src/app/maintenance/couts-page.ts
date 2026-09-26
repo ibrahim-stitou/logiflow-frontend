@@ -3,10 +3,8 @@ import { Component, computed, signal } from "@angular/core";
 import { RouterLink } from "@angular/router";
 import { environment } from "../../environments/environment";
 import { httpErrorMessage } from "../core/api/http-error";
-import {
-  FieldSelectComponent,
-  withNoneSelectOption,
-} from "../shared/ui/field-select";
+import { statutOptionsFrom } from "../shared/ui/list-filter";
+import { ListStatutFilter } from "../shared/ui/list-statut-filter";
 import { ListTableSkeleton } from "../shared/ui/list-table-skeleton";
 import {
   type CoutsMaintenance,
@@ -25,7 +23,6 @@ const PERIODES: readonly { label: string; value: Periode }[] = [
   { label: "Mois en cours", value: "MOIS" },
   { label: "3 derniers mois", value: "TRIMESTRE" },
   { label: "Année en cours", value: "ANNEE_CIVILE" },
-  { label: "12 derniers mois", value: "DOUZE_MOIS" },
 ];
 
 function iso(d: Date): string {
@@ -69,7 +66,7 @@ export function avecParts(
 @Component({
   imports: [
     RouterLink,
-    FieldSelectComponent,
+    ListStatutFilter,
     ListTableSkeleton,
     MaintenanceTabs,
   ],
@@ -80,19 +77,25 @@ export class CoutsPage {
   protected readonly libelle = libelle;
   protected readonly formatMontant = formatMontant;
   protected readonly formatDate = formatDate;
+  /** null = 12 derniers mois (allLabel). */
   protected readonly periodeOptions = PERIODES;
-  protected readonly typeEnginOptions = withNoneSelectOption(
-    "Tous les engins",
-    TYPES_ENGIN.map((t) => ({ label: libelle(t), value: t }))
-  );
+  protected readonly typeEnginOptions = statutOptionsFrom(TYPES_ENGIN, libelle);
 
-  protected readonly periode = signal<Periode>("DOUZE_MOIS");
-  protected readonly typeEngin = signal("");
+  protected readonly periodeFilter = signal<string | null>(null);
+  protected readonly typeEngin = signal<string | null>(null);
+
+  protected readonly periode = computed<Periode>(() => {
+    const v = this.periodeFilter();
+    if (v === "MOIS" || v === "TRIMESTRE" || v === "ANNEE_CIVILE") {
+      return v;
+    }
+    return "DOUZE_MOIS";
+  });
 
   protected readonly couts = httpResource<CoutsMaintenance>(() => {
     const params = parametresRequete({
       ...bornesPeriode(this.periode()),
-      typeEngin: this.typeEngin(),
+      typeEngin: this.typeEngin() ?? "",
     });
     return { params, url: `${environment.apiBaseUrl}/maintenance/couts` };
   });
@@ -128,11 +131,4 @@ export class CoutsPage {
     const c = this.couts.value();
     return c ? c.totalHt + c.coutNetSinistres : null;
   });
-
-  protected choisirPeriode(valeur: string): void {
-    const trouvee = PERIODES.find((p) => p.value === valeur);
-    if (trouvee) {
-      this.periode.set(trouvee.value);
-    }
-  }
 }

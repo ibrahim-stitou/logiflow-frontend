@@ -629,14 +629,17 @@ export function formatEcheance(e: Echeance | null | undefined): string {
     return "—";
   }
   const parties: string[] = [];
-  if (e.kmRestant !== null) {
-    parties.push(
-      e.kmRestant <= 0
-        ? `dépassée de ${formatKm(-e.kmRestant)}`
-        : `dans ${formatKm(e.kmRestant)}`
-    );
+  // API omits null fields → undefined; treat both as absent (`!= null`).
+  if (e.kmRestant != null) {
+    if (e.kmRestant < 0) {
+      parties.push(`dépassée de ${formatKm(-e.kmRestant)}`);
+    } else if (e.kmRestant === 0) {
+      parties.push("échéance km atteinte");
+    } else {
+      parties.push(`dans ${formatKm(e.kmRestant)}`);
+    }
   }
-  if (e.heuresRestantes !== null) {
+  if (e.heuresRestantes != null) {
     parties.push(`${e.heuresRestantes.toLocaleString("fr-FR")} h restantes`);
   }
   if (e.dateEcheance) {

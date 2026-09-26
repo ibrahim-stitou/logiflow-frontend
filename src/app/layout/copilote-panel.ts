@@ -30,8 +30,8 @@ import {
   lucideThumbsUp,
   lucideTrash2,
   lucideWrench,
-  lucideX,
 } from "@ng-icons/lucide";
+import { ZardButtonComponent } from "@/shared/components/button";
 import {
   afficherEtat,
   COPILOTE_QUESTION_MAX_LENGTH,
@@ -46,26 +46,17 @@ import {
 } from "../ia/copilote";
 import { renderMarkdown } from "../ia/copilote-markdown";
 import { CopiloteStore } from "../ia/copilote-store";
-import {
-  isTopmostOverlay,
-  popOverlay,
-  pushOverlay,
-} from "../shared/core/overlay/overlay-stack";
 
 /** Rafraîchissement de la pastille d'état tant que le panneau est ouvert. */
 const INTERVALLE_ETAT_MS = 30_000;
 const INTERVALLE_HORLOGE_MS = 1000;
 
 /**
- * Panneau latéral droit du copilote, rendu à la racine du shell : historique des
- * conversations à gauche, fil de messages à droite, état du moteur IA en tête.
- * Non modal : on peut naviguer dans l'application (liens des sources) en le gardant ouvert.
+ * Contenu du copilote projeté dans un Zard sheet (panneau droit) :
+ * historique, fil de messages et saisie. Fermeture : Escape, croix sheet, clic masque.
  */
 @Component({
-  host: {
-    "(document:keydown.escape)": "onEscape($event)",
-  },
-  imports: [NgIcon, RouterLink],
+  imports: [NgIcon, RouterLink, ZardButtonComponent],
   providers: [
     provideIcons({
       lucideCheck,
@@ -84,7 +75,6 @@ const INTERVALLE_HORLOGE_MS = 1000;
       lucideThumbsUp,
       lucideTrash2,
       lucideWrench,
-      lucideX,
     }),
   ],
   selector: "app-copilote-panel",
@@ -94,8 +84,6 @@ const INTERVALLE_HORLOGE_MS = 1000;
 export class CopilotePanel implements OnDestroy {
   protected readonly store = inject(CopiloteStore);
   private readonly injector = inject(Injector);
-  /** Référence d'identité pour la pile d'overlays (Escape ferme le plus haut). */
-  private readonly overlayRef = {};
 
   private readonly saisie =
     viewChild<ElementRef<HTMLTextAreaElement>>("saisie");
@@ -130,14 +118,7 @@ export class CopilotePanel implements OnDestroy {
   private readonly cacheMarkdown = new Map<string, string>();
 
   constructor() {
-    // Ouverture / fermeture : pile d'Escape, historique, état, focus.
     effect((onCleanup) => {
-      if (!this.store.ouvert()) {
-        return;
-      }
-      pushOverlay(this.overlayRef);
-      // untracked : seul `ouvert` doit relancer cet effet (sinon l'arrivée de
-      // l'historique redéclenche une vérification et un second minuteur).
       untracked(() => {
         if (!this.store.conversationsChargees()) {
           this.store.chargerConversations();
@@ -149,13 +130,9 @@ export class CopilotePanel implements OnDestroy {
         INTERVALLE_ETAT_MS
       );
       this.focaliserSaisie();
-      onCleanup(() => {
-        clearInterval(minuterie);
-        popOverlay(this.overlayRef);
-      });
+      onCleanup(() => clearInterval(minuterie));
     });
 
-    // Chronomètre « Réflexion… 45 s » pendant une réponse.
     effect((onCleanup) => {
       if (!this.store.enCours()) {
         return;
@@ -168,7 +145,6 @@ export class CopilotePanel implements OnDestroy {
       onCleanup(() => clearInterval(horloge));
     });
 
-    // Suit le flux : défile vers le bas à chaque nouveau token.
     effect(() => {
       this.store.messages();
       afterNextRender(
@@ -184,7 +160,6 @@ export class CopilotePanel implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    popOverlay(this.overlayRef);
     this.store.arreter();
   }
 
@@ -204,30 +179,6 @@ export class CopilotePanel implements OnDestroy {
     return rendu;
   }
 
-  protected fermer(): void {
-    this.store.fermer();
-    this.renommageId.set(null);
-    this.suppressionId.set(null);
-    document.getElementById("app-copilote-bouton")?.focus();
-  }
-
-  protected onEscape(event: Event): void {
-    if (!(this.store.ouvert() && isTopmostOverlay(this.overlayRef))) {
-      return;
-    }
-    event.preventDefault();
-    if (this.renommageId() || this.suppressionId()) {
-      this.renommageId.set(null);
-      this.suppressionId.set(null);
-      return;
-    }
-    if (this.historiqueMobile()) {
-      this.historiqueMobile.set(false);
-      return;
-    }
-    this.fermer();
-  }
-
   protected onQuestionInput(event: Event): void {
     const { target } = event;
     if (target instanceof HTMLTextAreaElement) {
@@ -236,7 +187,6 @@ export class CopilotePanel implements OnDestroy {
   }
 
   protected onQuestionKeydown(event: KeyboardEvent): void {
-    // Entrée envoie, Maj+Entrée va à la ligne (pas pendant une composition IME).
     if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
       event.preventDefault();
       this.envoyer();

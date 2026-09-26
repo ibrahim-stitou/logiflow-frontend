@@ -100,6 +100,18 @@ describe("maintenance", () => {
       })
     ).toMatch(ECHEANCE_ATTENDUE);
     expect(formatEcheance(null)).toBe("—");
+    // API JSON omits null numeric fields → undefined (must not throw).
+    expect(
+      formatEcheance({
+        dateEcheance: "2026-09-18",
+        etat: "ECHU",
+        heuresRestantes: undefined as unknown as null,
+        immatriculation: "TG-011-KJ",
+        kilometrageActuel: 65_070,
+        kmParJour: 250,
+        kmRestant: undefined as unknown as null,
+      })
+    ).toMatch(/le /);
   });
 
   it("lit les saisies facultatives", () => {

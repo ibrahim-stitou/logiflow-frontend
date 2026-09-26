@@ -97,22 +97,53 @@ export interface Document {
   url: string;
 }
 
-export interface DocumentUploadDraft {
-  dateExpiration: string;
-  reference: string;
-  typeDocument: DocumentType;
-}
-
-export function emptyDocumentUploadDraft(): DocumentUploadDraft {
-  return {
-    dateExpiration: "",
-    reference: "",
-    typeDocument: "CARTE_GRISE",
-  };
-}
-
 export function isDocumentType(value: string): value is DocumentType {
   return (DOCUMENT_TYPES as readonly string[]).includes(value);
+}
+
+/**
+ * Entity kinds whose files are typically compliance credentials with a
+ * validity window (permis, carte grise, attestation…).
+ * Justifications / work artifacts (carburant, OT, sinistre) never track expiry.
+ */
+const ENTITES_AVEC_EXPIRATION = new Set<TypeEntiteDocumentable>([
+  "VEHICULE",
+  "REMORQUE",
+  "CHAUFFEUR",
+  "CONTRAT_ASSURANCE",
+  "PRESTATAIRE",
+]);
+
+/**
+ * Types that are historical evidence even when attached to a compliance
+ * entity (photos, reports, invoices) — no expiry badge or upload field.
+ */
+const TYPES_SANS_EXPIRATION = new Set<DocumentType>([
+  "PHOTO",
+  "JUSTIFICATIF_CARBURANT",
+  "DEVIS",
+  "FACTURE",
+  "RAPPORT_INTERVENTION",
+  "CONSTAT_AMIABLE",
+  "RAPPORT_POLICE",
+  "RAPPORT_EXPERTISE",
+  "DECLARATION_SINISTRE",
+  "CONDITIONS_CONTRAT",
+  "AUTRE",
+]);
+
+/** Whether this entity/type combination should track document expiration. */
+export function documentSuitExpiration(
+  typeEntite: TypeEntiteDocumentable,
+  typeDocument?: DocumentType
+): boolean {
+  if (!ENTITES_AVEC_EXPIRATION.has(typeEntite)) {
+    return false;
+  }
+  if (typeDocument !== undefined && TYPES_SANS_EXPIRATION.has(typeDocument)) {
+    return false;
+  }
+  return true;
 }
 
 export function documentTypeLabel(type: DocumentType): string {

@@ -1,136 +1,299 @@
 <div class="flex flex-col gap-6">
   <app-maintenance-tabs />
-  <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-    <div>
-      <h1 class="module-page-title">Maintenance</h1>
-      <p class="mt-1 text-sm text-muted">
-        Échéances d'entretien, interventions en atelier, sinistres ouverts et coûts du mois.
-      </p>
-    </div>
-    <div class="flex flex-wrap gap-2">
-      <a class="btn-outline pressable" routerLink="/maintenance/sinistres/nouveau">Déclarer un sinistre</a>
-      <a class="btn-primary pressable" routerLink="/maintenance/ordres-travail/nouveau">Nouvel ordre de travail</a>
-    </div>
-  </div>
 
-  <section aria-label="Indicateurs" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-    <a class="rounded-xl border border-line bg-surface p-4 hover:border-pine" routerLink="/maintenance/plans">
-      <p class="text-xs text-muted">Échéances</p>
-      <p class="mt-1 text-xl font-semibold">
-        <span class="text-brake">{{ echus() }}</span>
-        <span class="text-sm font-normal text-muted">échue(s) ·</span>
-        <span class="text-amber">{{ enAlerte() }}</span>
-        <span class="text-sm font-normal text-muted">en alerte</span>
-      </p>
+  <app-inner-page-header
+    description="Échéances d'entretien, interventions en atelier, sinistres ouverts et coûts du mois."
+    icon="lucideWrench"
+    title="Maintenance"
+  >
+    <a
+      class="btn-outline pressable min-h-9 rounded-lg px-3.5 text-[0.8125rem]"
+      innerPageHeaderActions
+      routerLink="/maintenance/sinistres/nouveau"
+    >
+      Déclarer un sinistre
     </a>
-    <a class="rounded-xl border border-line bg-surface p-4 hover:border-pine" routerLink="/maintenance/ordres-travail">
-      <p class="text-xs text-muted">Atelier</p>
-      <p class="mt-1 text-xl font-semibold">{{ otOuverts().length }} <span class="text-sm font-normal text-muted">OT ouvert(s)</span></p>
-      <p class="text-xs text-muted">{{ enginsImmobilises() }} engin(s) immobilisé(s)</p>
+    <a
+      class="btn-toolbar pressable"
+      innerPageHeaderActions
+      routerLink="/maintenance/ordres-travail/nouveau"
+    >
+      <ng-icon aria-hidden="true" class="btn-toolbar__icon" name="lucidePlus" />
+      <span>Nouvel ordre de travail</span>
     </a>
-    <a class="rounded-xl border border-line bg-surface p-4 hover:border-pine" routerLink="/maintenance/sinistres">
-      <p class="text-xs text-muted">Sinistres ouverts</p>
-      <p class="mt-1 text-xl font-semibold">{{ sinistresOuverts().length }}</p>
-    </a>
-    <a class="rounded-xl border border-line bg-surface p-4 hover:border-pine" routerLink="/maintenance/couts">
-      <p class="text-xs text-muted">Coûts du mois (HT)</p>
-      <p class="mt-1 font-mono text-xl font-semibold tabular-nums">{{ formatMontant(coutsMois.value()?.totalHt) }}</p>
-      <p class="text-xs text-muted">{{ coutsMois.value()?.nombreOrdres ?? 0 }} OT terminé(s)</p>
-    </a>
+  </app-inner-page-header>
+
+  <section aria-label="Indicateurs">
+    <ul class="m-0 grid list-none gap-3 p-0 sm:grid-cols-2 lg:grid-cols-4">
+      <li class="min-h-0">
+        <a
+          class="pressable flex h-full flex-col rounded-xl border border-line/80 bg-surface px-4 py-3.5 shadow-sm transition-[border-color,box-shadow] duration-150 ease-out hover:border-pine"
+          routerLink="/maintenance/plans"
+        >
+          <span class="list-cell-with-icon">
+            <ng-icon
+              aria-hidden="true"
+              class="list-cell-with-icon__icon"
+              name="lucideCalendarClock"
+            />
+            <span class="text-sm font-medium text-ink">Échéances</span>
+          </span>
+          <p class="mt-2 text-2xl leading-none font-medium tracking-tight text-ink tabular-nums">
+            {{ echus() }}
+          </p>
+          <p class="mt-auto pt-1.5 text-xs text-muted">
+            <span class="text-brake tabular-nums">{{ echus() }}</span> échue(s) ·
+            <span class="text-amber tabular-nums">{{ enAlerte() }}</span> en alerte
+          </p>
+        </a>
+      </li>
+      <li class="min-h-0">
+        <a
+          class="pressable flex h-full flex-col rounded-xl border border-line/80 bg-surface px-4 py-3.5 shadow-sm transition-[border-color,box-shadow] duration-150 ease-out hover:border-pine"
+          routerLink="/maintenance/ordres-travail"
+        >
+          <span class="list-cell-with-icon">
+            <ng-icon
+              aria-hidden="true"
+              class="list-cell-with-icon__icon"
+              name="lucideWrench"
+            />
+            <span class="text-sm font-medium text-ink">Atelier</span>
+          </span>
+          <p class="mt-2 text-2xl leading-none font-medium tracking-tight text-ink tabular-nums">
+            {{ otOuverts().length }}
+          </p>
+          <p class="mt-auto pt-1.5 text-xs text-muted">
+            OT ouvert(s) · {{ enginsImmobilises() }} engin(s) immobilisé(s)
+          </p>
+        </a>
+      </li>
+      <li class="min-h-0">
+        <a
+          class="pressable flex h-full flex-col rounded-xl border border-line/80 bg-surface px-4 py-3.5 shadow-sm transition-[border-color,box-shadow] duration-150 ease-out hover:border-pine"
+          routerLink="/maintenance/sinistres"
+        >
+          <span class="list-cell-with-icon">
+            <ng-icon
+              aria-hidden="true"
+              class="list-cell-with-icon__icon"
+              name="lucideTriangleAlert"
+            />
+            <span class="text-sm font-medium text-ink">Sinistres ouverts</span>
+          </span>
+          <p class="mt-2 text-2xl leading-none font-medium tracking-tight text-ink tabular-nums">
+            {{ sinistresOuverts().length }}
+          </p>
+          <p class="mt-auto pt-1.5 text-xs text-muted">En cours de traitement</p>
+        </a>
+      </li>
+      <li class="min-h-0">
+        <a
+          class="pressable flex h-full flex-col rounded-xl border border-line/80 bg-surface px-4 py-3.5 shadow-sm transition-[border-color,box-shadow] duration-150 ease-out hover:border-pine"
+          routerLink="/maintenance/couts"
+        >
+          <span class="list-cell-with-icon">
+            <ng-icon
+              aria-hidden="true"
+              class="list-cell-with-icon__icon"
+              name="lucideBanknote"
+            />
+            <span class="text-sm font-medium text-ink">Coûts du mois (HT)</span>
+          </span>
+          <p
+            class="mt-2 font-mono text-2xl leading-none font-medium tracking-tight text-ink tabular-nums"
+          >
+            {{ formatMontant(coutsMois.value()?.totalHt) }}
+          </p>
+          <p class="mt-auto pt-1.5 text-xs text-muted">
+            {{ coutsMois.value()?.nombreOrdres ?? 0 }} OT terminé(s)
+          </p>
+        </a>
+      </li>
+    </ul>
   </section>
 
   <div class="grid gap-6 lg:grid-cols-2">
-    <section class="rounded-xl border border-line bg-surface p-4">
+    <section aria-labelledby="echeances-titre" class="flex min-w-0 flex-col gap-3">
       <div class="flex items-center justify-between gap-2">
-        <h2 class="font-medium text-ink">Échéances à 30 jours</h2>
-        <a class="text-sm text-pine hover:underline" routerLink="/maintenance/plans">Tous les plans</a>
+        <h2 class="text-sm font-semibold tracking-tight text-ink" id="echeances-titre">
+          Échéances à 30 jours
+        </h2>
+        <a class="text-sm font-medium text-pine underline-offset-2 hover:underline" routerLink="/maintenance/plans">
+          Tous les plans
+        </a>
       </div>
       @if (echeances.isLoading() && !echeances.hasValue()) {
-      <p class="mt-2 text-sm text-muted" role="status">Chargement…</p>
+      <p class="text-sm text-muted" role="status">Chargement…</p>
       } @else if (echeances.error()) {
-      <p class="mt-2 text-sm text-brake" role="alert">Échéances indisponibles.</p>
+      <p class="text-sm text-brake" role="alert">Échéances indisponibles.</p>
       } @else if (echeances.value()?.length === 0) {
-      <p class="mt-2 text-sm text-muted">Aucune échéance dans les 30 prochains jours.</p>
+      <p class="text-sm text-muted">Aucune échéance dans les 30 prochains jours.</p>
       } @else {
-      <ul class="mt-3 flex flex-col gap-2">
-        @for (p of echeances.value(); track p.id) {
-        <li class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-line/80 bg-canvas px-3 py-2 text-sm">
-          <a [routerLink]="['/maintenance/plans', p.id]" class="min-w-0 flex-1">
-            <span class="font-mono text-xs">{{ p.echeance?.immatriculation ?? lookups.engins().get(p.engin.id)?.immatriculation ?? "…" }}</span>
-            <span class="ml-2 text-ink">{{ p.libelle }}</span>
-            <span class="block text-xs text-muted">{{ formatEcheance(p.echeance) }}</span>
-          </a>
-          <app-statut-chip [label]="libelle(p.echeance?.etat ?? null)" [tone]="toneEcheance(p.echeance?.etat)" />
-        </li>
-        }
-      </ul>
+      <div class="list-table-panel">
+        <table z-table>
+          <thead z-table-header>
+            <tr z-table-row>
+              <th scope="col" z-table-head>Engin</th>
+              <th scope="col" z-table-head>Plan</th>
+              <th scope="col" z-table-head>État</th>
+            </tr>
+          </thead>
+          <tbody z-table-body>
+            @for (p of echeances.value(); track p.id) {
+            <tr class="list-row" z-table-row>
+              <td class="font-mono text-xs" z-table-cell>
+                <a
+                  [routerLink]="['/maintenance/plans', p.id]"
+                  class="text-pine underline-offset-2 hover:underline"
+                >
+                  {{ p.echeance?.immatriculation ?? lookups.engins().get(p.engin.id)?.immatriculation ?? "…" }}
+                </a>
+              </td>
+              <td z-table-cell>
+                <span class="text-ink">{{ p.libelle }}</span>
+                <span class="block text-xs text-muted">{{ formatEcheance(p.echeance) }}</span>
+              </td>
+              <td z-table-cell>
+                <app-statut-chip [label]="libelle(p.echeance?.etat ?? null)" [tone]="toneEcheance(p.echeance?.etat)" />
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
       }
     </section>
 
-    <section class="rounded-xl border border-line bg-surface p-4">
+    <section aria-labelledby="atelier-titre" class="flex min-w-0 flex-col gap-3">
       <div class="flex items-center justify-between gap-2">
-        <h2 class="font-medium text-ink">En atelier</h2>
-        <a class="text-sm text-pine hover:underline" routerLink="/maintenance/ordres-travail">Tous les OT</a>
+        <h2 class="text-sm font-semibold tracking-tight text-ink" id="atelier-titre">En atelier</h2>
+        <a
+          class="text-sm font-medium text-pine underline-offset-2 hover:underline"
+          routerLink="/maintenance/ordres-travail"
+        >
+          Tous les OT
+        </a>
       </div>
       @if (otOuverts().length === 0) {
-      <p class="mt-2 text-sm text-muted">Aucun ordre de travail ouvert.</p>
+      <p class="text-sm text-muted">Aucun ordre de travail ouvert.</p>
       } @else {
-      <ul class="mt-3 flex flex-col gap-2">
-        @for (ot of otOuverts(); track ot.id) {
-        <li class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-line/80 bg-canvas px-3 py-2 text-sm">
-          <a [routerLink]="['/maintenance/ordres-travail', ot.id]" class="min-w-0 flex-1">
-            <span class="font-mono text-xs">{{ lookups.engins().get(ot.engin.id)?.immatriculation ?? "…" }}</span>
-            <span class="ml-2 text-ink">{{ ot.titre }}</span>
-            <span class="block text-xs text-muted">
-              {{ ot.reference }} · {{ formatDateHeure(ot.debutPlanifie) }} · {{ lookups.prestataireLibelle(ot.prestataireId) }}
-            </span>
-          </a>
-          <app-statut-chip [label]="libelle(ot.statut)" [tone]="toneStatutOT(ot.statut)" />
-        </li>
-        }
-      </ul>
+      <div class="list-table-panel">
+        <table z-table>
+          <thead z-table-header>
+            <tr z-table-row>
+              <th scope="col" z-table-head>Référence</th>
+              <th scope="col" z-table-head>Intervention</th>
+              <th scope="col" z-table-head>Statut</th>
+            </tr>
+          </thead>
+          <tbody z-table-body>
+            @for (ot of otOuverts(); track ot.id) {
+            <tr class="list-row" z-table-row>
+              <td z-table-cell>
+                <a
+                  [routerLink]="['/maintenance/ordres-travail', ot.id]"
+                  class="font-mono text-xs text-pine underline-offset-2 hover:underline"
+                >
+                  {{ ot.reference }}
+                </a>
+                <span class="block font-mono text-xs text-muted">
+                  {{ lookups.engins().get(ot.engin.id)?.immatriculation ?? "…" }}
+                </span>
+              </td>
+              <td z-table-cell>
+                <span class="text-ink">{{ ot.titre }}</span>
+                <span class="block text-xs text-muted">
+                  {{ formatDateHeure(ot.debutPlanifie) }} · {{ lookups.prestataireLibelle(ot.prestataireId) }}
+                </span>
+              </td>
+              <td z-table-cell>
+                <app-statut-chip [label]="libelle(ot.statut)" [tone]="toneStatutOT(ot.statut)" />
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
       }
     </section>
 
-    <section class="rounded-xl border border-line bg-surface p-4 lg:col-span-2">
+    <section aria-labelledby="sinistres-titre" class="flex min-w-0 flex-col gap-3 lg:col-span-2">
       <div class="flex items-center justify-between gap-2">
-        <h2 class="font-medium text-ink">Sinistres ouverts</h2>
-        <a class="text-sm text-pine hover:underline" routerLink="/maintenance/sinistres">Tous les sinistres</a>
+        <h2 class="text-sm font-semibold tracking-tight text-ink" id="sinistres-titre">
+          Sinistres ouverts
+        </h2>
+        <a
+          class="text-sm font-medium text-pine underline-offset-2 hover:underline"
+          routerLink="/maintenance/sinistres"
+        >
+          Tous les sinistres
+        </a>
       </div>
       @if (sinistresOuverts().length === 0) {
-      <p class="mt-2 text-sm text-muted">Aucun sinistre en cours.</p>
+      <p class="text-sm text-muted">Aucun sinistre en cours.</p>
       } @else {
-      <ul class="mt-3 grid gap-2 sm:grid-cols-2">
-        @for (s of sinistresOuverts(); track s.id) {
-        <li class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-line/80 bg-canvas px-3 py-2 text-sm">
-          <a [routerLink]="['/maintenance/sinistres', s.id]" class="min-w-0 flex-1">
-            <span class="font-mono text-xs">{{ s.reference }}</span>
-            <span class="ml-2 text-ink">{{ libelle(s.type) }}</span>
-            <span class="block text-xs text-muted">
-              {{ enginLibelle(s) }} · {{ formatDate(s.dateSurvenance) }} · coût net {{ formatMontant(s.couts?.coutNet) }}
-            </span>
-            @if (s.declarationEnRetard) {
-            <span class="block text-xs text-brake">Déclaration assureur en retard</span>
+      <div class="list-table-panel">
+        <table z-table>
+          <thead z-table-header>
+            <tr z-table-row>
+              <th scope="col" z-table-head>Référence</th>
+              <th scope="col" z-table-head>Nature</th>
+              <th scope="col" z-table-head>Détail</th>
+              <th scope="col" z-table-head>Statut</th>
+            </tr>
+          </thead>
+          <tbody z-table-body>
+            @for (s of sinistresOuverts(); track s.id) {
+            <tr class="list-row" z-table-row>
+              <td z-table-cell>
+                <a
+                  [routerLink]="['/maintenance/sinistres', s.id]"
+                  class="font-mono text-xs text-pine underline-offset-2 hover:underline"
+                >
+                  {{ s.reference }}
+                </a>
+                @if (s.declarationEnRetard) {
+                <span class="block text-xs text-brake">Déclaration assureur en retard</span>
+                }
+              </td>
+              <td z-table-cell>{{ libelle(s.type) }}</td>
+              <td class="text-xs text-muted" z-table-cell>
+                {{ enginLibelle(s) }} · {{ formatDate(s.dateSurvenance) }} · coût net
+                {{ formatMontant(s.couts?.coutNet) }}
+              </td>
+              <td z-table-cell>
+                <app-statut-chip [label]="libelle(s.statut)" [tone]="toneStatutSinistre(s.statut)" />
+              </td>
+            </tr>
             }
-          </a>
-          <app-statut-chip [label]="libelle(s.statut)" [tone]="toneStatutSinistre(s.statut)" />
-        </li>
-        }
-      </ul>
+          </tbody>
+        </table>
+      </div>
       }
     </section>
   </div>
 
-  <section aria-labelledby="analyse-ia-titre" class="rounded-xl border border-pine/40 bg-pine/5 p-4">
+  <section
+    aria-labelledby="analyse-ia-titre"
+    class="rounded-xl border border-pine/30 bg-pine/5 p-4 shadow-sm sm:p-5"
+  >
     <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-      <div>
-        <h2 class="font-medium text-ink" id="analyse-ia-titre">Analyse prédictive</h2>
+      <div class="min-w-0">
+        <h2 class="text-sm font-semibold tracking-tight text-ink" id="analyse-ia-titre">
+          Analyse prédictive
+        </h2>
         <p class="mt-1 text-sm text-muted">
           L'agent croise échéances, usage, consommation, documents et réparations répétées, puis
           propose des interventions sur des créneaux libres entre les voyages.
         </p>
       </div>
-      <button (click)="lancerAnalyse()" [disabled]="analyseEnCours()" class="btn-primary pressable min-h-10 shrink-0 px-4" type="button">
+      <button
+        (click)="lancerAnalyse()"
+        [disabled]="analyseEnCours()"
+        class="btn-toolbar pressable min-h-9 shrink-0"
+        type="button"
+      >
         {{ analyseEnCours() ? "Analyse en cours…" : analyse() ? "Relancer l'analyse" : "Lancer l'analyse" }}
       </button>
     </div>
@@ -144,9 +307,11 @@
     <ul class="mt-4 flex flex-col gap-3">
       @for (v of resultat.vehicules; track v.vehiculeId) {
       @if (v.statut !== "BON" || v.recommandations.length > 0) {
-      <li class="rounded-lg border border-line bg-surface p-3">
+      <li class="rounded-lg border border-line/80 bg-surface p-3 shadow-sm">
         <div class="flex flex-wrap items-center gap-2">
-          <a [routerLink]="lienFiche(v)" class="font-mono text-sm text-pine hover:underline">{{ v.immatriculation }}</a>
+          <a [routerLink]="lienFiche(v)" class="font-mono text-sm text-pine underline-offset-2 hover:underline">
+            {{ v.immatriculation }}
+          </a>
           @if (v.typeEngin === "REMORQUE") {
           <span class="text-xs text-muted">remorque</span>
           }
@@ -164,7 +329,9 @@
         </ul>
         }
         @for (r of v.recommandations; track r.libelle) {
-        <div class="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-md bg-canvas px-3 py-2 text-sm">
+        <div
+          class="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-md bg-canvas px-3 py-2 text-sm"
+        >
           <div class="min-w-0 flex-1">
             <span class="text-ink">{{ r.libelle }}</span>
             <span class="block text-xs text-muted">

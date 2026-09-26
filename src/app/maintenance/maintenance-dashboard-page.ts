@@ -1,10 +1,20 @@
 import { HttpClient, httpResource } from "@angular/common/http";
 import { Component, computed, inject, signal } from "@angular/core";
 import { RouterLink } from "@angular/router";
+import { NgIcon, provideIcons } from "@ng-icons/core";
+import {
+  lucideBanknote,
+  lucideCalendarClock,
+  lucidePlus,
+  lucideTriangleAlert,
+  lucideWrench,
+} from "@ng-icons/lucide";
 import { firstValueFrom } from "rxjs";
+import { ZardTableImports } from "@/shared/components/table/table.imports";
 import { environment } from "../../environments/environment";
 import { httpErrorMessage } from "../core/api/http-error";
 import type { PageResponse } from "../core/api/page-response";
+import { InnerPageHeader } from "../shared/ui/inner-page-header";
 import { StatutChip } from "../shared/ui/statut-chip";
 import { bornesPeriode } from "./couts-page";
 import {
@@ -111,9 +121,25 @@ export function toneStatutIA(
 
 /** Tableau de bord du module : échéances, atelier, sinistres, coûts du mois, analyse IA. */
 @Component({
-  imports: [RouterLink, StatutChip, MaintenanceTabs],
+  imports: [
+    RouterLink,
+    NgIcon,
+    StatutChip,
+    InnerPageHeader,
+    MaintenanceTabs,
+    ...ZardTableImports,
+  ],
   selector: "app-maintenance-dashboard-page",
   templateUrl: "./maintenance-dashboard-page.html",
+  viewProviders: [
+    provideIcons({
+      lucideBanknote,
+      lucideCalendarClock,
+      lucidePlus,
+      lucideTriangleAlert,
+      lucideWrench,
+    }),
+  ],
 })
 export class MaintenanceDashboardPage {
   private readonly http = inject(HttpClient);

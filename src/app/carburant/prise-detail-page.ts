@@ -17,22 +17,12 @@ import { httpErrorMessage } from "../core/api/http-error";
 import type { PageResponse } from "../core/api/page-response";
 import { SessionUtilisateur } from "../core/auth/session";
 import { VOYAGES_PLAN_ROLES } from "../core/auth/role";
-import {
-  DOCUMENT_TYPES,
-  type Document,
-  type DocumentUploadDraft,
-  documentTypeLabel,
-  emptyDocumentUploadDraft,
-  formatDocumentExpiration,
-  isDocumentType,
-} from "../documents/document";
-import { DocumentApi } from "../documents/document-api";
 import { firstFieldError } from "../core/forms/first-field-error";
 import { fieldClasses, showFieldError } from "../core/forms/show-field-error";
-import { enumToSelectOptions } from "../shared/ui/field-select";
 import { statutOptionsFrom } from "../shared/ui/list-filter";
 import { priseCarburantStatutIcon } from "../shared/ui/list-statut-icons";
 import { statutIconForValue } from "../shared/ui/list-statut-filter";
+import { DocumentsSection } from "../shared/ui/documents-section";
 import { FICHE_PAGE_IMPORTS } from "../shared/ui/fiche-page";
 import { StatutChip } from "../shared/ui/statut-chip";
 import { NgIcon, provideIcons } from "@ng-icons/core";
@@ -64,6 +54,7 @@ interface PriseEditDraft {
 @Component({
   imports: [
     DatePipe,
+    DocumentsSection,
     FormField,
     NgIcon,
     RouterLink,
@@ -76,7 +67,6 @@ interface PriseEditDraft {
 })
 export class PriseDetailPage {
   private readonly api = inject(PriseCarburantApi);
-  private readonly documentApi = inject(DocumentApi);
   private readonly session = inject(SessionUtilisateur);
   private readonly toast = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
@@ -100,25 +90,12 @@ export class PriseDetailPage {
   }
   protected readonly typeCarburantLabel = typeCarburantLabel;
   protected readonly fuelTypes = TYPE_CARBURANTS;
-  protected readonly documentTypeLabel = documentTypeLabel;
-  protected readonly formatDocumentExpiration = formatDocumentExpiration;
-  protected readonly documentTypes = DOCUMENT_TYPES;
-  protected readonly documentTypeOptions = enumToSelectOptions(
-    ["JUSTIFICATIF_CARBURANT", "AUTRE", "PHOTO"] as const,
-    documentTypeLabel
-  );
   protected readonly firstFieldError = firstFieldError;
   protected readonly showFieldError = showFieldError;
   protected readonly fieldClasses = fieldClasses;
 
   protected readonly formError = signal<string | null>(null);
   protected readonly validateError = signal<string | null>(null);
-  protected readonly uploadError = signal<string | null>(null);
-  protected readonly selectedFile = signal<File | null>(null);
-  protected readonly uploadDraft = signal<DocumentUploadDraft>({
-    ...emptyDocumentUploadDraft(),
-    typeDocument: "JUSTIFICATIF_CARBURANT",
-  });
 
   protected readonly prise = httpResource<PriseCarburant>(() => ({
     url: `${environment.apiBaseUrl}/prises-carburant/${this.id()}`,
@@ -127,14 +104,6 @@ export class PriseDetailPage {
   protected readonly stations = httpResource<PageResponse<Station>>(() => ({
     params: { page: 0, size: 100 },
     url: `${environment.apiBaseUrl}/stations`,
-  }));
-
-  protected readonly documents = httpResource<Document[]>(() => ({
-    params: {
-      entiteId: this.id(),
-      typeEntite: "PRISE_CARBURANT",
-    },
-    url: `${environment.apiBaseUrl}/documents`,
   }));
 
   protected readonly editDraft = signal<PriseEditDraft>({
@@ -155,10 +124,6 @@ export class PriseDetailPage {
 
   protected readonly loadError = computed(() =>
     httpErrorMessage(this.prise.error())
-  );
-
-  protected readonly documentsLoadError = computed(() =>
-    httpErrorMessage(this.documents.error())
   );
 
   protected readonly editForm = form(this.editDraft, (path) => {
@@ -218,8 +183,8 @@ export class PriseDetailPage {
       try {
         const draft = this.editDraft();
         const body: PriseCarburantMaj = {
-          litrage: Number.parseFloat(draft.litrage),
-          montantTtc: Number.parseFloat(draft.montantTtc),
+          litrage: Number(draft.litrage),
+          montantTtc: Number(draft.montantTtc),
           stationId: draft.stationId,
           typeCarburant: draft.typeCarburant,
         };
@@ -240,56 +205,6 @@ export class PriseDetailPage {
       this.prise.reload();
     } catch (error) {
       this.validateError.set(httpErrorMessage(error));
-    }
-  }
-
-  protected onFileSelected(event: Event): void {
-    const { target } = event;
-    if (target instanceof HTMLInputElement && target.files?.[0]) {
-      this.selectedFile.set(target.files[0]);
-    }
-  }
-
-  protected onUploadType(value: string): void {
-    if (isDocumentType(value)) {
-      this.uploadDraft.update((current) => ({
-        ...current,
-        typeDocument: value,
-      }));
-    }
-  }
-
-  protected async uploadDocument(event: SubmitEvent): Promise<void> {
-    event.preventDefault();
-    this.uploadError.set(null);
-    const file = this.selectedFile();
-    if (!file) {
-      this.uploadError.set("Choisissez un fichier.");
-      return;
-    }
-    try {
-      await this.documentApi.televerser({
-        entiteId: this.id(),
-        fichier: file,
-        reference: this.uploadDraft().reference || undefined,
-        typeDocument: this.uploadDraft().typeDocument,
-        typeEntite: "PRISE_CARBURANT",
-      });
-      this.toast.success("Document téléversé.");
-      this.selectedFile.set(null);
-      this.documents.reload();
-    } catch (error) {
-      this.uploadError.set(httpErrorMessage(error));
-    }
-  }
-
-  protected async deleteDocument(documentId: string): Promise<void> {
-    try {
-      await this.documentApi.supprimer(documentId);
-      this.toast.success("Document supprimé.");
-      this.documents.reload();
-    } catch (error) {
-      this.toast.error(httpErrorMessage(error));
     }
   }
 }

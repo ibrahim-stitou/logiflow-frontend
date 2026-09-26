@@ -1,50 +1,24 @@
 <div class="flex flex-col gap-6">
   <app-maintenance-tabs />
-  <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-    <div>
-      <h1 class="module-page-title">Plans d'entretien</h1>
-      <p class="mt-1 text-sm text-muted">
-        Échéances projetées à partir des compteurs, de l'usage réel et de la dernière réalisation.
-      </p>
-    </div>
-    <a class="btn-primary pressable" routerLink="/maintenance/plans/nouveau">Nouveau plan</a>
-  </div>
 
-  <div class="flex flex-wrap items-center gap-3">
-    <div aria-label="Vue" class="flex gap-2" role="group">
-      <button
-        (click)="choisirVue('echeances')"
-        [attr.aria-pressed]="vue() === 'echeances'"
-        [class.btn-primary]="vue() === 'echeances'"
-        [class.btn-outline]="vue() !== 'echeances'"
-        class="pressable min-h-10 px-4 text-sm"
-        type="button"
-      >
-        À traiter (30 jours)
-      </button>
-      <button
-        (click)="choisirVue('tous')"
-        [attr.aria-pressed]="vue() === 'tous'"
-        [class.btn-primary]="vue() === 'tous'"
-        [class.btn-outline]="vue() !== 'tous'"
-        class="pressable min-h-10 px-4 text-sm"
-        type="button"
-      >
-        Tous les plans
-      </button>
-    </div>
-    <div class="w-48">
-      <app-field-select
-        (selectValueChange)="typeEngin.set($event); page.set(0)"
-        [options]="enginTypeOptions"
-        [selectValue]="typeEngin() || '__none__'"
-        inputId="plans-engin"
-      />
-    </div>
+  <div class="list-toolbar">
+    <app-list-statut-filter
+      [(selected)]="vueFilter"
+      [options]="vueOptions"
+      allLabel="À traiter (30 jours)"
+      ariaLabel="Filtrer la vue des plans"
+    />
+    <app-list-statut-filter
+      [(selected)]="typeEngin"
+      [options]="enginTypeOptions"
+      allLabel="Tous les engins"
+      ariaLabel="Filtrer par type d'engin"
+    />
+    <app-list-toolbar-cta label="Nouveau plan" link="/maintenance/plans/nouveau" />
   </div>
 
   @if (chargement() && lignes().length === 0) {
-  <app-list-table-skeleton label="Chargement des plans" />
+  <app-list-table-skeleton [columns]="6" label="Chargement des plans" />
   } @else if (erreur()) {
   <div class="alert-panel" role="alert">{{ erreur() }}</div>
   } @else if (lignes().length === 0) {
@@ -59,57 +33,82 @@
     actionLink="/maintenance/plans/nouveau"
   />
   } @else {
-  <div class="list-table-panel">
-    <table class="w-full min-w-3xl text-left text-sm">
-      <thead class="list-table-head">
-        <tr>
-          <th class="px-4 py-3 font-medium" scope="col">Plan</th>
-          <th class="px-4 py-3 font-medium" scope="col">Engin</th>
-          <th class="px-4 py-3 font-medium" scope="col">Périodicité</th>
-          <th class="px-4 py-3 font-medium" scope="col">Échéance</th>
-          <th class="px-4 py-3 font-medium" scope="col">État</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (plan of lignes(); track plan.id) {
-        <tr class="list-row border-b border-line last:border-0 hover:bg-canvas">
-          <td class="px-4 py-3">
-            <a
-              [routerLink]="['/maintenance/plans', plan.id]"
-              class="font-medium text-ink underline-offset-2 hover:underline"
-            >
-              {{ plan.libelle }}
-            </a>
-            <span class="block text-xs text-muted">{{ libelle(plan.type) }}</span>
-          </td>
-          <td class="px-4 py-3">
-            <span class="font-mono text-xs">{{ libelleEngin(plan.engin, lookups.engins()) }}</span>
-            <span class="block text-xs text-muted">{{ libelle(plan.engin.type) }}</span>
-          </td>
-          <td class="px-4 py-3 text-xs text-muted">{{ formatPeriodicite(plan) }}</td>
-          <td class="px-4 py-3 text-xs">{{ formatEcheance(plan.echeance) }}</td>
-          <td class="px-4 py-3">
-            <app-statut-chip
-              [label]="libelle(plan.echeance?.etat ?? null)"
-              [tone]="toneEcheance(plan.echeance?.etat)"
-            />
-            @if (!plan.actif) {
-            <app-statut-chip label="Inactif" tone="muted" />
-            }
-          </td>
-        </tr>
-        }
-      </tbody>
-    </table>
+  <div [class.list-table-stack]="vue() === 'tous' && plans.hasValue()">
+    <div class="list-table-panel">
+      <table z-table>
+        <thead z-table-header>
+          <tr z-table-row>
+            <th scope="col" z-table-head>Plan</th>
+            <th scope="col" z-table-head>Engin</th>
+            <th scope="col" z-table-head>Périodicité</th>
+            <th class="min-w-40" scope="col" z-table-head>Échéance</th>
+            <th scope="col" z-table-head>État</th>
+            <th scope="col" z-table-head class="text-right">
+              <span class="sr-only">Actions</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody z-table-body>
+          @for (plan of lignes(); track plan.id) {
+          <tr class="list-row" z-table-row>
+            <td z-table-cell>
+              <a
+                [routerLink]="['/maintenance/plans', plan.id]"
+                class="list-cell-with-icon font-medium text-ink underline-offset-2 hover:underline"
+              >
+                <ng-icon
+                  aria-hidden="true"
+                  class="list-cell-with-icon__icon"
+                  name="lucideWrench"
+                />
+                <span>{{ plan.libelle }}</span>
+              </a>
+              <span class="mt-0.5 block text-xs text-muted">{{ libelle(plan.type) }}</span>
+            </td>
+            <td z-table-cell>
+              <span class="font-mono text-xs">{{ libelleEngin(plan.engin, lookups.engins()) }}</span>
+              <span class="mt-0.5 block text-xs text-muted">{{ libelle(plan.engin.type) }}</span>
+            </td>
+            <td class="whitespace-nowrap text-xs text-muted" z-table-cell>
+              {{ formatPeriodicite(plan) }}
+            </td>
+            <td class="text-xs text-muted" z-table-cell>
+              {{ formatEcheance(plan.echeance) }}
+            </td>
+            <td z-table-cell>
+              <div class="flex flex-wrap items-center gap-1.5">
+                <app-statut-chip
+                  [label]="libelle(plan.echeance?.etat ?? null)"
+                  [tone]="toneEcheance(plan.echeance?.etat)"
+                />
+                @if (!plan.actif) {
+                <app-statut-chip label="Inactif" tone="muted" />
+                }
+              </div>
+            </td>
+            <td class="text-right" z-table-cell>
+              <a
+                [routerLink]="['/maintenance/plans', plan.id]"
+                class="list-row-action list-row-action--with-icon text-sm font-medium text-pine underline-offset-2 hover:underline"
+              >
+                <span>Ouvrir</span>
+                <ng-icon aria-hidden="true" name="lucideArrowRight" />
+              </a>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    @if (vue() === "tous" && plans.hasValue()) {
+    <app-list-pagination
+      [(page)]="page"
+      [pageSize]="20"
+      [totalElements]="plans.value().totalElements"
+      [totalPages]="plans.value().totalPages"
+      itemLabel="plan"
+    />
+    }
   </div>
-  @if (vue() === "tous" && plans.hasValue()) {
-  <app-list-pagination
-    [(page)]="page"
-    [pageSize]="20"
-    [totalElements]="plans.value().totalElements"
-    [totalPages]="plans.value().totalPages"
-    itemLabel="plan"
-  />
-  }
   }
 </div>

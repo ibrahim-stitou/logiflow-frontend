@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="LogiFlow">
+  <rect width="32" height="32" rx="7" fill="#215544"/>
+  <path d="M7.5 22.5 C11 16 13.5 13.5 16.5 16.5 C19 19 21.5 14.5 24.5 10.5"
+        fill="none" stroke="#F7F4EF" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M21.2 9.2 L25.2 9.6 L23.4 13.2 Z" fill="#F7F4EF"/>
+  <circle cx="7.5" cy="22.5" r="2.2" fill="#F7F4EF"/>
+  <circle cx="16.5" cy="16.5" r="1.5" fill="#F7F4EF"/>
+</svg>

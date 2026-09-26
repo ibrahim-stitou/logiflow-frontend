@@ -85,6 +85,11 @@ export class CopiloteStore {
     this.ouvert.update((ouvert) => !ouvert);
   }
 
+  /** Ouvre le panneau (sheet) sans basculer. */
+  ouvrirPanneau(): void {
+    this.ouvert.set(true);
+  }
+
   fermer(): void {
     this.ouvert.set(false);
   }

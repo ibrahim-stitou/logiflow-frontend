@@ -1,5 +1,19 @@
 import { httpResource } from "@angular/common/http";
-import { Component, computed, inject, input, signal } from "@angular/core";
+import {
+  Component,
+  computed,
+  inject,
+  input,
+  signal,
+  booleanAttribute,
+} from "@angular/core";
+import { NgIcon, provideIcons } from "@ng-icons/core";
+import {
+  lucideExternalLink,
+  lucideFileText,
+  lucideTrash2,
+  lucideUpload,
+} from "@ng-icons/lucide";
 import { environment } from "../../../environments/environment";
 import {
   etatValidite,
@@ -11,6 +25,7 @@ import {
   DOCUMENT_TYPES_PAR_ENTITE,
   type Document,
   type DocumentType,
+  documentSuitExpiration,
   documentTypeLabel,
   formatDocumentExpiration,
   isDocumentType,
@@ -24,12 +39,19 @@ import { ToastService } from "./toast";
 
 /**
  * Pièces justificatives d'une entité (liste, ouverture, suppression, téléversement).
- * Tous les documents sont optionnels : référence et date d'expiration aussi ;
- * quand l'expiration est renseignée, son état (valide / bientôt / expiré) est affiché.
+ * Ouverture via GET authentifié `/documents/{id}/contenu` (blob), pas via `/fichiers/**`.
  */
 @Component({
-  imports: [StatutChip, ...FORM_PAGE_IMPORTS],
+  imports: [NgIcon, StatutChip, ...FORM_PAGE_IMPORTS],
   selector: "app-documents-section",
+  viewProviders: [
+    provideIcons({
+      lucideExternalLink,
+      lucideFileText,
+      lucideTrash2,
+      lucideUpload,
+    }),
+  ],
   template: `
     <app-form-section [description]="description()" title="Documents">
       @if (documents.isLoading()) {
@@ -47,108 +69,186 @@ import { ToastService } from "./toast";
         </div>
       } @else if (documents.hasValue()) {
         @if (documents.value().length === 0) {
-          <p class="text-sm text-muted">Aucun document (facultatif).</p>
+          <div
+            class="flex flex-col items-center gap-2 rounded-[calc(var(--radius-xl)-1rem)] border border-dashed border-line/90 bg-canvas/60 px-4 py-8 text-center"
+          >
+            <ng-icon
+              aria-hidden="true"
+              class="size-8 text-muted opacity-70"
+              name="lucideFileText"
+            />
+            <p class="text-sm font-medium text-ink">Aucun document</p>
+            <p class="max-w-sm text-xs text-muted">{{ emptyHint() }}</p>
+          </div>
         } @else {
           <ul class="flex flex-col gap-2">
             @for (document of documents.value(); track document.id) {
               <li
-                class="flex flex-wrap items-end justify-between gap-3 rounded-lg border border-line/80 bg-canvas px-3 py-3"
+                class="group flex items-center gap-3 rounded-[calc(var(--radius-xl)-1rem)] border border-line/80 bg-canvas px-3 py-2.5 shadow-[inset_0_1px_2px_oklch(0_0_0/0.02)] transition-[border-color,box-shadow] duration-150 ease-[cubic-bezier(0.2,0,0,1)] hover:border-pine/35"
               >
-                <div class="min-w-0 flex-1 text-sm">
-                  <p class="flex flex-wrap items-center gap-2 font-medium text-ink">
-                    {{ documentTypeLabel(document.typeDocument) }}
-                    @if (document.dateExpiration) {
+                <div
+                  class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-pine/8 text-pine"
+                >
+                  <ng-icon
+                    aria-hidden="true"
+                    class="size-5"
+                    name="lucideFileText"
+                  />
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p class="flex flex-wrap items-center gap-2 text-sm font-medium text-ink">
+                    <span class="truncate">{{
+                      documentTypeLabel(document.typeDocument)
+                    }}</span>
+                    @if (dateExpirationSuivie(document); as dateExp) {
                       <app-statut-chip
-                        [label]="etatLabel(document.dateExpiration)"
-                        [tone]="etatTone(document.dateExpiration)"
+                        [label]="etatLabel(dateExp)"
+                        [tone]="etatTone(dateExp)"
                       />
                     }
                   </p>
                   @if (document.reference) {
-                    <p class="mt-1 text-muted">{{ document.reference }}</p>
-                  }
-                  @if (document.dateExpiration) {
-                    <p class="mt-1 font-mono text-xs tabular-nums text-muted">
-                      Expire le {{ formatDocumentExpiration(document.dateExpiration) }}
+                    <p class="mt-0.5 truncate text-xs text-muted">
+                      {{ document.reference }}
                     </p>
                   }
-                  @if (document.url) {
-                    <a
-                      [href]="document.url"
-                      class="mt-2 inline-block text-xs text-pine underline-offset-2 hover:underline"
-                      rel="noopener"
-                      target="_blank"
-                    >
-                      Ouvrir le fichier
-                    </a>
+                  @if (dateExpirationSuivie(document); as dateExp) {
+                    <p class="mt-0.5 font-mono text-[0.7rem] tabular-nums text-muted">
+                      Expire le {{ formatDocumentExpiration(dateExp) }}
+                    </p>
                   }
                 </div>
-                <button
-                  (click)="supprimer(document.id)"
-                  [attr.aria-label]="'Supprimer ' + documentTypeLabel(document.typeDocument)"
-                  class="btn-danger-outline pressable h-11 px-3 text-xs"
-                  type="button"
-                >
-                  Supprimer
-                </button>
+                <div class="flex shrink-0 items-center gap-1">
+                  <button
+                    (click)="ouvrir(document)"
+                    [attr.aria-label]="'Ouvrir ' + documentTypeLabel(document.typeDocument)"
+                    [disabled]="ouvertureId() === document.id"
+                    class="pressable inline-flex size-10 items-center justify-center rounded-lg text-pine transition-[background-color,color,opacity] duration-150 ease-[cubic-bezier(0.2,0,0,1)] hover:bg-pine/10 disabled:opacity-50"
+                    type="button"
+                  >
+                    <ng-icon
+                      aria-hidden="true"
+                      class="size-4"
+                      name="lucideExternalLink"
+                    />
+                  </button>
+                  @if (modifiable()) {
+                    <button
+                      (click)="supprimer(document.id)"
+                      [attr.aria-label]="'Supprimer ' + documentTypeLabel(document.typeDocument)"
+                      class="pressable inline-flex size-10 items-center justify-center rounded-lg text-brake transition-[background-color,opacity] duration-150 ease-[cubic-bezier(0.2,0,0,1)] hover:bg-brake/8"
+                      type="button"
+                    >
+                      <ng-icon
+                        aria-hidden="true"
+                        class="size-4"
+                        name="lucideTrash2"
+                      />
+                    </button>
+                  }
+                </div>
               </li>
             }
           </ul>
         }
 
-        <details class="fiche-disclosure fiche-inset">
-          <summary class="text-sm font-medium text-ink">Téléverser un document</summary>
-          <form (submit)="televerser($event)" class="mt-4" novalidate>
-            <app-form-field [inputId]="prefixe() + '-fichier'" label="Fichier *">
-              <input
-                (change)="onFichier($event)"
-                [id]="prefixe() + '-fichier'"
-                accept=".pdf,.png,.jpg,.jpeg,.webp"
-                class="field"
-                type="file"
-              />
-            </app-form-field>
-            <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <app-form-field [inputId]="prefixe() + '-type'" label="Type">
-                <app-field-select
-                  (selectValueChange)="onType($event)"
-                  [inputId]="prefixe() + '-type'"
-                  [options]="typeOptions()"
-                  [selectValue]="typeDocument()"
-                />
-              </app-form-field>
-              <app-form-field [inputId]="prefixe() + '-reference'" label="Référence">
-                <input
-                  (input)="onReference($event)"
-                  [id]="prefixe() + '-reference'"
-                  [value]="reference()"
-                  class="field"
-                  placeholder="Facultatif"
-                  type="text"
-                />
-              </app-form-field>
-              <app-form-field [inputId]="prefixe() + '-expiration'" label="Expiration">
-                <app-iso-date-input
-                  (isoDateChange)="expiration.set($event)"
-                  [inputId]="prefixe() + '-expiration'"
-                  [isoDate]="expiration()"
-                />
-              </app-form-field>
-            </div>
-            @if (erreur()) {
-              <div class="alert-panel mt-3" role="alert">{{ erreur() }}</div>
-            }
-            <app-form-actions>
-              <button
-                [disabled]="envoi()"
-                class="btn-primary pressable min-h-11 px-5"
-                type="submit"
+        @if (modifiable()) {
+          <div
+            class="rounded-[calc(var(--radius-xl)-1rem)] border border-line/80 bg-canvas/80 p-3 sm:p-4"
+          >
+            <p class="mb-3 text-xs font-medium tracking-wide text-muted uppercase">
+              Téléverser
+            </p>
+            <form (submit)="televerser($event)" class="flex flex-col gap-3" novalidate>
+              <label
+                [attr.for]="prefixe() + '-fichier'"
+                class="pressable flex cursor-pointer flex-col items-center gap-2 rounded-lg border border-dashed border-line/90 bg-surface px-4 py-5 text-center transition-[border-color,background-color] duration-150 ease-[cubic-bezier(0.2,0,0,1)] hover:border-pine/40 hover:bg-pine/4"
               >
-                {{ envoi() ? "Envoi…" : "Téléverser" }}
-              </button>
-            </app-form-actions>
-          </form>
-        </details>
+                <ng-icon
+                  aria-hidden="true"
+                  class="size-6 text-pine"
+                  name="lucideUpload"
+                />
+                <span class="text-sm font-medium text-ink">
+                  @if (fichier(); as f) {
+                    {{ f.name }}
+                  } @else {
+                    Choisir un fichier
+                  }
+                </span>
+                <span class="text-xs text-muted">PDF, PNG, JPG ou WebP</span>
+                <input
+                  (change)="onFichier($event)"
+                  [id]="prefixe() + '-fichier'"
+                  accept=".pdf,.png,.jpg,.jpeg,.webp"
+                  class="sr-only"
+                  type="file"
+                />
+              </label>
+
+              <div
+                [class]="
+                  saisieExpiration()
+                    ? 'grid grid-cols-1 gap-3 sm:grid-cols-3'
+                    : 'grid grid-cols-1 gap-3 sm:grid-cols-2'
+                "
+              >
+                <app-form-field [inputId]="prefixe() + '-type'" label="Type">
+                  <app-field-select
+                    (selectValueChange)="onType($event)"
+                    [inputId]="prefixe() + '-type'"
+                    [options]="typeOptions()"
+                    [selectValue]="typeDocument()"
+                  />
+                </app-form-field>
+                <app-form-field
+                  [inputId]="prefixe() + '-reference'"
+                  label="Référence"
+                >
+                  <input
+                    (input)="onReference($event)"
+                    [id]="prefixe() + '-reference'"
+                    [value]="reference()"
+                    class="field"
+                    placeholder="Facultatif"
+                    type="text"
+                  />
+                </app-form-field>
+                @if (saisieExpiration()) {
+                  <app-form-field
+                    [inputId]="prefixe() + '-expiration'"
+                    label="Expiration"
+                  >
+                    <app-iso-date-input
+                      (isoDateChange)="expiration.set($event)"
+                      [inputId]="prefixe() + '-expiration'"
+                      [isoDate]="expiration()"
+                    />
+                  </app-form-field>
+                }
+              </div>
+
+              @if (erreur()) {
+                <div class="alert-panel" role="alert">{{ erreur() }}</div>
+              }
+
+              <div class="flex justify-end">
+                <button
+                  [disabled]="envoi() || !fichier()"
+                  class="btn-toolbar pressable"
+                  type="submit"
+                >
+                  <ng-icon
+                    aria-hidden="true"
+                    class="btn-toolbar__icon"
+                    name="lucideUpload"
+                  />
+                  <span>{{ envoi() ? "Envoi…" : "Téléverser" }}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        }
       }
     </app-form-section>
   `,
@@ -160,8 +260,10 @@ export class DocumentsSection {
   readonly typeEntite = input.required<TypeEntiteDocumentable>();
   readonly entiteId = input.required<string>();
   readonly description = input(
-    "Pièces justificatives facultatives ; l'expiration renseignée est suivie."
+    "Pièces facultatives. L'expiration n'est suivie que pour les titres à durée limitée."
   );
+  /** When false, hide upload and delete (read-only fiche). */
+  readonly modifiable = input(true, { transform: booleanAttribute });
 
   protected readonly documentTypeLabel = documentTypeLabel;
   protected readonly formatDocumentExpiration = formatDocumentExpiration;
@@ -184,10 +286,20 @@ export class DocumentsSection {
       DOCUMENT_TYPES_PAR_ENTITE[this.typeEntite()][0] ??
       "AUTRE"
   );
+  /** Expiration field for the type currently selected in the upload form. */
+  protected readonly saisieExpiration = computed(() =>
+    documentSuitExpiration(this.typeEntite(), this.typeDocument())
+  );
+  protected readonly emptyHint = computed(() =>
+    documentSuitExpiration(this.typeEntite())
+      ? "Titres et pièces — l'expiration est suivie lorsqu'elle s'applique."
+      : "Justificatifs et pièces jointes — sans suivi d'expiration."
+  );
   protected readonly reference = signal("");
   protected readonly expiration = signal("");
   protected readonly erreur = signal<string | null>(null);
   protected readonly envoi = signal(false);
+  protected readonly ouvertureId = signal<string | null>(null);
 
   protected readonly documents = httpResource<Document[]>(() => ({
     params: { entiteId: this.entiteId(), typeEntite: this.typeEntite() },
@@ -200,6 +312,16 @@ export class DocumentsSection {
 
   private readonly aujourdhui = new Date();
 
+  protected dateExpirationSuivie(document: Document): string | null {
+    if (
+      !document.dateExpiration ||
+      !documentSuitExpiration(document.typeEntite, document.typeDocument)
+    ) {
+      return null;
+    }
+    return document.dateExpiration;
+  }
+
   protected etatLabel(dateExpiration: string): string {
     return etatValiditeLabel(etatValidite(dateExpiration, this.aujourdhui));
   }
@@ -211,6 +333,9 @@ export class DocumentsSection {
   protected onType(valeur: string): void {
     if (isDocumentType(valeur)) {
       this.typeDocumentChoisi.set(valeur);
+      if (!documentSuitExpiration(this.typeEntite(), valeur)) {
+        this.expiration.set("");
+      }
     }
   }
 
@@ -226,6 +351,19 @@ export class DocumentsSection {
     }
   }
 
+  protected async ouvrir(document: Document): Promise<void> {
+    this.erreur.set(null);
+    this.ouvertureId.set(document.id);
+    try {
+      await this.documentApi.ouvrir(document.id);
+    } catch (error) {
+      this.erreur.set(httpErrorMessage(error));
+      this.toast.error("Impossible d'ouvrir le fichier.");
+    } finally {
+      this.ouvertureId.set(null);
+    }
+  }
+
   protected async televerser(event: SubmitEvent): Promise<void> {
     event.preventDefault();
     this.erreur.set(null);
@@ -236,12 +374,15 @@ export class DocumentsSection {
     }
     this.envoi.set(true);
     try {
+      const typeDocument = this.typeDocument();
       await this.documentApi.televerser({
-        dateExpiration: this.expiration() || undefined,
+        dateExpiration: documentSuitExpiration(this.typeEntite(), typeDocument)
+          ? this.expiration() || undefined
+          : undefined,
         entiteId: this.entiteId(),
         fichier,
         reference: this.reference(),
-        typeDocument: this.typeDocument(),
+        typeDocument,
         typeEntite: this.typeEntite(),
       });
       this.fichier.set(null);

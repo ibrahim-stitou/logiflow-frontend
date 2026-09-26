@@ -1,71 +1,77 @@
 <div class="voyages-page">
-  <div class="list-toolbar voyages-toolbar">
+  <div class="list-toolbar">
     <app-list-search-bar
-        [(draft)]="searchDraft"
-        [(query)]="search"
-        inputId="voyage-search"
-        placeholder="Référence, type, portée…"
-      />
+      [(draft)]="searchDraft"
+      [(query)]="search"
+      inputId="voyage-search"
+      placeholder="Référence, type, portée…"
+    />
     <app-list-statut-filter
       [(selected)]="statutFilter"
       [options]="statutOptions"
     />
-    @if (canPlan()) {
-    <app-list-toolbar-cta label="Nouveau voyage" link="/voyages/nouveau" />
-    }
+    <div class="list-toolbar__actions">
+      @if (voyages.isLoading() || voyages.hasValue()) {
+      <button
+        (click)="toggleMapVisible()"
+        [attr.aria-expanded]="mapVisible()"
+        [attr.aria-pressed]="mapVisible()"
+        aria-controls="voyages-map-panel"
+        class="btn-outline pressable gap-1.5"
+        type="button"
+      >
+        <ng-icon aria-hidden="true" class="size-3.5" name="lucideMap" />
+        {{ mapVisible() ? "Masquer la carte" : "Carte" }}
+      </button>
+      }
+      @if (canPlan()) {
+      <app-list-toolbar-cta label="Nouveau voyage" link="/voyages/nouveau" />
+      }
+    </div>
   </div>
 
   @if (hasActiveFilters()) {
-  <z-card class="voyages-toolbar-meta">
-    <div class="voyages-toolbar__inner">
-      <div class="voyages-toolbar__meta">
-        <p class="voyages-toolbar__meta-text">
-          <ng-icon aria-hidden="true" name="lucideRoute" />
-          @if (search()) {
-          Recherche « {{ search() }} »
-          @if (activeStatutLabel(); as label) {
-          · {{ label }}
-          }
-          } @else if (activeStatutLabel(); as label) {
-          Filtre : {{ label }}
-          }
-        </p>
-        <button
-          (click)="clearFilters()"
-          type="button"
-          z-button
-          zSize="sm"
-          zType="ghost"
-        >
-          <ng-icon aria-hidden="true" name="lucideX" />
-          Effacer
-        </button>
-      </div>
-    </div>
-  </z-card>
+  <div class="voyages-filter-meta">
+    <p class="voyages-filter-meta__text">
+      <ng-icon aria-hidden="true" name="lucideRoute" />
+      @if (search()) {
+      Recherche « {{ search() }} »
+      @if (activeStatutLabel(); as label) {
+      · {{ label }}
+      }
+      } @else if (activeStatutLabel(); as label) {
+      Filtre : {{ label }}
+      }
+    </p>
+    <button
+      (click)="clearFilters()"
+      class="pressable inline-flex items-center gap-1 text-xs font-medium text-pine underline-offset-2 hover:underline"
+      type="button"
+    >
+      <ng-icon aria-hidden="true" name="lucideX" />
+      Effacer
+    </button>
+  </div>
   }
 
   @if (voyages.isLoading()) {
-  <div class="voyages-layout">
+  <div [class]="listWithMapLayoutClass()">
     <app-list-table-skeleton label="Chargement des voyages" />
+    @if (mapVisible()) {
     <app-map-aside-skeleton />
+    }
   </div>
   } @else if (voyages.error()) {
-  <z-alert
-    zIcon="lucideCircleAlert"
-    zType="destructive"
-    [zDescription]="errorMessage()"
-  />
-  <button
-    (click)="voyages.reload()"
-    class="self-start"
-    type="button"
-    z-button
-    zSize="sm"
-    zType="outline"
-  >
-    Réessayer
-  </button>
+  <div class="alert-panel" role="alert">
+    <p>{{ errorMessage() }}</p>
+    <button
+      (click)="voyages.reload()"
+      class="pressable mt-2 font-medium text-ink underline underline-offset-2"
+      type="button"
+    >
+      Réessayer
+    </button>
+  </div>
   } @else if (voyages.hasValue() && voyages.value().content.length === 0) {
   @if (search()) {
   <app-list-empty-state
@@ -95,50 +101,39 @@
     title="Aucun voyage pour ce filtre"
   />
   } @else if (voyages.hasValue()) {
-  <div class="voyages-layout">
-    <div class="voyages-table-wrap">
+  <div [class]="listWithMapLayoutClass()">
+    <div class="flex min-w-0 flex-col gap-3">
       <div class="list-table-stack">
         <div
           appListRowKeyboard
           [(activeId)]="selectedVoyageId"
           [rows]="keyboardRows()"
           aria-label="Liste des voyages — flèches pour naviguer, Entrée pour ouvrir"
-          class="voyages-table-panel"
+          class="list-table-panel"
         >
           <table z-table>
-            <thead class="voyages-table-head" z-table-header>
+            <thead z-table-header>
               <tr z-table-row>
-                <th scope="col" z-table-head>
-                  <span class="voyages-th">
-                    <ng-icon aria-hidden="true" name="lucideHash" />
-                    Référence
-                  </span>
-                </th>
+                <th scope="col" z-table-head>Référence</th>
                 <th class="voyages-col voyages-col--type" scope="col" z-table-head>
-                  <span class="voyages-th">
-                    <ng-icon aria-hidden="true" name="lucideRoute" />
-                    Type
-                  </span>
+                  Type
                 </th>
-                <th class="voyages-col voyages-col--portee" scope="col" z-table-head>
-                  <span class="voyages-th">
-                    <ng-icon aria-hidden="true" name="lucideGlobe" />
-                    Portée
-                  </span>
+                <th
+                  class="voyages-col voyages-col--portee"
+                  scope="col"
+                  z-table-head
+                >
+                  Portée
                 </th>
-                <th class="voyages-col voyages-col--depart" scope="col" z-table-head>
-                  <span class="voyages-th">
-                    <ng-icon aria-hidden="true" name="lucideCalendarClock" />
-                    Départ prévu
-                  </span>
+                <th
+                  class="voyages-col voyages-col--depart"
+                  scope="col"
+                  z-table-head
+                >
+                  Départ prévu
                 </th>
-                <th scope="col" z-table-head>
-                  <span class="voyages-th">
-                    <ng-icon aria-hidden="true" name="lucideCircleDot" />
-                    Statut
-                  </span>
-                </th>
-                <th scope="col" z-table-head>
+                <th scope="col" z-table-head>Statut</th>
+                <th class="text-right" scope="col" z-table-head>
                   <span class="sr-only">Actions</span>
                 </th>
               </tr>
@@ -149,55 +144,55 @@
                 z-table-row
                 (click)="selectVoyage(voyage.id)"
                 [attr.aria-selected]="selectedVoyageId() === voyage.id"
-                class="voyages-row"
+                [class.bg-pine/5]="selectedVoyageId() === voyage.id"
+                class="list-row cursor-pointer"
               >
                 <td z-table-cell>
                   <a
-                    (click)="$event.stopPropagation()"
+                    (click)="selectVoyage(voyage.id); $event.stopPropagation()"
                     [routerLink]="['/voyages', voyage.id]"
-                    class="voyages-ref"
+                    class="font-mono text-xs text-pine underline-offset-2 hover:underline"
                   >
-                    <ng-icon aria-hidden="true" name="lucideHash" />
                     {{ voyage.reference }}
                   </a>
                 </td>
                 <td class="voyages-col voyages-col--type" z-table-cell>
-                  <span class="voyages-cell">
+                  <span class="list-cell-with-icon">
                     <ng-icon
                       aria-hidden="true"
+                      class="list-cell-with-icon__icon"
                       [name]="typeVoyageIcon(voyage.typeVoyage)"
                     />
-                    {{ typeVoyageLabel(voyage.typeVoyage) }}
+                    <span>{{ typeVoyageLabel(voyage.typeVoyage) }}</span>
                   </span>
                 </td>
-                <td class="voyages-col voyages-col--portee" z-table-cell>
-                  <span class="voyages-cell voyages-cell--muted">
-                    <ng-icon
-                      aria-hidden="true"
-                      [name]="porteeIcon(voyage.portee)"
-                    />
-                    {{ porteeLabel(voyage.portee) }}
-                  </span>
+                <td
+                  class="voyages-col voyages-col--portee text-muted"
+                  z-table-cell
+                >
+                  {{ porteeLabel(voyage.portee) }}
                 </td>
-                <td class="voyages-col voyages-col--depart" z-table-cell>
-                  <span class="voyages-cell voyages-cell--muted voyages-cell--mono">
-                    <ng-icon aria-hidden="true" name="lucideCalendarClock" />
-                    {{ formatInstant(voyage.departPrevu) }}
-                  </span>
+                <td
+                  class="voyages-col voyages-col--depart font-mono text-xs tabular-nums text-muted"
+                  z-table-cell
+                >
+                  {{ formatInstant(voyage.departPrevu) }}
                 </td>
                 <td z-table-cell>
-                  <z-badge [zType]="statutBadgeType(voyage.statut)">
-                    {{ statutVoyageLabel(voyage.statut) }}
-                  </z-badge>
+                  <app-statut-chip
+                    [icon]="statutChipIcon(voyage.statut)"
+                    [label]="statutVoyageLabel(voyage.statut)"
+                    [tone]="voyageStatutTone(voyage.statut)"
+                  />
                 </td>
                 <td class="text-right" z-table-cell>
                   <a
                     (click)="$event.stopPropagation()"
                     [routerLink]="['/voyages', voyage.id]"
-                    class="voyages-row-action"
+                    class="list-row-action list-row-action--with-icon text-sm font-medium text-pine underline-offset-2 hover:underline"
                   >
-                    Ouvrir
-                    <ng-icon aria-hidden="true" name="lucideChevronRight" />
+                    <span>Ouvrir</span>
+                    <ng-icon aria-hidden="true" name="lucideArrowRight" />
                   </a>
                 </td>
               </tr>
@@ -218,18 +213,34 @@
       </div>
     </div>
 
-    <z-card class="voyages-map-card">
-      <z-card-header>
-        <div class="voyages-map-card__header">
-          <ng-icon aria-hidden="true" class="voyages-map-card__icon" name="lucideMap" />
-          <div>
-            <z-card-title zTitle="Itinéraire" />
-            <z-card-description [zDescription]="mapHint()" />
-          </div>
+    @if (mapVisible()) {
+    <aside
+      class="voyages-map-aside surface-panel"
+      id="voyages-map-panel"
+    >
+      <div class="voyages-map-aside__header">
+        <div class="voyages-map-aside__title-row">
+          <ng-icon
+            aria-hidden="true"
+            class="voyages-map-aside__icon"
+            name="lucideMap"
+          />
+          <h2 class="text-sm font-medium text-ink">Itinéraire</h2>
         </div>
-      </z-card-header>
-      <div class="voyages-map-card__body">
+        <p class="voyages-map-aside__hint">{{ mapHint() }}</p>
+        @if (selectedVoyage(); as voyage) {
+        <a
+          [routerLink]="['/voyages', voyage.id]"
+          class="voyages-map-aside__ref pressable"
+        >
+          {{ voyage.reference }}
+          <ng-icon aria-hidden="true" name="lucideArrowRight" />
+        </a>
+        }
+      </div>
+      <div class="voyages-map-aside__body">
         <app-geo-markers-map
+          embedded
           [ariaLabel]="
             selectedVoyage()
               ? 'Itinéraire du voyage ' + selectedVoyage()!.reference
@@ -237,10 +248,11 @@
           "
           [markers]="mapMarkers()"
           [path]="mapPath()"
+          class="voyages-map-aside__map"
         />
       </div>
-    </z-card>
+    </aside>
+    }
   </div>
   }
 </div>
-

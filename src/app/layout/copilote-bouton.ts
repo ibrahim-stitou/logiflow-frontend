@@ -3,10 +3,11 @@ import { NgIcon, provideIcons } from "@ng-icons/core";
 import { lucideSparkles } from "@ng-icons/lucide";
 import { afficherEtat } from "../ia/copilote";
 import { CopiloteStore } from "../ia/copilote-store";
+import { CopiloteSheetService } from "./copilote-sheet.service";
 
 /**
- * Bouton « Copilote » du header. Le panneau lui-même est rendu à la racine du
- * shell (le header a un backdrop-filter qui piégerait un élément `fixed`).
+ * Bouton « Copilote » du header. Ouvre le panneau via {@link CopiloteSheetService}
+ * (Zard sheet) : le header a un backdrop-filter qui piégerait un élément `fixed`.
  */
 @Component({
   imports: [NgIcon],
@@ -23,7 +24,7 @@ import { CopiloteStore } from "../ia/copilote-store";
       border-radius: 999px;
     }
     .copilote-point--ok {
-      background: #16a34a;
+      background: var(--color-pine);
     }
     .copilote-point--degrade {
       background: var(--color-amber);
@@ -34,7 +35,7 @@ import { CopiloteStore } from "../ia/copilote-store";
   `,
   template: `
     <button
-      (click)="store.basculer()"
+      (click)="sheet.basculer()"
       [attr.aria-expanded]="store.ouvert()"
       aria-controls="app-copilote-panel"
       aria-haspopup="dialog"
@@ -56,6 +57,7 @@ import { CopiloteStore } from "../ia/copilote-store";
 })
 export class CopiloteBouton {
   protected readonly store = inject(CopiloteStore);
+  protected readonly sheet = inject(CopiloteSheetService);
   protected readonly etat = computed(() => afficherEtat(this.store.etat()));
   protected readonly niveau = computed(() => this.etat().niveau);
 }

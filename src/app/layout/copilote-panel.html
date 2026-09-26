@@ -1,13 +1,7 @@
-@if (store.ouvert()) {
-<!-- Voile sur petit écran uniquement : en large, le panneau laisse l'application utilisable. -->
-<div (click)="fermer()" aria-hidden="true" class="copilote-voile"></div>
-
-<aside
+<div
   aria-labelledby="app-copilote-title"
-  aria-modal="false"
   class="copilote-panneau"
   id="app-copilote-panel"
-  role="dialog"
 >
   <!-- ═══ Colonne historique ═══ -->
   <nav
@@ -19,7 +13,7 @@
       <h3 class="text-xs font-semibold tracking-wide text-muted uppercase">Conversations</h3>
       <span class="font-mono text-[0.65rem] text-muted tabular-nums">{{ store.conversations().length }}</span>
     </div>
-    <button (click)="nouvelle()" class="copilote-nouvelle pressable" type="button">
+    <button (click)="nouvelle()" class="copilote-nouvelle" type="button" z-button zSize="sm">
       <ng-icon name="lucidePlus" />
       Nouvelle conversation
     </button>
@@ -40,7 +34,7 @@
             maxlength="200"
             name="titre"
           />
-          <button aria-label="Valider" class="copilote-icone pressable" type="submit">
+          <button aria-label="Valider" type="submit" z-button zType="ghost" zSize="icon-xs">
             <ng-icon name="lucideCheck" />
           </button>
         </form>
@@ -48,10 +42,10 @@
         <div class="flex w-full flex-col gap-1.5 p-2">
           <span class="text-xs text-ink">Supprimer « {{ conversation.titre }} » ?</span>
           <div class="flex gap-1">
-            <button (click)="confirmerSuppression(conversation.id)" class="copilote-mini copilote-mini--danger pressable" type="button">
+            <button (click)="confirmerSuppression(conversation.id)" type="button" z-button zType="destructive" zSize="xs">
               Supprimer
             </button>
-            <button (click)="suppressionId.set(null)" class="copilote-mini pressable" type="button">Annuler</button>
+            <button (click)="suppressionId.set(null)" type="button" z-button zType="outline" zSize="xs">Annuler</button>
           </div>
         </div>
         } @else {
@@ -71,16 +65,20 @@
           <button
             (click)="renommageId.set(conversation.id)"
             [attr.aria-label]="'Renommer ' + conversation.titre"
-            class="copilote-icone pressable"
             type="button"
+            z-button
+            zType="ghost"
+            zSize="icon-xs"
           >
             <ng-icon name="lucidePencil" />
           </button>
           <button
             (click)="suppressionId.set(conversation.id)"
             [attr.aria-label]="'Supprimer ' + conversation.titre"
-            class="copilote-icone pressable"
             type="button"
+            z-button
+            zType="ghost"
+            zSize="icon-xs"
           >
             <ng-icon name="lucideTrash2" />
           </button>
@@ -102,14 +100,17 @@
         (click)="historiqueMobile.set(!historiqueMobile())"
         [attr.aria-expanded]="historiqueMobile()"
         aria-label="Afficher l'historique"
-        class="copilote-icone copilote-icone--historique pressable"
+        class="copilote-icone--historique"
         type="button"
+        z-button
+        zType="outline"
+        zSize="icon-sm"
       >
         <ng-icon name="lucidePanelLeft" />
       </button>
-      <div class="min-w-0 flex-1">
-        <h2 class="flex items-center gap-1.5 text-sm font-semibold text-ink" id="app-copilote-title">
-          <ng-icon class="text-pine" name="lucideSparkles" />
+      <div class="min-w-0 flex-1 pe-10">
+        <h2 class="flex items-center gap-1.5 text-sm font-semibold tracking-tight text-ink" id="app-copilote-title">
+          <ng-icon class="translate-y-px text-pine" name="lucideSparkles" />
           Copilote
         </h2>
         <p class="truncate text-xs text-muted">{{ titre() }}</p>
@@ -117,15 +118,12 @@
       <button
         (click)="store.verifierEtat()"
         [attr.aria-label]="'État du moteur IA : ' + etat().libelle + '. Vérifier à nouveau.'"
-        [class]="'copilote-etat pressable copilote-etat--' + etat().niveau"
+        [class]="'copilote-etat copilote-etat--' + etat().niveau"
         [title]="etat().detail"
         type="button"
       >
         <span aria-hidden="true" class="copilote-etat-point"></span>
         <span class="hidden sm:inline">{{ etat().libelle }}</span>
-      </button>
-      <button (click)="fermer()" aria-label="Fermer le copilote" class="copilote-icone pressable" type="button">
-        <ng-icon name="lucideX" />
       </button>
     </header>
 
@@ -133,7 +131,7 @@
     <div class="copilote-bandeau" role="status">
       <ng-icon class="mt-0.5 shrink-0" name="lucideCircleAlert" />
       <p class="flex-1">{{ etat().detail }}</p>
-      <button (click)="store.verifierEtat()" class="copilote-mini pressable" type="button">
+      <button (click)="store.verifierEtat()" type="button" z-button zType="outline" zSize="xs">
         <ng-icon name="lucideRefreshCw" /> Réessayer
       </button>
     </div>
@@ -159,7 +157,7 @@
         <ul class="mt-2 grid w-full gap-1.5">
           @for (suggestion of suggestions; track suggestion) {
           <li>
-            <button (click)="poser(suggestion)" class="copilote-suggestion pressable" type="button">
+            <button (click)="poser(suggestion)" class="copilote-suggestion" type="button">
               {{ suggestion }}
             </button>
           </li>
@@ -167,7 +165,7 @@
         </ul>
       </div>
       } @else {
-      <ol class="flex flex-col gap-4 p-4">
+      <ol class="flex flex-col gap-3.5 p-4 sm:gap-4">
         @for (message of store.messages(); track message.id) {
         @if (message.role === "user") {
         <li class="copilote-ligne copilote-ligne--user">
@@ -234,7 +232,7 @@
                 @for (source of message.sources; track source.type + source.reference) {
                 <li>
                   @if (routeSource(source); as route) {
-                  <a [routerLink]="route" class="copilote-source pressable">
+                  <a [routerLink]="route" class="copilote-source">
                     {{ libelleTypeSource(source.type) }} · {{ source.reference }}
                   </a>
                   } @else {
@@ -260,8 +258,11 @@
                   (click)="store.noter(message.id, 1)"
                   [attr.aria-pressed]="message.note === 1"
                   aria-label="Réponse utile"
-                  class="copilote-avis pressable"
+                  class="copilote-avis"
                   type="button"
+                  z-button
+                  zType="ghost"
+                  zSize="icon-xs"
                 >
                   <ng-icon name="lucideThumbsUp" />
                 </button>
@@ -269,8 +270,11 @@
                   (click)="store.noter(message.id, -1)"
                   [attr.aria-pressed]="message.note === -1"
                   aria-label="Réponse pas utile"
-                  class="copilote-avis pressable"
+                  class="copilote-avis"
                   type="button"
+                  z-button
+                  zType="ghost"
+                  zSize="icon-xs"
                 >
                   <ng-icon name="lucideThumbsDown" />
                 </button>
@@ -300,11 +304,11 @@
           rows="1"
         ></textarea>
         @if (store.enCours()) {
-        <button (click)="store.arreter()" aria-label="Arrêter la réponse" class="copilote-envoi copilote-envoi--stop pressable" type="button">
+        <button (click)="store.arreter()" aria-label="Arrêter la réponse" class="copilote-envoi--stop" type="button" z-button zType="secondary" zSize="icon-sm">
           <ng-icon name="lucideSquare" />
         </button>
         } @else {
-        <button [disabled]="!peutEnvoyer()" aria-label="Envoyer" class="copilote-envoi pressable" type="submit">
+        <button [disabled]="!peutEnvoyer()" [zDisabled]="!peutEnvoyer()" aria-label="Envoyer" type="submit" z-button zSize="icon-sm">
           <ng-icon name="lucideSend" />
         </button>
         }
@@ -315,5 +319,4 @@
       </p>
     </form>
   </section>
-</aside>
-}
+</div>

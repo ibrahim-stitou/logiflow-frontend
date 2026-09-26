@@ -25,15 +25,6 @@ import { firstFieldError } from "../core/forms/first-field-error";
 import { fieldClasses, showFieldError } from "../core/forms/show-field-error";
 import { bindShellBreadcrumbLeaf } from "../core/nav/shell-breadcrumb-leaf";
 import { WORK_DESTINATIONS } from "../core/nav/work-destination";
-import {
-  DOCUMENT_TYPES,
-  type Document,
-  documentTypeLabel,
-  emptyDocumentUploadDraft,
-  formatDocumentExpiration,
-  isDocumentType,
-} from "../documents/document";
-import { DocumentApi } from "../documents/document-api";
 import { EnginMaintenanceSection } from "../maintenance/engin-maintenance-section";
 import {
   draftToWrite,
@@ -45,8 +36,8 @@ import {
   statutSanteTone,
 } from "../maintenance/score-sante";
 import { ScoreSanteApi } from "../maintenance/score-sante-api";
+import { DocumentsSection } from "../shared/ui/documents-section";
 import { FICHE_PAGE_IMPORTS } from "../shared/ui/fiche-page";
-import { enumToSelectOptions } from "../shared/ui/field-select";
 import { statutOptionsFrom } from "../shared/ui/list-filter";
 import { statutIconForValue } from "../shared/ui/list-statut-filter";
 import { vehiculeStatutIcon } from "../shared/ui/list-statut-icons";
@@ -67,6 +58,7 @@ import { VehiculeApi } from "./vehicule-api";
 
 @Component({
   imports: [
+    DocumentsSection,
     EnginMaintenanceSection,
     FormField,
     NgIcon,
@@ -79,7 +71,6 @@ import { VehiculeApi } from "./vehicule-api";
 })
 export class VehiculeDetailPage {
   private readonly api = inject(VehiculeApi);
-  private readonly documentApi = inject(DocumentApi);
   private readonly scoreApi = inject(ScoreSanteApi);
   private readonly session = inject(SessionUtilisateur);
   private readonly toast = inject(ToastService);
@@ -92,13 +83,6 @@ export class VehiculeDetailPage {
     statutLabel,
     vehiculeStatutIcon
   );
-  protected readonly documentTypes = DOCUMENT_TYPES;
-  protected readonly documentTypeOptions = enumToSelectOptions(
-    DOCUMENT_TYPES,
-    documentTypeLabel
-  );
-  protected readonly documentTypeLabel = documentTypeLabel;
-  protected readonly formatDocumentExpiration = formatDocumentExpiration;
   protected readonly typeLabel = typeLabel;
   protected readonly statutLabel = statutLabel;
   protected readonly energieDisplay = energieDisplay;
@@ -123,18 +107,10 @@ export class VehiculeDetailPage {
   );
 
   protected readonly compteursError = signal<string | null>(null);
-  protected readonly uploadError = signal<string | null>(null);
   protected readonly scoreError = signal<string | null>(null);
-  protected readonly selectedFile = signal<File | null>(null);
-  protected readonly uploadDraft = signal(emptyDocumentUploadDraft());
 
   protected readonly vehicule = httpResource<Vehicule>(() => ({
     url: `${environment.apiBaseUrl}/vehicules/${this.id()}`,
-  }));
-
-  protected readonly documents = httpResource<Document[]>(() => ({
-    params: { entiteId: this.id(), typeEntite: "VEHICULE" },
-    url: `${environment.apiBaseUrl}/documents`,
   }));
 
   protected readonly scoreSante = httpResource<ScoreSante | null>(() => ({
@@ -144,11 +120,6 @@ export class VehiculeDetailPage {
 
   protected readonly loadError = computed(() => {
     const error = this.vehicule.error();
-    return error ? httpErrorMessage(error) : null;
-  });
-
-  protected readonly documentsLoadError = computed(() => {
-    const error = this.documents.error();
     return error ? httpErrorMessage(error) : null;
   });
 
@@ -212,39 +183,6 @@ export class VehiculeDetailPage {
     });
   }
 
-  protected onUploadType(typeDocument: string): void {
-    if (isDocumentType(typeDocument)) {
-      this.uploadDraft.update((draft) => ({
-        ...draft,
-        typeDocument,
-      }));
-    }
-  }
-
-  protected onUploadReference(event: Event): void {
-    const { target } = event;
-    if (target instanceof HTMLInputElement) {
-      this.uploadDraft.update((draft) => ({
-        ...draft,
-        reference: target.value,
-      }));
-    }
-  }
-
-  protected onUploadExpirationIso(isoDate: string): void {
-    this.uploadDraft.update((draft) => ({
-      ...draft,
-      dateExpiration: isoDate,
-    }));
-  }
-
-  protected onFileSelected(event: Event): void {
-    const { target } = event;
-    if (target instanceof HTMLInputElement) {
-      this.selectedFile.set(target.files?.[0] ?? null);
-    }
-  }
-
   protected async saveCompteurs(event: SubmitEvent): Promise<void> {
     event.preventDefault();
     this.compteursError.set(null);
@@ -266,55 +204,6 @@ export class VehiculeDetailPage {
         this.compteursError.set(httpErrorMessage(error));
       }
     });
-  }
-
-  protected async uploadDocument(event: SubmitEvent): Promise<void> {
-    event.preventDefault();
-    this.uploadError.set(null);
-
-    const file = this.selectedFile();
-    if (!file) {
-      this.uploadError.set("Choisissez un fichier à téléverser.");
-      return;
-    }
-
-    const draft = this.uploadDraft();
-    if (draft.reference.trim().length === 0) {
-      this.uploadError.set("La référence du document est obligatoire.");
-      return;
-    }
-    if (draft.dateExpiration.length === 0) {
-      this.uploadError.set("La date d'expiration est obligatoire.");
-      return;
-    }
-
-    try {
-      await this.documentApi.televerser({
-        dateExpiration: draft.dateExpiration,
-        entiteId: this.id(),
-        fichier: file,
-        reference: draft.reference.trim(),
-        typeDocument: draft.typeDocument,
-        typeEntite: "VEHICULE",
-      });
-      this.selectedFile.set(null);
-      this.uploadDraft.set(emptyDocumentUploadDraft());
-      this.documents.reload();
-      this.toast.success("Document téléversé.");
-    } catch (error) {
-      this.uploadError.set(httpErrorMessage(error));
-    }
-  }
-
-  protected async deleteDocument(documentId: string): Promise<void> {
-    this.uploadError.set(null);
-    try {
-      await this.documentApi.supprimer(documentId);
-      this.documents.reload();
-      this.toast.success("Document supprimé.");
-    } catch (error) {
-      this.uploadError.set(httpErrorMessage(error));
-    }
   }
 
   protected async enregistrerScore(event: SubmitEvent): Promise<void> {

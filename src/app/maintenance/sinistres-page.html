@@ -1,42 +1,30 @@
 <div class="flex flex-col gap-6">
   <app-maintenance-tabs />
-  <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-    <div>
-      <h1 class="module-page-title">Sinistres</h1>
-      <p class="mt-1 text-sm text-muted">
-        Accidents, dommages, vols : suivi assurance, réparations et coût net pour l'entreprise.
-      </p>
-    </div>
-    <a class="btn-primary pressable" routerLink="/maintenance/sinistres/nouveau">Déclarer un sinistre</a>
-  </div>
 
-  <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
-    <div class="min-w-0 flex-1">
-      <app-list-search-bar
-        [(draft)]="searchDraft"
-        [(query)]="search"
-        inputId="sinistre-search"
-        placeholder="Référence ou lieu…"
-      />
-    </div>
-    <div class="grid grid-cols-2 gap-3 sm:w-md">
-      <app-field-select
-        (selectValueChange)="statut.set($event)"
-        [options]="statutOptions"
-        [selectValue]="statut() || '__none__'"
-        inputId="sinistre-statut"
-      />
-      <app-field-select
-        (selectValueChange)="type.set($event)"
-        [options]="typeOptions"
-        [selectValue]="type() || '__none__'"
-        inputId="sinistre-type"
-      />
-    </div>
+  <div class="list-toolbar">
+    <app-list-search-bar
+      [(draft)]="searchDraft"
+      [(query)]="search"
+      inputId="sinistre-search"
+      placeholder="Référence ou lieu…"
+    />
+    <app-list-statut-filter
+      [(selected)]="statut"
+      [options]="statutOptions"
+      allLabel="Tous les statuts"
+      ariaLabel="Filtrer par statut"
+    />
+    <app-list-statut-filter
+      [(selected)]="type"
+      [options]="typeOptions"
+      allLabel="Tous les types"
+      ariaLabel="Filtrer par type"
+    />
+    <app-list-toolbar-cta label="Déclarer un sinistre" link="/maintenance/sinistres/nouveau" />
   </div>
 
   @if (sinistres.isLoading() && !sinistres.hasValue()) {
-  <app-list-table-skeleton label="Chargement des sinistres" />
+  <app-list-table-skeleton [columns]="6" label="Chargement des sinistres" />
   } @else if (sinistres.error()) {
   <div class="alert-panel" role="alert">{{ erreur() }}</div>
   } @else if (sinistres.hasValue() && sinistres.value().content.length === 0) {
@@ -47,62 +35,81 @@
     title="Aucun sinistre"
   />
   } @else if (sinistres.hasValue()) {
-  <div class="list-table-panel">
-    <table class="w-full min-w-3xl text-left text-sm">
-      <thead class="list-table-head">
-        <tr>
-          <th class="px-4 py-3 font-medium" scope="col">Référence</th>
-          <th class="px-4 py-3 font-medium" scope="col">Date</th>
-          <th class="px-4 py-3 font-medium" scope="col">Engins</th>
-          <th class="px-4 py-3 font-medium" scope="col">Nature</th>
-          <th class="px-4 py-3 font-medium" scope="col">Statut</th>
-          <th class="px-4 py-3 text-right font-medium" scope="col">Coût net</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (s of sinistres.value().content; track s.id) {
-        <tr class="list-row border-b border-line last:border-0 hover:bg-canvas">
-          <td class="px-4 py-3">
-            <a
-              [routerLink]="['/maintenance/sinistres', s.id]"
-              class="font-mono text-xs font-medium text-pine underline-offset-2 hover:underline"
-            >
-              {{ s.reference }}
-            </a>
-            @if (s.declarationEnRetard) {
-            <span class="block text-xs text-brake">Déclaration assureur en retard</span>
-            }
-          </td>
-          <td class="px-4 py-3 font-mono text-xs tabular-nums text-muted">
-            {{ formatDateHeure(s.dateSurvenance) }}
-          </td>
-          <td class="px-4 py-3 font-mono text-xs">{{ engins(s) }}</td>
-          <td class="px-4 py-3">
-            <span class="text-ink">{{ libelle(s.type) }}</span>
-            <span class="block text-xs text-muted">
-              {{ libelle(s.gravite) }} · {{ libelle(s.responsabilite) }}
-            </span>
-          </td>
-          <td class="px-4 py-3">
-            <app-statut-chip [label]="libelle(s.statut)" [tone]="toneStatutSinistre(s.statut)" />
-            @if (s.enginImmobilise && s.statut !== "CLOS" && s.statut !== "CLASSE_SANS_SUITE") {
-            <app-statut-chip label="Immobilisé" tone="brake" />
-            }
-          </td>
-          <td class="px-4 py-3 text-right font-mono text-xs tabular-nums">
-            {{ formatMontant(s.couts?.coutNet) }}
-          </td>
-        </tr>
-        }
-      </tbody>
-    </table>
+  <div class="list-table-stack">
+    <div class="list-table-panel">
+      <table z-table>
+        <thead z-table-header>
+          <tr z-table-row>
+            <th scope="col" z-table-head>Référence</th>
+            <th scope="col" z-table-head>Date</th>
+            <th scope="col" z-table-head>Engins</th>
+            <th scope="col" z-table-head>Nature</th>
+            <th scope="col" z-table-head>Statut</th>
+            <th scope="col" z-table-head class="text-right">Coût net</th>
+            <th scope="col" z-table-head class="text-right">
+              <span class="sr-only">Actions</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody z-table-body>
+          @for (s of sinistres.value().content; track s.id) {
+          <tr class="list-row" z-table-row>
+            <td z-table-cell>
+              <a
+                [routerLink]="['/maintenance/sinistres', s.id]"
+                class="list-cell-with-icon font-mono text-xs text-pine underline-offset-2 hover:underline"
+              >
+                <ng-icon
+                  aria-hidden="true"
+                  class="list-cell-with-icon__icon"
+                  name="lucideWrench"
+                />
+                <span>{{ s.reference }}</span>
+              </a>
+              @if (s.declarationEnRetard) {
+              <span class="mt-0.5 block text-xs text-brake">Déclaration assureur en retard</span>
+              }
+            </td>
+            <td class="font-mono text-xs tabular-nums text-muted" z-table-cell>
+              {{ formatDateHeure(s.dateSurvenance) }}
+            </td>
+            <td class="font-mono text-xs" z-table-cell>{{ engins(s) }}</td>
+            <td z-table-cell>
+              <span class="text-ink">{{ libelle(s.type) }}</span>
+              <span class="mt-0.5 block text-xs text-muted">
+                {{ libelle(s.gravite) }} · {{ libelle(s.responsabilite) }}
+              </span>
+            </td>
+            <td z-table-cell>
+              <app-statut-chip [label]="libelle(s.statut)" [tone]="toneStatutSinistre(s.statut)" />
+              @if (s.enginImmobilise && s.statut !== "CLOS" && s.statut !== "CLASSE_SANS_SUITE") {
+              <app-statut-chip label="Immobilisé" tone="brake" />
+              }
+            </td>
+            <td class="text-right font-mono text-xs tabular-nums" z-table-cell>
+              {{ formatMontant(s.couts?.coutNet) }}
+            </td>
+            <td class="text-right" z-table-cell>
+              <a
+                [routerLink]="['/maintenance/sinistres', s.id]"
+                class="list-row-action list-row-action--with-icon text-sm font-medium text-pine underline-offset-2 hover:underline"
+              >
+                <span>Ouvrir</span>
+                <ng-icon aria-hidden="true" name="lucideArrowRight" />
+              </a>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <app-list-pagination
+      [(page)]="page"
+      [pageSize]="20"
+      [totalElements]="sinistres.value().totalElements"
+      [totalPages]="sinistres.value().totalPages"
+      itemLabel="sinistre"
+    />
   </div>
-  <app-list-pagination
-    [(page)]="page"
-    [pageSize]="20"
-    [totalElements]="sinistres.value().totalElements"
-    [totalPages]="sinistres.value().totalPages"
-    itemLabel="sinistre"
-  />
   }
 </div>

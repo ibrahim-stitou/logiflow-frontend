@@ -55,6 +55,12 @@ const ROUTE_POLYLINE_COLOR = "#215544";
       border-radius: inherit;
     }
 
+    /* Flush inset in a sized parent: fill remaining height instead of a fixed square. */
+    :host:has(.map-host--embedded) {
+      min-height: 0;
+      height: 100%;
+    }
+
     .map-host {
       flex: 1 1 auto;
       width: 100%;
@@ -64,7 +70,7 @@ const ROUTE_POLYLINE_COLOR = "#215544";
     }
 
     .map-host--embedded {
-      min-height: 18rem;
+      min-height: 0;
       border: none;
       border-radius: inherit;
       background: color-mix(in oklch, var(--color-canvas) 42%, var(--color-surface));

@@ -11,13 +11,6 @@ import { AUTH_DEMO_TEST_PROVIDERS } from "../core/auth/auth-test-providers";
 import { VehiculeDetailPage } from "./vehicule-detail-page";
 
 const VEHICULE_ID = "33333333-3333-3333-3333-333333333333";
-const PAGE_VIDE = {
-  content: [],
-  pageNumber: 0,
-  pageSize: 10,
-  totalElements: 0,
-  totalPages: 0,
-};
 const ESSAIS_MAX = 50;
 
 /**
@@ -43,6 +36,9 @@ async function requeteAttendue(
 
 describe("VehiculeDetailPage", () => {
   beforeEach(async () => {
+    // Session démo partagée entre les tests (sessionStorage) : on part d'un état vierge pour
+    // que l'affichage des sections dépendant du rôle (maintenance) soit déterministe.
+    sessionStorage.clear();
     await TestBed.configureTestingModule({
       imports: [VehiculeDetailPage],
       providers: [
@@ -94,20 +90,6 @@ describe("VehiculeDetailPage", () => {
           req.params.get("entiteId") === VEHICULE_ID
       )
     ).flush([]);
-
-    for (const url of [
-      "/api/v1/maintenance/plans",
-      "/api/v1/maintenance/ordres-travail",
-      "/api/v1/maintenance/sinistres",
-    ]) {
-      // biome-ignore lint/performance/noAwaitInLoops: requêtes servies l'une après l'autre.
-      (
-        await requeteAttendue(
-          http,
-          (req) => req.url === url && req.params.get("enginId") === VEHICULE_ID
-        )
-      ).flush(PAGE_VIDE);
-    }
 
     await fixture.whenStable();
     fixture.detectChanges();

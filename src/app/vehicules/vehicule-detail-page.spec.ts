@@ -8,6 +8,15 @@ import { provideRouter } from "@angular/router";
 import { AUTH_DEMO_TEST_PROVIDERS } from "../core/auth/auth-test-providers";
 import { VehiculeDetailPage } from "./vehicule-detail-page";
 
+const VEHICULE_ID = "33333333-3333-3333-3333-333333333333";
+const PAGE_VIDE = {
+  content: [],
+  pageNumber: 0,
+  pageSize: 10,
+  totalElements: 0,
+  totalPages: 0,
+};
+
 describe("VehiculeDetailPage", () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -62,6 +71,19 @@ describe("VehiculeDetailPage", () => {
             "33333333-3333-3333-3333-333333333333"
       )
       .flush(null);
+
+    // Section maintenance du véhicule (rendue une fois le véhicule reçu).
+    for (const url of [
+      "/api/v1/maintenance/plans",
+      "/api/v1/maintenance/ordres-travail",
+      "/api/v1/maintenance/sinistres",
+    ]) {
+      http
+        .expectOne(
+          (req) => req.url === url && req.params.get("enginId") === VEHICULE_ID
+        )
+        .flush(PAGE_VIDE);
+    }
 
     await fixture.whenStable();
     fixture.detectChanges();

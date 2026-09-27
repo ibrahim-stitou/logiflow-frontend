@@ -1,7 +1,10 @@
-import { commandeStatutIcon } from "./list-statut-icons";
-import { iconForStatutOption } from "./list-statut-filter";
+import {
+  STATUT_COMMANDES,
+  statutCommandeLabel,
+} from "../../commandes/commande";
 import { statutOptionsFrom } from "./list-filter";
-import { STATUT_COMMANDES, statutCommandeLabel } from "../../commandes/commande";
+import { iconForStatutOption } from "./list-statut-filter";
+import { commandeStatutIcon } from "./list-statut-icons";
 
 describe("commandeStatutIcon", () => {
   it("maps each commande statut to a distinct lucide icon", () => {

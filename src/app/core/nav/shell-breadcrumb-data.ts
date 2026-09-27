@@ -4,35 +4,30 @@ export interface ShellBreadcrumbTrailItem {
 }
 
 export interface ShellBreadcrumbRouteData {
-  trail: readonly ShellBreadcrumbTrailItem[];
   leaf?: string;
+  trail: readonly ShellBreadcrumbTrailItem[];
 }
 
 export const shellBreadcrumb = {
-  list(label: string): { shellBreadcrumb: ShellBreadcrumbRouteData } {
-    return { shellBreadcrumb: { trail: [{ label }] } };
-  },
-
-  nested(
-    parentLabel: string,
-    parentPath: string,
-    label: string
-  ): { shellBreadcrumb: ShellBreadcrumbRouteData } {
-    return {
-      shellBreadcrumb: {
-        trail: [{ label: parentLabel, path: parentPath }, { label }],
-      },
-    };
-  },
-
   create(
     moduleLabel: string,
     listPath: string
   ): { shellBreadcrumb: ShellBreadcrumbRouteData } {
     return {
       shellBreadcrumb: {
-        trail: [{ label: moduleLabel, path: listPath }],
         leaf: "Nouveau",
+        trail: [{ label: moduleLabel, path: listPath }],
+      },
+    };
+  },
+
+  createNested(trail: readonly ShellBreadcrumbTrailItem[]): {
+    shellBreadcrumb: ShellBreadcrumbRouteData;
+  } {
+    return {
+      shellBreadcrumb: {
+        leaf: "Nouveau",
+        trail,
       },
     };
   },
@@ -48,22 +43,26 @@ export const shellBreadcrumb = {
     };
   },
 
-  createNested(
-    trail: readonly ShellBreadcrumbTrailItem[]
+  detailNested(trail: readonly ShellBreadcrumbTrailItem[]): {
+    shellBreadcrumb: ShellBreadcrumbRouteData;
+  } {
+    return {
+      shellBreadcrumb: { trail },
+    };
+  },
+  list(label: string): { shellBreadcrumb: ShellBreadcrumbRouteData } {
+    return { shellBreadcrumb: { trail: [{ label }] } };
+  },
+
+  nested(
+    parentLabel: string,
+    parentPath: string,
+    label: string
   ): { shellBreadcrumb: ShellBreadcrumbRouteData } {
     return {
       shellBreadcrumb: {
-        trail,
-        leaf: "Nouveau",
+        trail: [{ label: parentLabel, path: parentPath }, { label }],
       },
-    };
-  },
-
-  detailNested(
-    trail: readonly ShellBreadcrumbTrailItem[]
-  ): { shellBreadcrumb: ShellBreadcrumbRouteData } {
-    return {
-      shellBreadcrumb: { trail },
     };
   },
 };

@@ -1,21 +1,98 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  input,
-  model,
-  output,
-} from "@angular/core";
+import { Component, computed, input, model, output } from "@angular/core";
 import { ZardPaginationImports } from "@/shared/components/pagination/pagination.imports";
-import { ZardSelectItemComponent } from "@/shared/components/select/select-item.component";
 import { ZardSelectComponent } from "@/shared/components/select/select.component";
+import { ZardSelectItemComponent } from "@/shared/components/select/select-item.component";
 import { buildPaginationRange } from "./pagination-range";
 
 let nextPageSizeSelectId = 0;
 
 @Component({
+  imports: [
+    ZardPaginationImports,
+    ZardSelectComponent,
+    ZardSelectItemComponent,
+  ],
   selector: "app-list-pagination",
-  imports: [ZardPaginationImports, ZardSelectComponent, ZardSelectItemComponent],
+  styles: `
+    .list-pagination {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      padding: 0.625rem 1rem;
+      background: var(--color-surface);
+      border: 1px solid color-mix(in oklch, var(--color-line) 80%, transparent);
+      border-top: none;
+      border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+    }
+
+    @media (min-width: 640px) {
+      .list-pagination {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+    }
+
+    .list-pagination__meta {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      min-width: 0;
+    }
+
+    @media (min-width: 640px) {
+      .list-pagination__meta {
+        flex-direction: row;
+        align-items: center;
+        gap: 0.75rem;
+      }
+    }
+
+    .list-pagination__summary {
+      margin: 0;
+      font-size: 0.8125rem;
+      line-height: 1.4;
+      font-variant-numeric: tabular-nums;
+      color: var(--color-muted);
+      text-align: center;
+    }
+
+    @media (min-width: 640px) {
+      .list-pagination__summary {
+        text-align: left;
+      }
+    }
+
+    .list-pagination__size {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      flex-shrink: 0;
+    }
+
+    .list-pagination__size-label {
+      font-size: 0.75rem;
+      line-height: 1;
+      color: var(--color-muted);
+      white-space: nowrap;
+    }
+
+    .list-pagination__controls {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      min-width: 0;
+    }
+
+    @media (min-width: 640px) {
+      .list-pagination__controls {
+        width: auto;
+        justify-content: flex-end;
+      }
+    }
+  `,
   template: `
     @if (showFooter()) {
     <nav
@@ -103,86 +180,6 @@ let nextPageSizeSelectId = 0;
       </ul>
     </ng-template>
   `,
-  styles: `
-    .list-pagination {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-      padding: 0.625rem 1rem;
-      background: var(--color-surface);
-      border: 1px solid color-mix(in oklch, var(--color-line) 80%, transparent);
-      border-top: none;
-      border-radius: 0 0 var(--radius-xl) var(--radius-xl);
-    }
-
-    @media (min-width: 640px) {
-      .list-pagination {
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-      }
-    }
-
-    .list-pagination__meta {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.5rem;
-      min-width: 0;
-    }
-
-    @media (min-width: 640px) {
-      .list-pagination__meta {
-        flex-direction: row;
-        align-items: center;
-        gap: 0.75rem;
-      }
-    }
-
-    .list-pagination__summary {
-      margin: 0;
-      font-size: 0.8125rem;
-      line-height: 1.4;
-      font-variant-numeric: tabular-nums;
-      color: var(--color-muted);
-      text-align: center;
-    }
-
-    @media (min-width: 640px) {
-      .list-pagination__summary {
-        text-align: left;
-      }
-    }
-
-    .list-pagination__size {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.375rem;
-      flex-shrink: 0;
-    }
-
-    .list-pagination__size-label {
-      font-size: 0.75rem;
-      line-height: 1;
-      color: var(--color-muted);
-      white-space: nowrap;
-    }
-
-    .list-pagination__controls {
-      display: flex;
-      justify-content: center;
-      width: 100%;
-      min-width: 0;
-    }
-
-    @media (min-width: 640px) {
-      .list-pagination__controls {
-        width: auto;
-        justify-content: flex-end;
-      }
-    }
-  `,
 })
 export class ListPagination {
   readonly page = model.required<number>();
@@ -194,7 +191,8 @@ export class ListPagination {
   readonly visibleCount = input<number | null>(null);
   readonly itemLabel = input("élément");
 
-  protected readonly pageSizeSelectId = `list-pagination-size-${nextPageSizeSelectId++}`;
+  protected readonly pageSizeSelectId =
+    `list-pagination-size-${nextPageSizeSelectId++}`;
 
   protected readonly showPageSizeSelector = computed(() => {
     const options = this.pageSizeOptions();
@@ -205,9 +203,7 @@ export class ListPagination {
     buildPaginationRange(this.page(), this.totalPages())
   );
 
-  protected readonly pageSizeValue = computed(() =>
-    String(this.pageSize())
-  );
+  protected readonly pageSizeValue = computed(() => String(this.pageSize()));
 
   protected readonly showFooter = computed(() => {
     const total = this.totalElements();

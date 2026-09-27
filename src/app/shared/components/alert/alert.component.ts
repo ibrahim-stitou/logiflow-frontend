@@ -1,11 +1,18 @@
-import { ChangeDetectionStrategy, Component, computed, input, TemplateRef, ViewEncapsulation } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  input,
+  TemplateRef,
+  ViewEncapsulation,
+} from "@angular/core";
 
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import { lucideCircleAlert } from '@ng-icons/lucide';
-import type { ClassValue } from 'clsx';
+import { NgIcon, provideIcons } from "@ng-icons/core";
+import { lucideCircleAlert } from "@ng-icons/lucide";
+import type { ClassValue } from "clsx";
 
-import { ZardStringTemplateOutletDirective } from '@/shared/core/directives/string-template-outlet/string-template-outlet.directive';
-import { mergeClasses } from '@/shared/utils/merge-classes';
+import { ZardStringTemplateOutletDirective } from "@/shared/core/directives/string-template-outlet/string-template-outlet.directive";
+import { mergeClasses } from "@/shared/utils/merge-classes";
 
 import {
   alertActionVariants,
@@ -14,11 +21,19 @@ import {
   alertTitleVariants,
   alertVariants,
   type ZardAlertTypeVariants,
-} from './alert.variants';
+} from "./alert.variants";
 
 @Component({
-  selector: 'z-alert, [z-alert]',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  exportAs: "zAlert",
+  host: {
+    "[attr.role]": "role()",
+    "[class]": "classes()",
+    "data-slot": "alert",
+  },
   imports: [NgIcon, ZardStringTemplateOutletDirective],
+  selector: "z-alert, [z-alert]",
   template: `
     @if (zIcon() || iconName()) {
       <span [class]="iconClasses()" data-slot="alert-icon">
@@ -48,30 +63,28 @@ import {
       }
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
   viewProviders: [provideIcons({ lucideCircleAlert })],
-  host: {
-    '[attr.role]': 'role()',
-    '[class]': 'classes()',
-    'data-slot': 'alert',
-  },
-  exportAs: 'zAlert',
 })
 export class ZardAlertComponent {
-  readonly class = input<ClassValue>('');
+  readonly class = input<ClassValue>("");
   readonly zAction = input<TemplateRef<void>>();
-  readonly zDescription = input<string | TemplateRef<void>>('');
+  readonly zDescription = input<string | TemplateRef<void>>("");
   readonly zIcon = input<TemplateRef<void> | string>();
-  readonly zRole = input<'alert' | 'status'>();
-  readonly zTitle = input<string | TemplateRef<void>>('');
-  readonly zType = input<ZardAlertTypeVariants>('default');
+  readonly zRole = input<"alert" | "status">();
+  readonly zTitle = input<string | TemplateRef<void>>("");
+  readonly zType = input<ZardAlertTypeVariants>("default");
 
   protected readonly actionClasses = computed(() => alertActionVariants());
-  protected readonly classes = computed(() => mergeClasses(alertVariants({ zType: this.zType() }), this.class()));
-  protected readonly descriptionClasses = computed(() => alertDescriptionVariants({ zType: this.zType() }));
+  protected readonly classes = computed(() =>
+    mergeClasses(alertVariants({ zType: this.zType() }), this.class())
+  );
+  protected readonly descriptionClasses = computed(() =>
+    alertDescriptionVariants({ zType: this.zType() })
+  );
   protected readonly iconClasses = computed(() => alertIconVariants());
-  protected readonly role = computed(() => this.zRole() ?? (this.zAction() ? 'status' : 'alert'));
+  protected readonly role = computed(
+    () => this.zRole() ?? (this.zAction() ? "status" : "alert")
+  );
   protected readonly titleClasses = computed(() => alertTitleVariants());
 
   protected readonly iconName = computed((): string | undefined => {
@@ -80,8 +93,8 @@ export class ZardAlertComponent {
       return customIcon;
     }
 
-    if (this.zType() === 'destructive') {
-      return 'lucideCircleAlert';
+    if (this.zType() === "destructive") {
+      return "lucideCircleAlert";
     }
 
     return undefined;

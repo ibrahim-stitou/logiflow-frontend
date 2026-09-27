@@ -1,5 +1,7 @@
 import type { ListStatutOption } from "./list-statut-filter";
 
+const ESPACES = /\s+/;
+
 /** Keeps rows whose statut matches, or all rows when selected is null. */
 export function filterByStatut<T>(
   rows: readonly T[],
@@ -33,7 +35,7 @@ export function filterByQuery<T>(
   const tokens = query
     .trim()
     .toLowerCase()
-    .split(/\s+/)
+    .split(ESPACES)
     .filter((token) => token.length > 0);
   if (tokens.length === 0) {
     return [...rows];

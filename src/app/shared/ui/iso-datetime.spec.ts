@@ -38,20 +38,20 @@ describe("iso-datetime helpers", () => {
   });
 
   it("picks the latest datetime-local value", () => {
-    expect(
-      maxDatetimeLocal("2026-09-22T23:56", "2026-09-23T00:07")
-    ).toBe("2026-09-23T00:07");
-    expect(compareDatetimeLocal("2026-09-22T23:56", "2026-09-23T00:07")).toBeLessThan(
-      0
+    expect(maxDatetimeLocal("2026-09-22T23:56", "2026-09-23T00:07")).toBe(
+      "2026-09-23T00:07"
     );
+    expect(
+      compareDatetimeLocal("2026-09-22T23:56", "2026-09-23T00:07")
+    ).toBeLessThan(0);
   });
 
   it("clamps datetime-local values to a minimum", () => {
-    expect(
-      clampDatetimeLocal("2026-09-22T23:50", "2026-09-23T00:07")
-    ).toBe("2026-09-23T00:07");
-    expect(
-      clampDatetimeLocal("2026-09-23T00:10", "2026-09-23T00:07")
-    ).toBe("2026-09-23T00:10");
+    expect(clampDatetimeLocal("2026-09-22T23:50", "2026-09-23T00:07")).toBe(
+      "2026-09-23T00:07"
+    );
+    expect(clampDatetimeLocal("2026-09-23T00:10", "2026-09-23T00:07")).toBe(
+      "2026-09-23T00:10"
+    );
   });
 });

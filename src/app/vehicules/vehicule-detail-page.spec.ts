@@ -55,7 +55,8 @@ describe("VehiculeDetailPage", () => {
       .expectOne(
         (req) =>
           req.url === "/api/v1/scores-sante/dernier" &&
-          req.params.get("vehiculeId") === "33333333-3333-3333-3333-333333333333"
+          req.params.get("vehiculeId") ===
+            "33333333-3333-3333-3333-333333333333"
       )
       .flush(null);
 

@@ -1,8 +1,8 @@
-import type { OverlayRef } from '@angular/cdk/overlay';
+import type { OverlayRef } from "@angular/cdk/overlay";
 
-import { ZardOverlayRefBase } from '@/shared/core';
+import { ZardOverlayRefBase } from "@/shared/core";
 
-import type { ZardSheetComponent, ZardSheetOptions } from './sheet.component';
+import type { ZardSheetComponent, ZardSheetOptions } from "./sheet.component";
 
 /** How long the leave transition runs, in ms. Mirrors the CSS. */
 const SHEET_DURATION = 200;
@@ -14,15 +14,23 @@ const SHEET_DURATION = 200;
  * and alert-dialog; only the leave animation and the mask behaviour are the
  * sheet's own.
  */
-export class ZardSheetRef<T = unknown, R = unknown, U = unknown> extends ZardOverlayRefBase<T, R> {
+export class ZardSheetRef<
+  T = unknown,
+  R = unknown,
+  U = unknown,
+> extends ZardOverlayRefBase<T, R> {
   constructor(
     overlayRef: OverlayRef | null,
     private readonly config: ZardSheetOptions<T, U>,
     private readonly containerInstance: ZardSheetComponent<T, U> | null,
-    platformId: object,
+    platformId: object
   ) {
     super(overlayRef, config, platformId);
-    this.attach(this.containerInstance ? ZardSheetRef.outputsOf(this.containerInstance) : null);
+    this.attach(
+      this.containerInstance
+        ? ZardSheetRef.outputsOf(this.containerInstance)
+        : null
+    );
   }
 
   protected override get defaultDuration(): number {
@@ -30,7 +38,7 @@ export class ZardSheetRef<T = unknown, R = unknown, U = unknown> extends ZardOve
   }
 
   protected override playLeaveAnimation(): void {
-    this.containerInstance?.getNativeElement().classList.add('sheet-leave');
+    this.containerInstance?.getNativeElement().classList.add("sheet-leave");
   }
 
   protected override closesOnOutsidePointer(): boolean {

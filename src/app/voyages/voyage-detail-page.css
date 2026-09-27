@@ -22,8 +22,8 @@
 .voyage-detail app-fiche-header .inner-page-header {
   position: static;
   z-index: auto;
-  margin: 0;
   padding: 0;
+  margin: 0;
   background: transparent;
   border-bottom: none;
   box-shadow: none;
@@ -66,8 +66,8 @@
 
 .voyage-metric__head {
   display: flex;
-  align-items: center;
   gap: 0.375rem;
+  align-items: center;
 }
 
 .voyage-metric__icon {
@@ -80,9 +80,9 @@
 .voyage-metric__label {
   font-size: 0.6875rem;
   font-weight: 500;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
   color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .voyage-metric__value {
@@ -106,11 +106,11 @@
 }
 
 .voyage-metric__bar {
-  margin-top: 0.25rem;
   height: 0.375rem;
+  margin-top: 0.25rem;
   overflow: hidden;
-  border-radius: 9999px;
   background: color-mix(in oklch, var(--color-line) 85%, transparent);
+  border-radius: 9999px;
 }
 
 .voyage-metric__bar-fill {
@@ -130,10 +130,11 @@
   z-index: 12;
   flex-wrap: wrap;
   max-width: 100%;
-  margin-inline: -0.25rem;
   padding: 0.625rem 0.25rem 0.75rem;
+  margin-inline: -0.25rem;
   background: var(--color-canvas);
-  border-bottom: 1px solid color-mix(in oklch, var(--color-line) 70%, transparent);
+  border-bottom: 1px solid
+    color-mix(in oklch, var(--color-line) 70%, transparent);
   box-shadow: 0 4px 12px oklch(0 0 0 / 0.03);
 }
 
@@ -210,18 +211,18 @@
 }
 
 .voyage-resource-grid--span {
-  grid-column: 1 / -1;
   display: flex;
   flex-direction: column;
+  grid-column: 1 / -1;
   gap: 0.75rem;
-  margin-top: 0.5rem;
   padding-top: 1.25rem;
+  margin-top: 0.5rem;
   border-top: 1px solid color-mix(in oklch, var(--color-line) 70%, transparent);
 }
 
 .voyage-resource-grid--span:first-child {
-  margin-top: 0;
   padding-top: 0;
+  margin-top: 0;
   border-top: none;
 }
 
@@ -236,9 +237,9 @@
 .voyage-resource-link {
   display: flex;
   flex-wrap: nowrap;
+  gap: 0.75rem;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
   padding: 0.875rem 1rem !important;
   color: inherit;
   text-decoration: none;
@@ -263,8 +264,8 @@
 
 .voyage-resource-link__main {
   display: flex;
-  align-items: flex-start;
   gap: 0.625rem;
+  align-items: flex-start;
   min-width: 0;
 }
 
@@ -311,8 +312,8 @@
 .voyage-crew-card__meta {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
   gap: 0.375rem;
+  align-items: center;
   font-size: 0.75rem;
   line-height: 1.45;
   color: var(--color-muted);
@@ -321,10 +322,10 @@
 .voyage-trajet-summary {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
   gap: 0.375rem 0.75rem;
-  margin-bottom: 1rem;
+  align-items: center;
   padding: 0.75rem 0.875rem;
+  margin-bottom: 1rem;
   font-family: var(--font-mono);
   font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
@@ -385,8 +386,8 @@
 .voyage-trajet-step__title {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
   gap: 0.375rem 0.5rem;
+  align-items: baseline;
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--color-ink);
@@ -427,8 +428,8 @@
 
 .voyage-detail .fiche-subsection__title {
   display: inline-flex;
-  align-items: center;
   gap: 0.375rem;
+  align-items: center;
 }
 
 .voyage-detail z-card[data-size="default"] {
@@ -468,8 +469,8 @@
 .voyage-chronologie__title {
   font-size: 0.875rem;
   font-weight: 600;
-  letter-spacing: -0.01em;
   color: var(--color-ink);
+  letter-spacing: -0.01em;
 }
 
 .voyage-chronologie__hint {

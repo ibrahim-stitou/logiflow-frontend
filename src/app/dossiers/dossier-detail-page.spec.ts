@@ -23,18 +23,14 @@ describe("DossierDetailPage", () => {
 
   it("loads a dossier by id", async () => {
     const fixture = TestBed.createComponent(DossierDetailPage);
-    fixture.componentRef.setInput(
-      "id",
-      "22222222-2222-2222-2222-222222222222"
-    );
+    fixture.componentRef.setInput("id", "22222222-2222-2222-2222-222222222222");
     fixture.detectChanges();
 
     const http = TestBed.inject(HttpTestingController);
     http
       .expectOne(
         (req) =>
-          req.url ===
-          "/api/v1/dossiers/22222222-2222-2222-2222-222222222222"
+          req.url === "/api/v1/dossiers/22222222-2222-2222-2222-222222222222"
       )
       .flush({
         carrosserieRequise: null,

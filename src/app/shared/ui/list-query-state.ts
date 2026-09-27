@@ -1,10 +1,6 @@
-import {
-  DestroyRef,
-  effect,
-  type WritableSignal,
-} from "@angular/core";
+import { type DestroyRef, effect, type WritableSignal } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { ActivatedRoute, type ParamMap, Router } from "@angular/router";
+import type { ActivatedRoute, ParamMap, Router } from "@angular/router";
 
 const PAGE_PARAM = "page";
 const STATUT_PARAM = "statut";

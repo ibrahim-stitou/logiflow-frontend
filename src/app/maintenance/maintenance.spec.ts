@@ -13,6 +13,8 @@ import {
   transitionsSinistre,
 } from "./maintenance";
 
+const MENTION_DATE = /le /;
+
 const PERIODICITE_ATTENDUE = /40\s000 km · 12 mois/;
 const ECHEANCE_ATTENDUE = /dépassée de 1\s200 km · le 12\/11\/2026/;
 
@@ -111,7 +113,7 @@ describe("maintenance", () => {
         kmParJour: 250,
         kmRestant: undefined as unknown as null,
       })
-    ).toMatch(/le /);
+    ).toMatch(MENTION_DATE);
   });
 
   it("lit les saisies facultatives", () => {

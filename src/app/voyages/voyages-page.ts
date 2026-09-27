@@ -24,33 +24,39 @@ import { ZardTableImports } from "@/shared/components/table/table.imports";
 import { environment } from "../../environments/environment";
 import { httpErrorMessage } from "../core/api/http-error";
 import type { PageResponse } from "../core/api/page-response";
-import { SessionUtilisateur } from "../core/auth/session";
 import { VOYAGES_PLAN_ROLES } from "../core/auth/role";
+import { SessionUtilisateur } from "../core/auth/session";
 import type { Dossier } from "../dossiers/dossier";
-import { filterByStatut, statutOptionsFrom } from "../shared/ui/list-filter";
-import { voyageStatutIcon } from "../shared/ui/list-statut-icons";
+import { canCalculerItineraire } from "../ia/itineraire";
+import { ItineraireApi } from "../ia/itineraire-api";
+import type { GeoMapPathPoint } from "../shared/ui/geo-markers-map";
+import { GeoMarkersMap } from "../shared/ui/geo-markers-map";
 import { ListEmptyState } from "../shared/ui/list-empty-state";
-import {
-  ListTableSkeleton,
-  MapAsideSkeleton,
-} from "../shared/ui/list-table-skeleton";
-import { LIST_TABLE_ROW_ICON_PROVIDERS } from "../shared/ui/list-table-row-icons";
-import { connectListQueryState } from "../shared/ui/list-query-state";
-import {
-  listKeyboardRows,
-  ListRowKeyboard,
-  syncListKeyboardActiveId,
-} from "../shared/ui/list-row-keyboard";
+import { filterByStatut, statutOptionsFrom } from "../shared/ui/list-filter";
 import {
   DEFAULT_LIST_PAGE_SIZE,
   LIST_PAGE_SIZE_OPTIONS,
   resolveListPageSize,
 } from "../shared/ui/list-page-size";
 import { ListPagination } from "../shared/ui/list-pagination";
+import { connectListQueryState } from "../shared/ui/list-query-state";
+import {
+  ListRowKeyboard,
+  listKeyboardRows,
+  syncListKeyboardActiveId,
+} from "../shared/ui/list-row-keyboard";
 import { ListSearchBar } from "../shared/ui/list-search-bar";
-import { ListStatutFilter } from "../shared/ui/list-statut-filter";
+import {
+  ListStatutFilter,
+  statutIconForValue,
+} from "../shared/ui/list-statut-filter";
+import { voyageStatutIcon } from "../shared/ui/list-statut-icons";
+import { LIST_TABLE_ROW_ICON_PROVIDERS } from "../shared/ui/list-table-row-icons";
+import {
+  ListTableSkeleton,
+  MapAsideSkeleton,
+} from "../shared/ui/list-table-skeleton";
 import { ListToolbarCta } from "../shared/ui/list-toolbar-cta";
-import { statutIconForValue } from "../shared/ui/list-statut-filter";
 import { StatutChip } from "../shared/ui/statut-chip";
 import type { Site } from "../sites/site";
 import { voyageStatutTone } from "../tableau/apercu";
@@ -58,16 +64,12 @@ import {
   formatInstant,
   porteeLabel,
   STATUT_VOYAGES,
-  statutVoyageLabel,
-  typeVoyageLabel,
   type StatutVoyage,
+  statutVoyageLabel,
   type TypeVoyage,
+  typeVoyageLabel,
   type Voyage,
 } from "./voyage";
-import { ItineraireApi } from "../ia/itineraire-api";
-import { canCalculerItineraire } from "../ia/itineraire";
-import type { GeoMapPathPoint } from "../shared/ui/geo-markers-map";
-import { GeoMarkersMap } from "../shared/ui/geo-markers-map";
 import {
   voyageItinerairePath,
   voyageItinerairePoints,
@@ -93,8 +95,8 @@ const LOOKUP_PAGE_SIZE = 100;
     ...ZardTableImports,
   ],
   selector: "app-voyages-page",
-  templateUrl: "./voyages-page.html",
   styleUrl: "./voyages-page.css",
+  templateUrl: "./voyages-page.html",
   viewProviders: [
     LIST_TABLE_ROW_ICON_PROVIDERS,
     provideIcons({
@@ -268,10 +270,7 @@ export class VoyagesPage {
   });
 
   protected readonly keyboardRows = computed(() =>
-    listKeyboardRows(
-      this.visibleVoyages(),
-      (voyage) => `/voyages/${voyage.id}`
-    )
+    listKeyboardRows(this.visibleVoyages(), (voyage) => `/voyages/${voyage.id}`)
   );
 
   protected readonly listWithMapLayoutClass = computed(() =>

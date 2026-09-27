@@ -20,8 +20,8 @@ export function skeletonCellWidthClass(
 }
 
 @Component({
-  selector: "app-list-table-skeleton",
   imports: [...ZardTableImports],
+  selector: "app-list-table-skeleton",
   template: `
     <div
       [attr.aria-label]="label()"

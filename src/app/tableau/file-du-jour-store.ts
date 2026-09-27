@@ -1,20 +1,20 @@
 import { httpResource } from "@angular/common/http";
-import { computed, inject, Injectable } from "@angular/core";
+import { computed, Injectable, inject } from "@angular/core";
 import { environment } from "../../environments/environment";
+import type { PriseCarburant } from "../carburant/prise-carburant";
 import type { Commande } from "../commandes/commande";
 import type { PageResponse } from "../core/api/page-response";
 import { SessionUtilisateur } from "../core/auth/session";
 import { destinationsForRoles } from "../core/nav/work-destination";
 import type { Dossier } from "../dossiers/dossier";
 import type { Vehicule } from "../vehicules/vehicule";
-import type { PriseCarburant } from "../carburant/prise-carburant";
 import type { Voyage } from "../voyages/voyage";
 import { APERCU_CHART_PAGE_SIZE } from "./apercu";
 import {
   buildFileDuJour,
-  fileDuJourSummary,
   type FileDuJourItem,
   type FileDuJourSummary,
+  fileDuJourSummary,
 } from "./file-du-jour";
 
 type FileDuJourModuleId =
@@ -79,8 +79,8 @@ export class FileDuJourStore {
     );
   });
 
-  readonly summary = computed((): FileDuJourSummary =>
-    fileDuJourSummary(this.items())
+  readonly summary = computed(
+    (): FileDuJourSummary => fileDuJourSummary(this.items())
   );
 
   private listRequest(

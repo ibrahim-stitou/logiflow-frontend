@@ -1,4 +1,9 @@
-import { draftToWrite, emptyDossierDraft, manualNextStatuts, nextStatuts } from "./dossier";
+import {
+  draftToWrite,
+  emptyDossierDraft,
+  manualNextStatuts,
+  nextStatuts,
+} from "./dossier";
 
 describe("dossier domain helpers", () => {
   it("maps a draft to the backend write shape", () => {
@@ -26,9 +31,6 @@ describe("dossier domain helpers", () => {
 
   it("hides voyage-owned transitions from manual UI", () => {
     expect(manualNextStatuts("CREE")).toEqual(["ANNULE"]);
-    expect(manualNextStatuts("PLANIFIE")).toEqual([
-      "EN_CHARGEMENT",
-      "ANNULE",
-    ]);
+    expect(manualNextStatuts("PLANIFIE")).toEqual(["EN_CHARGEMENT", "ANNULE"]);
   });
 });

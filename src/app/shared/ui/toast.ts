@@ -47,10 +47,7 @@ export class ToastService {
 
   private show(message: string, tone: ToastTone): void {
     const id = ++this.nextId;
-    this.messages.update((current) => [
-      ...current,
-      { id, message, tone },
-    ]);
+    this.messages.update((current) => [...current, { id, message, tone }]);
     const timer = globalThis.setTimeout(() => {
       this.dismiss(id);
     }, TOAST_DURATION_MS);

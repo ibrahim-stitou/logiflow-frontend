@@ -82,7 +82,9 @@ describe("CopilotePanel", () => {
     const { compiled, http } = await ouvrir();
 
     expect(compiled.querySelector("#app-copilote-panel")).not.toBeNull();
-    expect(compiled.querySelector("[data-slot='sheet-content']")).not.toBeNull();
+    expect(
+      compiled.querySelector("[data-slot='sheet-content']")
+    ).not.toBeNull();
     expect(
       compiled.querySelector(".copilote-historique")?.textContent
     ).toContain("Consommation carburant");
@@ -110,7 +112,7 @@ describe("CopilotePanel", () => {
   });
 
   it("shows send status on user messages and renders answers safely", async () => {
-    const { compiled, fixture } = await ouvrir();
+    const { fixture } = await ouvrir();
     TestBed.inject(CopiloteStore).messages.set([
       message({ contenu: "Question 1", id: "u1", role: "user" }),
       message({
@@ -135,9 +137,9 @@ describe("CopilotePanel", () => {
     fixture.detectChanges();
 
     const overlay = TestBed.inject(OverlayContainer).getContainerElement();
-    const statuts = [
-      ...overlay.querySelectorAll(".copilote-envoi-statut"),
-    ].map((e) => e.textContent?.trim());
+    const statuts = [...overlay.querySelectorAll(".copilote-envoi-statut")].map(
+      (e) => e.textContent?.trim()
+    );
     expect(statuts).toEqual(["Envoyé", "Non envoyé"]);
     const markdown = overlay.querySelector(".copilote-markdown");
     expect(markdown?.querySelector("strong")?.textContent).toBe("VOY-1");

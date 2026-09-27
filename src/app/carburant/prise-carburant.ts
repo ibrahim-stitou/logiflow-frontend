@@ -1,11 +1,6 @@
 import { formatAmountDh } from "../core/api/money";
 
-export const TYPE_CARBURANTS = [
-  "DIESEL",
-  "GNR",
-  "ADBLUE",
-  "ESSENCE",
-] as const;
+export const TYPE_CARBURANTS = ["DIESEL", "GNR", "ADBLUE", "ESSENCE"] as const;
 export type TypeCarburant = (typeof TYPE_CARBURANTS)[number];
 
 export const STATUT_PRISES = ["BROUILLON", "VALIDEE"] as const;
@@ -148,8 +143,8 @@ export function formatPrixUnitaire(value: number | null): string {
     return "—";
   }
   return `${value.toLocaleString("fr-FR", {
-    minimumFractionDigits: 3,
     maximumFractionDigits: 3,
+    minimumFractionDigits: 3,
   })} DH/L`;
 }
 
@@ -157,10 +152,8 @@ export function draftToWrite(
   draft: PriseCarburantDraft,
   voyage: { remorqueId: string | null; vehiculeId: string }
 ): PriseCarburantWrite {
-  const vehiculeId =
-    draft.engin === "vehicule" ? voyage.vehiculeId : null;
-  const remorqueId =
-    draft.engin === "remorque" ? voyage.remorqueId : null;
+  const vehiculeId = draft.engin === "vehicule" ? voyage.vehiculeId : null;
+  const remorqueId = draft.engin === "remorque" ? voyage.remorqueId : null;
   return {
     datePrise: new Date(draft.datePrise).toISOString(),
     litrage: Number.parseFloat(draft.litrage),

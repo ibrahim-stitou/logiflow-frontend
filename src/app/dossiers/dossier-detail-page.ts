@@ -7,46 +7,40 @@ import {
   input,
   signal,
 } from "@angular/core";
-import { bindShellBreadcrumbLeaf } from "../core/nav/shell-breadcrumb-leaf";
 import { RouterLink } from "@angular/router";
-import { statutOptionsFrom } from "../shared/ui/list-filter";
-import { dossierStatutIcon } from "../shared/ui/list-statut-icons";
-import { statutIconForValue } from "../shared/ui/list-statut-filter";
-import { FICHE_PAGE_IMPORTS } from "../shared/ui/fiche-page";
-import { ToastService } from "../shared/ui/toast";
-import { OpsTimeline } from "../shared/ui/ops-timeline";
-import { StatutChip } from "../shared/ui/statut-chip";
-import { dossierStatutTone } from "../tableau/apercu";
 import { environment } from "../../environments/environment";
+import { type Commande, commandeLabelFromLookup } from "../commandes/commande";
 import { httpErrorMessage } from "../core/api/http-error";
 import type { PageResponse } from "../core/api/page-response";
+import { DOSSIERS_PLAN_ROLES, VOYAGES_ALLOWED_ROLES } from "../core/auth/role";
 import { SessionUtilisateur } from "../core/auth/session";
+import { bindShellBreadcrumbLeaf } from "../core/nav/shell-breadcrumb-leaf";
 import {
-  DOSSIERS_PLAN_ROLES,
-  VOYAGES_ALLOWED_ROLES,
-} from "../core/auth/role";
-import {
-  commandeLabelFromLookup,
-  type Commande,
-} from "../commandes/commande";
-import {
-  marchandiseLabelFromLookup,
   type Marchandise,
+  marchandiseLabelFromLookup,
 } from "../marchandises/marchandise";
+import { FICHE_PAGE_IMPORTS } from "../shared/ui/fiche-page";
+import { statutOptionsFrom } from "../shared/ui/list-filter";
+import { statutIconForValue } from "../shared/ui/list-statut-filter";
+import { dossierStatutIcon } from "../shared/ui/list-statut-icons";
+import { OpsTimeline } from "../shared/ui/ops-timeline";
+import { StatutChip } from "../shared/ui/statut-chip";
+import { ToastService } from "../shared/ui/toast";
+import { dossierStatutTone } from "../tableau/apercu";
 import { statutVoyageLabel } from "../voyages/voyage";
 import {
   carrosserieRequiseLabel,
+  type Dossier,
+  type DossierLookupSite,
   formatInstant,
   formatWindow,
   manualNextStatuts,
-  siteLabelFromLookup,
   STATUT_DOSSIERS,
+  type StatutDossier,
+  siteLabelFromLookup,
   statutDocumentTransportLabel,
   statutDossierLabel,
   typeDocumentTransportLabel,
-  type Dossier,
-  type DossierLookupSite,
-  type StatutDossier,
   typeSegmentLabel,
   typeTransportLabel,
 } from "./dossier";
@@ -94,7 +88,8 @@ export class DossierDetailPage {
     dossierStatutIcon
   );
   protected readonly statutDossierLabel = statutDossierLabel;
-  protected readonly statutDocumentTransportLabel = statutDocumentTransportLabel;
+  protected readonly statutDocumentTransportLabel =
+    statutDocumentTransportLabel;
   protected readonly dossierStatutTone = dossierStatutTone;
 
   protected statutChipIcon(statut: string): string | null {
@@ -119,33 +114,37 @@ export class DossierDetailPage {
     url: `${environment.apiBaseUrl}/dossiers/${this.id()}`,
   }));
 
-  protected readonly voyagesPorteurs = httpResource<
-    PageResponse<VoyageLink>
-  >(() => {
-    const dossier = this.dossier.value();
-    if (!dossier || dossier.statut !== "PLANIFIE") {
-      return undefined;
+  protected readonly voyagesPorteurs = httpResource<PageResponse<VoyageLink>>(
+    () => {
+      const dossier = this.dossier.value();
+      if (dossier?.statut !== "PLANIFIE") {
+        return;
+      }
+      return {
+        params: { dossierId: this.id() },
+        url: `${environment.apiBaseUrl}/voyages`,
+      };
     }
-    return {
-      params: { dossierId: this.id() },
-      url: `${environment.apiBaseUrl}/voyages`,
-    };
-  });
+  );
 
   protected readonly commandes = httpResource<PageResponse<Commande>>(() => ({
     params: { page: 0, q: "", size: COMMANDE_LOOKUP_PAGE_SIZE },
     url: `${environment.apiBaseUrl}/commandes`,
   }));
 
-  protected readonly sites = httpResource<PageResponse<DossierLookupSite>>(() => ({
-    params: { page: 0, q: "", size: SITE_LOOKUP_PAGE_SIZE },
-    url: `${environment.apiBaseUrl}/sites`,
-  }));
+  protected readonly sites = httpResource<PageResponse<DossierLookupSite>>(
+    () => ({
+      params: { page: 0, q: "", size: SITE_LOOKUP_PAGE_SIZE },
+      url: `${environment.apiBaseUrl}/sites`,
+    })
+  );
 
-  protected readonly marchandises = httpResource<PageResponse<Marchandise>>(() => ({
-    params: { page: 0, size: MARCHANDISE_LOOKUP_PAGE_SIZE },
-    url: `${environment.apiBaseUrl}/marchandises`,
-  }));
+  protected readonly marchandises = httpResource<PageResponse<Marchandise>>(
+    () => ({
+      params: { page: 0, size: MARCHANDISE_LOOKUP_PAGE_SIZE },
+      url: `${environment.apiBaseUrl}/marchandises`,
+    })
+  );
 
   protected readonly sitesById = computed(() => {
     const map = new Map<string, DossierLookupSite>();

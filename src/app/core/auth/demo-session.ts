@@ -1,10 +1,13 @@
 import { computed, Service, signal } from "@angular/core";
+import {
+  clearAuthSessionStorage,
+  DEMO_SESSION_STORAGE_KEY,
+} from "./auth-storage";
 import { DEMO_PASSWORD, findDemoIdentity } from "./demo-identity";
-import { clearAuthSessionStorage } from "./auth-storage";
 import { isRole, type Role } from "./role";
 import { SessionUtilisateur, type UtilisateurConnecte } from "./session";
 
-export const DEMO_SESSION_STORAGE_KEY = "logiflow.demo-session";
+export { DEMO_SESSION_STORAGE_KEY } from "./auth-storage";
 
 export interface DemoSession {
   login: string;
@@ -13,7 +16,9 @@ export interface DemoSession {
 
 @Service()
 export class DemoSessionService extends SessionUtilisateur {
-  private readonly sessionState = signal<DemoSession | null>(readStoredSession());
+  private readonly sessionState = signal<DemoSession | null>(
+    readStoredSession()
+  );
 
   readonly isSignedIn = computed(() => this.sessionState() !== null);
 
@@ -47,12 +52,14 @@ export class DemoSessionService extends SessionUtilisateur {
     return true;
   }
 
-  async connecter(_retour = "/"): Promise<void> {
+  connecter(_retour = "/"): Promise<void> {
     // En mode démo, la page /connexion appelle signIn() directement.
+    return Promise.resolve();
   }
 
-  async deconnecter(): Promise<void> {
+  deconnecter(): Promise<void> {
     this.signOut();
+    return Promise.resolve();
   }
 
   signOut(): void {
@@ -60,8 +67,8 @@ export class DemoSessionService extends SessionUtilisateur {
     this.sessionState.set(null);
   }
 
-  async jetonAcces(): Promise<string | null> {
-    return null;
+  jetonAcces(): Promise<string | null> {
+    return Promise.resolve(null);
   }
 
   override hasAnyRole(roles: readonly Role[]): boolean {

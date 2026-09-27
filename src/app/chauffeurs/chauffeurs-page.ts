@@ -41,8 +41,8 @@ import {
   DESTINATION_NAV_ICON,
   LIST_TABLE_ROW_ICON_PROVIDERS,
 } from "../shared/ui/list-table-row-icons";
-import { ListToolbarCta } from "../shared/ui/list-toolbar-cta";
 import { ListTableSkeleton } from "../shared/ui/list-table-skeleton";
+import { ListToolbarCta } from "../shared/ui/list-toolbar-cta";
 import { StatutChip } from "../shared/ui/statut-chip";
 import {
   alertesChauffeur,

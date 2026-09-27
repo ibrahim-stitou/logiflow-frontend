@@ -2,23 +2,23 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  effect,
   ElementRef,
+  effect,
   forwardRef,
   inject,
   input,
   model,
   ViewEncapsulation,
-} from '@angular/core';
-import { type ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+} from "@angular/core";
+import { type ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 
-import type { ClassValue } from 'clsx';
+import type { ClassValue } from "clsx";
 
-import { ZardInputGroupComponent } from '@/shared/components/input-group';
-import { mergeClasses } from '@/shared/utils/merge-classes';
-import { noopFn } from '@/shared/utils/noop';
+import { ZardInputGroupComponent } from "@/shared/components/input-group";
+import { mergeClasses } from "@/shared/utils/merge-classes";
+import { noopFn } from "@/shared/utils/noop";
 
-import { inputGroupInputVariants, inputVariants } from './input.variants';
+import { inputGroupInputVariants, inputVariants } from "./input.variants";
 
 type OnTouchedType = () => void;
 type ZardInputElement = HTMLInputElement | HTMLTextAreaElement;
@@ -26,24 +26,24 @@ type ZardInputValue = string | number | null | undefined;
 type OnChangeType = (value: ZardInputValue) => void;
 
 @Component({
-  selector: 'input[z-input]',
-  template: '',
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => ZardInputComponent),
-      multi: true,
-    },
-  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
+  exportAs: "zInput",
   host: {
-    '[attr.data-slot]': 'parentGroup ? "input-group-control" : "input"',
-    '[class]': 'classes()',
-    '(input)': 'updateValue($event.target)',
-    '(blur)': 'onBlur()',
+    "(blur)": "onBlur()",
+    "(input)": "updateValue($event.target)",
+    "[attr.data-slot]": 'parentGroup ? "input-group-control" : "input"',
+    "[class]": "classes()",
   },
-  exportAs: 'zInput',
+  providers: [
+    {
+      multi: true,
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => ZardInputComponent),
+    },
+  ],
+  selector: "input[z-input]",
+  template: "",
 })
 export class ZardInputComponent implements ControlValueAccessor {
   readonly parentGroup = inject(ZardInputGroupComponent, { optional: true });
@@ -52,11 +52,15 @@ export class ZardInputComponent implements ControlValueAccessor {
   private onTouchedFn: OnTouchedType = noopFn;
   private onChangeFn: OnChangeType = noopFn;
 
-  readonly class = input<ClassValue>('');
+  readonly class = input<ClassValue>("");
   readonly value = model<ZardInputValue>(null);
 
   protected readonly classes = computed(() =>
-    mergeClasses(inputVariants(), this.parentGroup ? inputGroupInputVariants() : '', this.class()),
+    mergeClasses(
+      inputVariants(),
+      this.parentGroup ? inputGroupInputVariants() : "",
+      this.class()
+    )
   );
 
   constructor() {
@@ -96,23 +100,28 @@ export class ZardInputComponent implements ControlValueAccessor {
   }
 
   writeValue(value?: string): void {
-    this.value.set(value ?? '');
+    this.value.set(value ?? "");
   }
 
-  private isNumericInput(element: ZardInputElement): element is HTMLInputElement {
-    return element.tagName.toLowerCase() === 'input' && ['number', 'range'].includes(element.type);
+  private isNumericInput(
+    element: ZardInputElement
+  ): element is HTMLInputElement {
+    return (
+      element.tagName.toLowerCase() === "input" &&
+      ["number", "range"].includes(element.type)
+    );
   }
 
   private readNativeValue(element: ZardInputElement | null): ZardInputValue {
     if (!element) {
-      return '';
+      return "";
     }
 
     if (this.isNumericInput(element)) {
       const currentValue = this.value();
 
-      if (typeof currentValue === 'number' || currentValue === null) {
-        if (element.value === '') {
+      if (typeof currentValue === "number" || currentValue === null) {
+        if (element.value === "") {
           return null;
         }
 
@@ -127,11 +136,11 @@ export class ZardInputComponent implements ControlValueAccessor {
   private writeNativeValue(value: ZardInputValue): void {
     const element = this.elementRef.nativeElement;
 
-    if (this.isNumericInput(element) && typeof value === 'number') {
-      element.value = Number.isNaN(value) ? '' : String(value);
+    if (this.isNumericInput(element) && typeof value === "number") {
+      element.value = Number.isNaN(value) ? "" : String(value);
       return;
     }
 
-    element.value = String(value ?? '');
+    element.value = String(value ?? "");
   }
 }

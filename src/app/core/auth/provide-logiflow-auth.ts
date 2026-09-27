@@ -1,11 +1,7 @@
+import { provideHttpClient, withInterceptors } from "@angular/common/http";
 import {
-  provideHttpClient,
-  withFetch,
-  withInterceptors,
-} from "@angular/common/http";
-import {
-  inject,
   type EnvironmentProviders,
+  inject,
   makeEnvironmentProviders,
   provideAppInitializer,
 } from "@angular/core";
@@ -17,14 +13,14 @@ import {
 } from "angular-auth-oidc-client";
 import { firstValueFrom } from "rxjs";
 import { environment } from "../../../environments/environment";
-import { AuthSyncService } from "./auth-sync";
 import { apiErrorInterceptor } from "./api-error.interceptor";
+import { AuthSyncService } from "./auth-sync";
 import { DemoSessionService } from "./demo-session";
 import { KeycloakSessionService } from "./keycloak-session";
 import { SessionUtilisateur } from "./session";
 
 export function provideLogiflowAuth(): EnvironmentProviders {
-  const mode = environment.auth.mode;
+  const { mode } = environment.auth;
 
   const sessionProvider =
     mode === "keycloak"
@@ -41,11 +37,10 @@ export function provideLogiflowAuth(): EnvironmentProviders {
     mode === "keycloak"
       ? [
           provideHttpClient(
-            withFetch(),
             withInterceptors([authInterceptor(), apiErrorInterceptor])
           ),
         ]
-      : [provideHttpClient(withFetch())];
+      : [provideHttpClient()];
 
   const oidcProviders =
     mode === "keycloak" && environment.auth.mode === "keycloak"
@@ -54,15 +49,15 @@ export function provideLogiflowAuth(): EnvironmentProviders {
             config: {
               authority: environment.auth.authority,
               clientId: environment.auth.clientId,
-              redirectUrl: environment.auth.redirectUrl,
+              logLevel: LogLevel.Warn,
               postLogoutRedirectUri: environment.auth.postLogoutRedirectUri,
-              scope: environment.auth.scope,
+              redirectUrl: environment.auth.redirectUrl,
+              renewTimeBeforeTokenExpiresInSeconds: 30,
               responseType: "code",
+              scope: environment.auth.scope,
+              secureRoutes: ["/api/"],
               silentRenew: true,
               useRefreshToken: true,
-              renewTimeBeforeTokenExpiresInSeconds: 30,
-              secureRoutes: ["/api/"],
-              logLevel: LogLevel.Warn,
             },
           }),
           provideAppInitializer(() => {

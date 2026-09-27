@@ -9,6 +9,8 @@ import {
 import { DESTINATION_NAV_ICON, TABLEAU_NAV_ICON } from "./nav-icon";
 import { destinationsForRoles, workDestination } from "./work-destination";
 
+const ESPACES = /\s+/;
+
 export type PaletteItemKind = "module" | "action" | "entity";
 export type PaletteSection = "Modules" | "Actions" | "Références";
 
@@ -191,7 +193,7 @@ export function filterPaletteItems(
   const tokens = query
     .trim()
     .toLowerCase()
-    .split(/\s+/)
+    .split(ESPACES)
     .filter((token) => token.length > 0);
   if (tokens.length === 0) {
     return [...items];

@@ -1,22 +1,26 @@
-import { type ComponentType, Overlay, OverlayConfig, OverlayRef } from '@angular/cdk/overlay';
-import { ComponentPortal, TemplatePortal } from '@angular/cdk/portal';
-import { isPlatformBrowser } from '@angular/common';
 import {
-  inject,
+  type ComponentType,
+  Overlay,
+  OverlayConfig,
+  OverlayRef,
+} from "@angular/cdk/overlay";
+import { ComponentPortal, TemplatePortal } from "@angular/cdk/portal";
+import { isPlatformBrowser } from "@angular/common";
+import {
   Injectable,
   InjectionToken,
   Injector,
+  inject,
   PLATFORM_ID,
   TemplateRef,
   type ViewContainerRef,
-} from '@angular/core';
-
-import { ZardSheetRef } from './sheet-ref';
-import { ZardSheetComponent, ZardSheetOptions } from './sheet.component';
+} from "@angular/core";
+import { ZardSheetComponent, ZardSheetOptions } from "./sheet.component";
+import { ZardSheetRef } from "./sheet-ref";
 
 type ContentType<T> = ComponentType<T> | TemplateRef<T> | string;
 
-export const Z_SHEET_DATA = new InjectionToken<unknown>('Z_SHEET_DATA');
+export const Z_SHEET_DATA = new InjectionToken<unknown>("Z_SHEET_DATA");
 
 /**
  * Type-safe accessor for the data passed to a sheet via {@link ZardSheetOptions.zData}.
@@ -31,7 +35,7 @@ export function injectSheetData<T>(): T {
 }
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class ZardSheetService {
   private readonly overlay = inject(Overlay);
@@ -55,7 +59,7 @@ export class ZardSheetService {
       config.zContent as ContentType<T>,
       sheetContainer,
       overlayRef,
-      config,
+      config
     );
 
     sheetContainer.sheetRef = sheetRef;
@@ -66,14 +70,20 @@ export class ZardSheetService {
   private createOverlay(): OverlayRef {
     return this.overlay.create(
       new OverlayConfig({
+        backdropClass: [
+          "bg-black/10",
+          "supports-backdrop-filter:backdrop-blur-xs",
+        ],
         hasBackdrop: true,
-        backdropClass: ['bg-black/10', 'supports-backdrop-filter:backdrop-blur-xs'],
         positionStrategy: this.overlay.position().global(),
-      }),
+      })
     );
   }
 
-  private attachSheetContainer<T, U>(overlayRef: OverlayRef, config: ZardSheetOptions<T, U>) {
+  private attachSheetContainer<T, U>(
+    overlayRef: OverlayRef,
+    config: ZardSheetOptions<T, U>
+  ) {
     const injector = Injector.create({
       parent: this.injector,
       providers: [
@@ -85,32 +95,48 @@ export class ZardSheetService {
     const containerPortal = new ComponentPortal<ZardSheetComponent<T, U>>(
       ZardSheetComponent,
       config.zViewContainerRef,
-      injector,
+      injector
     );
 
-    return overlayRef.attach<ZardSheetComponent<T, U>>(containerPortal).instance;
+    return overlayRef.attach<ZardSheetComponent<T, U>>(containerPortal)
+      .instance;
   }
 
   private attachSheetContent<T, U>(
     componentOrTemplateRef: ContentType<T>,
     sheetContainer: ZardSheetComponent<T, U>,
     overlayRef: OverlayRef,
-    config: ZardSheetOptions<T, U>,
+    config: ZardSheetOptions<T, U>
   ): ZardSheetRef<T> {
-    const sheetRef = new ZardSheetRef<T>(overlayRef, config, sheetContainer, this.platformId);
+    const sheetRef = new ZardSheetRef<T>(
+      overlayRef,
+      config,
+      sheetContainer,
+      this.platformId
+    );
 
     if (componentOrTemplateRef instanceof TemplateRef) {
       // CDK's TemplatePortal type requires a ViewContainerRef even though it tolerates null at runtime,
       // and types the template context as T (the template's data shape) — we expose `sheetRef` instead.
-      const vcr = (config.zViewContainerRef ?? null) as unknown as ViewContainerRef;
+      const vcr = (config.zViewContainerRef ??
+        null) as unknown as ViewContainerRef;
       const ctx = { sheetRef } as unknown as T;
-      sheetContainer.attachTemplatePortal(new TemplatePortal(componentOrTemplateRef, vcr, ctx));
-    } else if (componentOrTemplateRef != null && typeof componentOrTemplateRef !== 'string') {
+      sheetContainer.attachTemplatePortal(
+        new TemplatePortal(componentOrTemplateRef, vcr, ctx)
+      );
+    } else if (
+      componentOrTemplateRef != null &&
+      typeof componentOrTemplateRef !== "string"
+    ) {
       // Guard against a missing `zContent`: without it, `undefined` reaches ComponentPortal and
       // Angular throws NG0919 (DEF_TYPE_UNDEFINED) while creating the component.
       const injector = this.createInjector<T, U>(sheetRef, config);
       const contentRef = sheetContainer.attachComponentPortal<T>(
-        new ComponentPortal(componentOrTemplateRef, config.zViewContainerRef, injector),
+        new ComponentPortal(
+          componentOrTemplateRef,
+          config.zViewContainerRef,
+          injector
+        )
       );
       sheetRef.setComponentInstance(contentRef.instance);
     }
@@ -118,7 +144,10 @@ export class ZardSheetService {
     return sheetRef;
   }
 
-  private createInjector<T, U>(sheetRef: ZardSheetRef<T>, config: ZardSheetOptions<T, U>): Injector {
+  private createInjector<T, U>(
+    sheetRef: ZardSheetRef<T>,
+    config: ZardSheetOptions<T, U>
+  ): Injector {
     return Injector.create({
       parent: this.injector,
       providers: [

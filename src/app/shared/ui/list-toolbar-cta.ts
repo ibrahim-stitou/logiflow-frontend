@@ -5,9 +5,8 @@ import { lucidePlus } from "@ng-icons/lucide";
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  selector: "app-list-toolbar-cta",
   imports: [NgIcon, RouterLink],
-  viewProviders: [provideIcons({ lucidePlus })],
+  selector: "app-list-toolbar-cta",
   styles: `
     :host {
       display: block;
@@ -25,6 +24,7 @@ import { lucidePlus } from "@ng-icons/lucide";
       <span>{{ label() }}</span>
     </a>
   `,
+  viewProviders: [provideIcons({ lucidePlus })],
 })
 export class ListToolbarCta {
   readonly link = input.required<string | readonly string[]>();

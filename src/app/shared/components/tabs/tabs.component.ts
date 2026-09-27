@@ -1,4 +1,4 @@
-import { NgTemplateOutlet } from '@angular/common';
+import { NgTemplateOutlet } from "@angular/common";
 import {
   booleanAttribute,
   ChangeDetectionStrategy,
@@ -10,45 +10,54 @@ import {
   output,
   signal,
   type TemplateRef,
-  viewChild,
   ViewEncapsulation,
-} from '@angular/core';
+  viewChild,
+} from "@angular/core";
 
-import { NgIcon } from '@ng-icons/core';
-import type { ClassValue } from 'clsx';
+import { NgIcon } from "@ng-icons/core";
+import type { ClassValue } from "clsx";
 
 import {
   tabButtonVariants,
   tabContainerVariants,
   tabNavVariants,
   type ZardTabVariants,
-} from '@/shared/components/tabs/tabs.variants';
-import { mergeClasses } from '@/shared/utils/merge-classes';
+} from "@/shared/components/tabs/tabs.variants";
+import { mergeClasses } from "@/shared/utils/merge-classes";
 
 @Component({
-  selector: 'z-tab',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  exportAs: "zTab",
+  host: {
+    "data-slot": "tab",
+  },
+  selector: "z-tab",
   template: `
     <ng-template #content>
       <ng-content />
     </ng-template>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
-  host: {
-    'data-slot': 'tab',
-  },
-  exportAs: 'zTab',
 })
 export class ZardTabComponent {
   readonly label = input.required<string>();
   readonly zIcon = input<string | undefined>(undefined);
   readonly zDisabled = input(false, { transform: booleanAttribute });
-  readonly contentTemplate = viewChild.required<TemplateRef<unknown>>('content');
+  readonly contentTemplate =
+    viewChild.required<TemplateRef<unknown>>("content");
 }
 
 @Component({
-  selector: 'z-tab-group',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  exportAs: "zTabGroup",
+  host: {
+    "[attr.data-orientation]": "zOrientation()",
+    "[class]": "containerClasses()",
+    "data-slot": "tab-group",
+  },
   imports: [NgTemplateOutlet, NgIcon],
+  selector: "z-tab-group",
   template: `
     <nav
       [class]="navClasses()"
@@ -92,17 +101,11 @@ export class ZardTabComponent {
       }
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
-  host: {
-    'data-slot': 'tab-group',
-    '[class]': 'containerClasses()',
-    '[attr.data-orientation]': 'zOrientation()',
-  },
-  exportAs: 'zTabGroup',
 })
 export class ZardTabGroupComponent {
-  private readonly tabComponents = contentChildren(ZardTabComponent, { descendants: true });
+  private readonly tabComponents = contentChildren(ZardTabComponent, {
+    descendants: true,
+  });
 
   protected readonly tabs = computed(() => this.tabComponents());
   protected readonly activeTabIndex = signal<number>(0);
@@ -119,10 +122,10 @@ export class ZardTabGroupComponent {
     tab: ZardTabComponent;
   }>();
 
-  readonly zVariant = input<ZardTabVariants['zVariant']>('default');
-  readonly zOrientation = input<ZardTabVariants['zOrientation']>('horizontal');
+  readonly zVariant = input<ZardTabVariants["zVariant"]>("default");
+  readonly zOrientation = input<ZardTabVariants["zOrientation"]>("horizontal");
   readonly zDisabled = input(false, { transform: booleanAttribute });
-  readonly class = input<ClassValue>('');
+  readonly class = input<ClassValue>("");
 
   protected setActiveTab(index: number) {
     const currentTab = this.tabs()[this.activeTabIndex()];
@@ -146,10 +149,15 @@ export class ZardTabGroupComponent {
   }
 
   protected readonly containerClasses = computed(() =>
-    mergeClasses(tabContainerVariants({ zOrientation: this.zOrientation() }), this.class()),
+    mergeClasses(
+      tabContainerVariants({ zOrientation: this.zOrientation() }),
+      this.class()
+    )
   );
 
-  protected readonly navClasses = computed(() => tabNavVariants({ zVariant: this.zVariant() }));
+  protected readonly navClasses = computed(() =>
+    tabNavVariants({ zVariant: this.zVariant() })
+  );
 
   protected readonly buttonClasses = computed(() => tabButtonVariants());
 

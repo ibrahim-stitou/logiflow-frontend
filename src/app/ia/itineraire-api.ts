@@ -15,8 +15,10 @@ import type {
 @Service()
 export class ItineraireApi {
   private readonly http = inject(HttpClient);
-  private readonly calculUrl = `${environment.apiBaseUrl}/ia/itineraires/calcul`;
-  private readonly geometrieUrl = `${environment.apiBaseUrl}/ia/itineraires/geometrie`;
+  private readonly calculUrl =
+    `${environment.apiBaseUrl}/ia/itineraires/calcul`;
+  private readonly geometrieUrl =
+    `${environment.apiBaseUrl}/ia/itineraires/geometrie`;
 
   calculer(points: readonly ItinerairePoint[]): Promise<ItineraireCalcule> {
     return firstValueFrom(
@@ -24,7 +26,9 @@ export class ItineraireApi {
     );
   }
 
-  calculerGeometrie(points: readonly ItinerairePoint[]): Promise<ItineraireGeometrie> {
+  calculerGeometrie(
+    points: readonly ItinerairePoint[]
+  ): Promise<ItineraireGeometrie> {
     return firstValueFrom(
       this.http.post<ItineraireGeometrie>(this.geometrieUrl, { points })
     );

@@ -343,7 +343,9 @@ export function isStatutDossier(value: string): value is StatutDossier {
   return (STATUT_DOSSIERS as readonly string[]).includes(value);
 }
 
-export function isCarrosserieRequise(value: string): value is CarrosserieRequise {
+export function isCarrosserieRequise(
+  value: string
+): value is CarrosserieRequise {
   return (CARROSSERIES_REQUISES as readonly string[]).includes(value);
 }
 

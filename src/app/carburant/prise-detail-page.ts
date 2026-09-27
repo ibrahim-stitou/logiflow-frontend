@@ -9,39 +9,39 @@ import {
   input,
   signal,
 } from "@angular/core";
-import { bindShellBreadcrumbLeaf } from "../core/nav/shell-breadcrumb-leaf";
 import { FormField, form, required, submit } from "@angular/forms/signals";
 import { RouterLink } from "@angular/router";
+import { NgIcon, provideIcons } from "@ng-icons/core";
+import { lucideCheck } from "@ng-icons/lucide";
 import { environment } from "../../environments/environment";
 import { httpErrorMessage } from "../core/api/http-error";
 import type { PageResponse } from "../core/api/page-response";
-import { SessionUtilisateur } from "../core/auth/session";
 import { VOYAGES_PLAN_ROLES } from "../core/auth/role";
+import { SessionUtilisateur } from "../core/auth/session";
 import { firstFieldError } from "../core/forms/first-field-error";
 import { fieldClasses, showFieldError } from "../core/forms/show-field-error";
-import { statutOptionsFrom } from "../shared/ui/list-filter";
-import { priseCarburantStatutIcon } from "../shared/ui/list-statut-icons";
-import { statutIconForValue } from "../shared/ui/list-statut-filter";
+import { bindShellBreadcrumbLeaf } from "../core/nav/shell-breadcrumb-leaf";
 import { DocumentsSection } from "../shared/ui/documents-section";
 import { FICHE_PAGE_IMPORTS } from "../shared/ui/fiche-page";
+import { statutOptionsFrom } from "../shared/ui/list-filter";
+import { statutIconForValue } from "../shared/ui/list-statut-filter";
+import { priseCarburantStatutIcon } from "../shared/ui/list-statut-icons";
 import { StatutChip } from "../shared/ui/statut-chip";
-import { NgIcon, provideIcons } from "@ng-icons/core";
-import { lucideCheck } from "@ng-icons/lucide";
 import { ToastService } from "../shared/ui/toast";
-import { PriseCarburantApi } from "./prise-carburant-api";
 import {
   formatLitres,
   formatMontantTtc,
   formatPriseShortId,
   formatPrixUnitaire,
+  type PriseCarburant,
+  type PriseCarburantMaj,
   STATUT_PRISES,
   statutPriseLabel,
   statutPriseTone,
   TYPE_CARBURANTS,
-  type PriseCarburant,
-  type PriseCarburantMaj,
   typeCarburantLabel,
 } from "./prise-carburant";
+import { PriseCarburantApi } from "./prise-carburant-api";
 import type { Station } from "./station";
 
 interface PriseEditDraft {
@@ -136,9 +136,7 @@ export class PriseDetailPage {
     bindShellBreadcrumbLeaf(
       this.destroyRef,
       computed(() =>
-        this.prise.hasValue()
-          ? formatPriseShortId(this.prise.value().id)
-          : null
+        this.prise.hasValue() ? formatPriseShortId(this.prise.value().id) : null
       )
     );
 

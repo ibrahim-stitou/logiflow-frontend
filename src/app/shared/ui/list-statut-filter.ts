@@ -22,10 +22,10 @@ import {
 import { LIST_STATUT_FILTER_ICON_PROVIDERS } from "./list-statut-icons";
 
 export interface ListStatutOption {
-  label: string;
-  value: string;
   /** Lucide icon name for ng-icon (e.g. lucideCircleCheck). */
   icon?: string;
+  label: string;
+  value: string;
 }
 
 export function iconForStatutOption(option: ListStatutOption): string {
@@ -51,98 +51,8 @@ export function statutIconForValue(
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  selector: "app-list-statut-filter",
   imports: [NgIcon, ZardPopoverComponent, ZardPopoverDirective],
-  viewProviders: [
-    provideIcons({
-      lucideCheck,
-      lucideChevronDown,
-      lucideCircleCheck,
-      lucideCircleOff,
-      lucideListFilter,
-      lucideTag,
-    }),
-    LIST_STATUT_FILTER_ICON_PROVIDERS,
-  ],
-  template: `
-    <button
-      [attr.aria-expanded]="menuOpen()"
-      [attr.aria-label]="ariaLabel()"
-      [zContent]="menuTemplate"
-      (zVisibleChange)="menuOpen.set($event)"
-      [zAlign]="'start'"
-      [zSideOffset]="6"
-      [zVisible]="menuOpen()"
-      class="list-filter-trigger pressable"
-      type="button"
-      zPopover
-    >
-      <ng-icon
-        [name]="triggerIcon()"
-        aria-hidden="true"
-        class="list-filter-trigger__icon"
-      />
-      <span class="list-filter-trigger__label">{{ triggerLabel() }}</span>
-      <ng-icon
-        aria-hidden="true"
-        class="list-filter-trigger__chevron"
-        name="lucideChevronDown"
-      />
-    </button>
-
-    <ng-template #menuTemplate>
-      <z-popover
-        [attr.aria-label]="ariaLabel()"
-        class="list-filter-menu"
-        role="menu"
-      >
-        <button
-          (click)="pick(null)"
-          [attr.aria-checked]="selected() === null"
-          class="list-filter-menu__item"
-          role="menuitemradio"
-          type="button"
-        >
-          <ng-icon
-            aria-hidden="true"
-            class="list-filter-menu__icon"
-            name="lucideListFilter"
-          />
-          <span class="list-filter-menu__text">{{ allLabel() }}</span>
-          @if (selected() === null) {
-          <ng-icon
-            aria-hidden="true"
-            class="list-filter-menu__check"
-            name="lucideCheck"
-          />
-          }
-        </button>
-        @for (option of options(); track option.value) {
-        <button
-          (click)="pick(option.value)"
-          [attr.aria-checked]="selected() === option.value"
-          class="list-filter-menu__item"
-          role="menuitemradio"
-          type="button"
-        >
-          <ng-icon
-            [name]="iconFor(option)"
-            aria-hidden="true"
-            class="list-filter-menu__icon"
-          />
-          <span class="list-filter-menu__text">{{ option.label }}</span>
-          @if (selected() === option.value) {
-          <ng-icon
-            aria-hidden="true"
-            class="list-filter-menu__check"
-            name="lucideCheck"
-          />
-          }
-        </button>
-        }
-      </z-popover>
-    </ng-template>
-  `,
+  selector: "app-list-statut-filter",
   styles: `
     :host {
       display: block;
@@ -247,6 +157,96 @@ export function statutIconForValue(
       color: var(--color-pine);
     }
   `,
+  template: `
+    <button
+      [attr.aria-expanded]="menuOpen()"
+      [attr.aria-label]="ariaLabel()"
+      [zContent]="menuTemplate"
+      (zVisibleChange)="menuOpen.set($event)"
+      [zAlign]="'start'"
+      [zSideOffset]="6"
+      [zVisible]="menuOpen()"
+      class="list-filter-trigger pressable"
+      type="button"
+      zPopover
+    >
+      <ng-icon
+        [name]="triggerIcon()"
+        aria-hidden="true"
+        class="list-filter-trigger__icon"
+      />
+      <span class="list-filter-trigger__label">{{ triggerLabel() }}</span>
+      <ng-icon
+        aria-hidden="true"
+        class="list-filter-trigger__chevron"
+        name="lucideChevronDown"
+      />
+    </button>
+
+    <ng-template #menuTemplate>
+      <z-popover
+        [attr.aria-label]="ariaLabel()"
+        class="list-filter-menu"
+        role="menu"
+      >
+        <button
+          (click)="pick(null)"
+          [attr.aria-checked]="selected() === null"
+          class="list-filter-menu__item"
+          role="menuitemradio"
+          type="button"
+        >
+          <ng-icon
+            aria-hidden="true"
+            class="list-filter-menu__icon"
+            name="lucideListFilter"
+          />
+          <span class="list-filter-menu__text">{{ allLabel() }}</span>
+          @if (selected() === null) {
+          <ng-icon
+            aria-hidden="true"
+            class="list-filter-menu__check"
+            name="lucideCheck"
+          />
+          }
+        </button>
+        @for (option of options(); track option.value) {
+        <button
+          (click)="pick(option.value)"
+          [attr.aria-checked]="selected() === option.value"
+          class="list-filter-menu__item"
+          role="menuitemradio"
+          type="button"
+        >
+          <ng-icon
+            [name]="iconFor(option)"
+            aria-hidden="true"
+            class="list-filter-menu__icon"
+          />
+          <span class="list-filter-menu__text">{{ option.label }}</span>
+          @if (selected() === option.value) {
+          <ng-icon
+            aria-hidden="true"
+            class="list-filter-menu__check"
+            name="lucideCheck"
+          />
+          }
+        </button>
+        }
+      </z-popover>
+    </ng-template>
+  `,
+  viewProviders: [
+    provideIcons({
+      lucideCheck,
+      lucideChevronDown,
+      lucideCircleCheck,
+      lucideCircleOff,
+      lucideListFilter,
+      lucideTag,
+    }),
+    LIST_STATUT_FILTER_ICON_PROVIDERS,
+  ],
 })
 export class ListStatutFilter {
   readonly options = input.required<readonly ListStatutOption[]>();

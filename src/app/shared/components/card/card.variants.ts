@@ -10,7 +10,7 @@ export const cardVariants = cva(
         sm: "",
       },
     },
-  },
+  }
 );
 
 export type ZardCardSizeType = NonNullable<
@@ -18,23 +18,21 @@ export type ZardCardSizeType = NonNullable<
 >;
 
 export const cardHeaderVariants = cva(
-  "group/card-header @container/card-header grid auto-rows-min items-start gap-1 px-4 group-data-[size=sm]/card:px-3 has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto] [&.border-b]:pb-4 group-data-[size=sm]/card:[&.border-b]:pb-3",
+  "group/card-header @container/card-header grid auto-rows-min items-start gap-1 px-4 group-data-[size=sm]/card:px-3 has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto] [&.border-b]:pb-4 group-data-[size=sm]/card:[&.border-b]:pb-3"
 );
 
 export const cardTitleVariants = cva(
-  "font-display text-base/snug font-medium tracking-tight text-ink group-data-[size=sm]/card:text-sm",
+  "font-display text-base/snug font-medium tracking-tight text-ink group-data-[size=sm]/card:text-sm"
 );
 
 export const cardDescriptionVariants = cva("text-sm text-muted");
 
 export const cardActionVariants = cva(
-  "col-start-2 row-span-2 row-start-1 self-start justify-self-end",
+  "col-start-2 row-span-2 row-start-1 self-start justify-self-end"
 );
 
-export const cardContentVariants = cva(
-  "px-4 group-data-[size=sm]/card:px-3",
-);
+export const cardContentVariants = cva("px-4 group-data-[size=sm]/card:px-3");
 
 export const cardFooterVariants = cva(
-  "flex items-center rounded-b-xl bg-secondary/50 p-4 group-data-[size=sm]/card:p-3",
+  "flex items-center rounded-b-xl bg-secondary/50 p-4 group-data-[size=sm]/card:p-3"
 );

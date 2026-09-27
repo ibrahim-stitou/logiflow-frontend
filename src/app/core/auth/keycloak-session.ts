@@ -17,8 +17,8 @@ export class KeycloakSessionService extends SessionUtilisateur {
 
   private readonly etatAuth = toSignal(this.oidc.isAuthenticated$, {
     initialValue: {
-      isAuthenticated: false,
       allConfigsAuthenticated: [],
+      isAuthenticated: false,
     },
   });
 
@@ -47,14 +47,14 @@ export class KeycloakSessionService extends SessionUtilisateur {
       typeof claims["preferred_username"] === "string"
         ? claims["preferred_username"]
         : "";
-    const nom =
-      typeof claims["name"] === "string" ? claims["name"] : null;
+    const nom = typeof claims["name"] === "string" ? claims["name"] : null;
     return { login, nom, roles };
   });
 
-  async connecter(retour = "/"): Promise<void> {
+  connecter(retour = "/"): Promise<void> {
     enregistrerRetourConnexion(retour);
     this.oidc.authorize();
+    return Promise.resolve();
   }
 
   async deconnecter(): Promise<void> {

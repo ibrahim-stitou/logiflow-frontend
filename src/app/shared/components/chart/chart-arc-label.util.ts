@@ -11,18 +11,18 @@
 const START_OFFSET_DEGREES = 5;
 
 export interface ZardArcLabelGeometry {
+  /** Whether the bars sweep towards a larger angle. */
+  ascending: boolean;
   /** Centre of the polar system, in canvas pixels. */
   cx: number;
   cy: number;
+  fill: string;
+  font: string;
+  fontSize: number;
   /** Radius of each ring, outermost last, matching the order of `texts`. */
   radii: readonly number[];
   /** Where the bars begin, in ECharts degrees: 0 is three o'clock, positive counter-clockwise. */
   startAngle: number;
-  /** Whether the bars sweep towards a larger angle. */
-  ascending: boolean;
-  font: string;
-  fontSize: number;
-  fill: string;
 }
 
 type TextElement = Record<string, unknown>;
@@ -35,7 +35,8 @@ function measureContext(): CanvasRenderingContext2D | null {
   }
 
   try {
-    ruler = globalThis.document?.createElement('canvas').getContext('2d') ?? null;
+    ruler =
+      globalThis.document?.createElement("canvas").getContext("2d") ?? null;
   } catch {
     ruler = null;
   }
@@ -44,7 +45,11 @@ function measureContext(): CanvasRenderingContext2D | null {
 }
 
 /** Lays one label along one ring, a glyph at a time. */
-function glyphsOf(text: string, radius: number, geometry: ZardArcLabelGeometry): TextElement[] {
+function glyphsOf(
+  text: string,
+  radius: number,
+  geometry: ZardArcLabelGeometry
+): TextElement[] {
   const context = measureContext();
   if (!context || radius <= 0) {
     return [];
@@ -56,9 +61,11 @@ function glyphsOf(text: string, radius: number, geometry: ZardArcLabelGeometry):
 
   let travelled = (START_OFFSET_DEGREES * Math.PI * radius) / 180;
 
-  return characters.map(character => {
+  return characters.map((character) => {
     const { width } = context.measureText(character);
-    const angle = geometry.startAngle + ((sign * (travelled + width / 2)) / radius) * (180 / Math.PI);
+    const angle =
+      geometry.startAngle +
+      ((sign * (travelled + width / 2)) / radius) * (180 / Math.PI);
     const radians = (angle * Math.PI) / 180;
     travelled += width;
 
@@ -67,34 +74,43 @@ function glyphsOf(text: string, radius: number, geometry: ZardArcLabelGeometry):
     const tangentY = -Math.cos(radians) * sign;
 
     return {
-      type: 'text',
-      x: geometry.cx + Math.cos(radians) * radius,
-      y: geometry.cy - Math.sin(radians) * radius,
       rotation: -Math.atan2(tangentY, tangentX),
-      z: 100,
       silent: true,
       style: {
-        text: character,
+        align: "center",
         fill: geometry.fill,
         font: geometry.font,
-        align: 'center',
-        verticalAlign: 'middle',
+        text: character,
+        verticalAlign: "middle",
       },
+      type: "text",
+      x: geometry.cx + Math.cos(radians) * radius,
+      y: geometry.cy - Math.sin(radians) * radius,
+      z: 100,
     };
   });
 }
 
 /** Every glyph of every label, ready to hand to ECharts as `graphic` elements. */
-export function buildArcLabels(texts: readonly string[], geometry: ZardArcLabelGeometry): TextElement[] {
-  return texts.flatMap((text, index) => glyphsOf(text, geometry.radii[index] ?? 0, geometry));
+export function buildArcLabels(
+  texts: readonly string[],
+  geometry: ZardArcLabelGeometry
+): TextElement[] {
+  return texts.flatMap((text, index) =>
+    glyphsOf(text, geometry.radii[index] ?? 0, geometry)
+  );
 }
 
 /** ECharts sizes a polar radius against half the shorter side; percentages resolve the same way. */
-export function resolveRadius(value: string | number | undefined, base: number, fallback: number): number {
-  if (typeof value === 'number') {
+export function resolveRadius(
+  value: string | number | undefined,
+  base: number,
+  fallback: number
+): number {
+  if (typeof value === "number") {
     return value;
   }
-  if (typeof value === 'string' && value.endsWith('%')) {
+  if (typeof value === "string" && value.endsWith("%")) {
     const percent = Number.parseFloat(value);
     return Number.isFinite(percent) ? (percent / 100) * base : fallback;
   }

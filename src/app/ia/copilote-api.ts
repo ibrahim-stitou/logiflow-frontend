@@ -115,9 +115,7 @@ export class CopiloteApi {
     }
     if (reponse.status === 401 && !signal?.aborted) {
       const keycloak =
-        this.session instanceof KeycloakSessionService
-          ? this.session
-          : null;
+        this.session instanceof KeycloakSessionService ? this.session : null;
       if (keycloak) {
         await keycloak.forcerRenouvellement();
         reponse = await this.fetchFluxMessages(

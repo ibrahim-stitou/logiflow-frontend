@@ -1,4 +1,10 @@
-import { BarChart, GaugeChart, LineChart, PieChart, RadarChart } from 'echarts/charts';
+import {
+  BarChart,
+  GaugeChart,
+  LineChart,
+  PieChart,
+  RadarChart,
+} from "echarts/charts";
 import {
   AriaComponent,
   BrushComponent,
@@ -15,10 +21,10 @@ import {
   ToolboxComponent,
   TooltipComponent,
   TransformComponent,
-} from 'echarts/components';
-import * as echarts from 'echarts/core';
-import { LabelLayout, UniversalTransition } from 'echarts/features';
-import { CanvasRenderer, SVGRenderer } from 'echarts/renderers';
+} from "echarts/components";
+import * as echarts from "echarts/core";
+import { LabelLayout, UniversalTransition } from "echarts/features";
+import { CanvasRenderer, SVGRenderer } from "echarts/renderers";
 
 /**
  * The tree-shaken ECharts build ZardUI charts run on. Drop what you do not use — every

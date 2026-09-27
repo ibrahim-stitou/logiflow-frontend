@@ -4,10 +4,6 @@ import {
   computed,
   input,
 } from "@angular/core";
-import { isFieldSelectNone } from "../shared/ui/field-select";
-import type { RemorqueListItem } from "../remorques/remorque";
-import type { Dossier } from "../dossiers/dossier";
-import type { Site } from "../sites/site";
 import {
   ZardCardComponent,
   ZardCardContentComponent,
@@ -15,6 +11,10 @@ import {
   ZardCardHeaderComponent,
   ZardCardTitleComponent,
 } from "@/shared/components/card/card.component";
+import type { Dossier } from "../dossiers/dossier";
+import type { RemorqueListItem } from "../remorques/remorque";
+import { isFieldSelectNone } from "../shared/ui/field-select";
+import type { Site } from "../sites/site";
 import { RemorqueCapacityDisplay } from "./remorque-capacity-display";
 import { buildCapacitePreview } from "./voyage-capacite-preview";
 
@@ -38,16 +38,19 @@ export class RemorqueCapacityPreview {
   readonly dossiersById = input<
     ReadonlyMap<string, Pick<Dossier, "poidsBrutKg" | "volumeM3" | "segments">>
   >(new Map());
-  readonly sitesById = input<
-    ReadonlyMap<string, Pick<Site, "libelle">>
-  >(new Map());
+  readonly sitesById = input<ReadonlyMap<string, Pick<Site, "libelle">>>(
+    new Map()
+  );
 
   protected readonly remorqueSelectionnee = computed(() => {
     const remorqueId = this.remorqueId();
     if (!remorqueId || isFieldSelectNone(remorqueId)) {
       return null;
     }
-    return this.remorqueOptions().find((remorque) => remorque.id === remorqueId) ?? null;
+    return (
+      this.remorqueOptions().find((remorque) => remorque.id === remorqueId) ??
+      null
+    );
   });
 
   protected readonly capacitePreview = computed(() => {

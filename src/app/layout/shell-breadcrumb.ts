@@ -1,52 +1,19 @@
-import {
-  Component,
-  computed,
-  DestroyRef,
-  inject,
-  signal,
-} from "@angular/core";
+import { Component, computed, DestroyRef, inject, signal } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import {
-  NavigationEnd,
-  Router,
-  RouterLink,
-} from "@angular/router";
+import { NavigationEnd, Router, RouterLink } from "@angular/router";
 import { filter } from "rxjs";
 import type { ShellBreadcrumbRouteData } from "../core/nav/shell-breadcrumb-data";
 import { ShellBreadcrumbStore } from "../core/nav/shell-breadcrumb-store";
 
 export interface ShellBreadcrumbCrumb {
+  current: boolean;
   label: string;
   path?: string;
-  current: boolean;
 }
 
 @Component({
-  selector: "app-shell-breadcrumb",
   imports: [RouterLink],
-  template: `
-    @if (crumbs().length > 0) {
-    <nav aria-label="Fil d'Ariane" class="shell-breadcrumb">
-      <ol class="shell-breadcrumb__list">
-        @for (crumb of crumbs(); track crumb.label + (crumb.path ?? '')) {
-        <li class="shell-breadcrumb__item">
-          @if (!crumb.current && crumb.path) {
-          <a class="shell-breadcrumb__link" [routerLink]="crumb.path">{{
-            crumb.label
-          }}</a>
-          } @else {
-          <span
-            [attr.aria-current]="crumb.current ? 'page' : null"
-            class="shell-breadcrumb__current"
-            >{{ crumb.label }}</span
-          >
-          }
-        </li>
-        }
-      </ol>
-    </nav>
-    }
-  `,
+  selector: "app-shell-breadcrumb",
   styles: `
     :host {
       display: block;
@@ -104,6 +71,29 @@ export interface ShellBreadcrumbCrumb {
       white-space: nowrap;
     }
   `,
+  template: `
+    @if (crumbs().length > 0) {
+    <nav aria-label="Fil d'Ariane" class="shell-breadcrumb">
+      <ol class="shell-breadcrumb__list">
+        @for (crumb of crumbs(); track crumb.label + (crumb.path ?? '')) {
+        <li class="shell-breadcrumb__item">
+          @if (!crumb.current && crumb.path) {
+          <a class="shell-breadcrumb__link" [routerLink]="crumb.path">{{
+            crumb.label
+          }}</a>
+          } @else {
+          <span
+            [attr.aria-current]="crumb.current ? 'page' : null"
+            class="shell-breadcrumb__current"
+            >{{ crumb.label }}</span
+          >
+          }
+        </li>
+        }
+      </ol>
+    </nav>
+    }
+  `,
 })
 export class ShellBreadcrumbComponent {
   private readonly router = inject(Router);
@@ -138,9 +128,9 @@ export class ShellBreadcrumbComponent {
       const hasLeaf = Boolean(data.leaf) || this.store.leafLabel() !== null;
       const current = isLastTrail && !hasLeaf;
       return {
+        current,
         label: item.label,
         path: current ? undefined : item.path,
-        current,
       };
     });
 
@@ -156,7 +146,7 @@ export class ShellBreadcrumbComponent {
           };
         }
       }
-      items.push({ label: leaf, current: true });
+      items.push({ current: true, label: leaf });
     }
 
     return items;

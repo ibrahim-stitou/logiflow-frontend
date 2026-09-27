@@ -9,17 +9,17 @@ import {
 } from "@angular/core";
 import { NgIcon, provideIcons } from "@ng-icons/core";
 import { lucideCircleOff } from "@ng-icons/lucide";
-import { bindShellBreadcrumbLeaf } from "../core/nav/shell-breadcrumb-leaf";
 import { environment } from "../../environments/environment";
 import { httpErrorMessage } from "../core/api/http-error";
+import { bindShellBreadcrumbLeaf } from "../core/nav/shell-breadcrumb-leaf";
 import { FICHE_PAGE_IMPORTS } from "../shared/ui/fiche-page";
-import { ToastService } from "../shared/ui/toast";
 import {
   actifIcon,
   actifLabel,
   actifTone,
   StatutChip,
 } from "../shared/ui/statut-chip";
+import { ToastService } from "../shared/ui/toast";
 import type { Client } from "./client";
 import { ClientApi } from "./client-api";
 
@@ -39,9 +39,7 @@ export class ClientDetailPage {
   constructor() {
     bindShellBreadcrumbLeaf(
       this.destroyRef,
-      computed(() =>
-        this.client.hasValue() ? this.client.value().code : null
-      )
+      computed(() => (this.client.hasValue() ? this.client.value().code : null))
     );
   }
 

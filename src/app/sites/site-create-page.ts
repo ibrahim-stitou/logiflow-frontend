@@ -1,6 +1,4 @@
 import { Component, inject, signal } from "@angular/core";
-import { NgIcon, provideIcons } from "@ng-icons/core";
-import { lucideCheck } from "@ng-icons/lucide";
 import {
   FormField,
   form,
@@ -10,6 +8,8 @@ import {
   submit,
 } from "@angular/forms/signals";
 import { Router, RouterLink } from "@angular/router";
+import { NgIcon, provideIcons } from "@ng-icons/core";
+import { lucideCheck } from "@ng-icons/lucide";
 import { httpErrorMessage } from "../core/api/http-error";
 import { firstFieldError } from "../core/forms/first-field-error";
 import { fieldClasses, showFieldError } from "../core/forms/show-field-error";

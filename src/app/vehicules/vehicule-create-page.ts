@@ -1,6 +1,4 @@
 import { Component, computed, inject, signal } from "@angular/core";
-import { NgIcon, provideIcons } from "@ng-icons/core";
-import { lucideCheck } from "@ng-icons/lucide";
 import {
   FormField,
   form,
@@ -12,6 +10,8 @@ import {
   validate,
 } from "@angular/forms/signals";
 import { Router, RouterLink } from "@angular/router";
+import { NgIcon, provideIcons } from "@ng-icons/core";
+import { lucideCheck } from "@ng-icons/lucide";
 import { httpErrorMessage } from "../core/api/http-error";
 import { firstFieldError } from "../core/forms/first-field-error";
 import { fieldClasses, showFieldError } from "../core/forms/show-field-error";
@@ -50,7 +50,10 @@ export class VehiculeCreatePage {
   private readonly toast = inject(ToastService);
 
   protected readonly types = VEHICULE_TYPES;
-  protected readonly typeOptions = enumToSelectOptions(VEHICULE_TYPES, typeLabel);
+  protected readonly typeOptions = enumToSelectOptions(
+    VEHICULE_TYPES,
+    typeLabel
+  );
   protected readonly energieOptions = withNoneSelectOption(
     "Non renseignée",
     enumToSelectOptions(VEHICULE_ENERGIES, energieLabel)
@@ -74,7 +77,11 @@ export class VehiculeCreatePage {
   /** Volume utile calculé automatiquement : longueur × largeur × hauteur. */
   protected readonly volumeUtileCalcule = computed(() => {
     const draft = this.draft();
-    return computeVolumeUtileM3(draft.longueurM, draft.largeurM, draft.hauteurM);
+    return computeVolumeUtileM3(
+      draft.longueurM,
+      draft.largeurM,
+      draft.hauteurM
+    );
   });
 
   protected readonly createForm = form(this.draft, (path) => {

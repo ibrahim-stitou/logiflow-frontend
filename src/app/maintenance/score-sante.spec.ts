@@ -23,14 +23,14 @@ describe("score-sante helpers", () => {
     const draft = emptyScoreSanteDraft();
     draft.recommandation = "  Contrôle freins ";
 
-    expect(
-      draftToWrite("11111111-1111-1111-1111-111111111111", draft)
-    ).toEqual({
-      dateEcheanceProjetee: draft.dateEcheanceProjetee,
-      kmAvantEcheance: draft.kmAvantEcheance,
-      recommandation: "Contrôle freins",
-      score: draft.score,
-      vehiculeId: "11111111-1111-1111-1111-111111111111",
-    });
+    expect(draftToWrite("11111111-1111-1111-1111-111111111111", draft)).toEqual(
+      {
+        dateEcheanceProjetee: draft.dateEcheanceProjetee,
+        kmAvantEcheance: draft.kmAvantEcheance,
+        recommandation: "Contrôle freins",
+        score: draft.score,
+        vehiculeId: "11111111-1111-1111-1111-111111111111",
+      }
+    );
   });
 });

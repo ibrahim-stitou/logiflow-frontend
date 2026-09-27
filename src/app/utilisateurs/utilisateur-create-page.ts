@@ -1,14 +1,14 @@
 import { Component, inject, signal } from "@angular/core";
-import { NgIcon, provideIcons } from "@ng-icons/core";
-import { lucideCheck } from "@ng-icons/lucide";
 import { FormField, form, required, submit } from "@angular/forms/signals";
 import { Router, RouterLink } from "@angular/router";
+import { NgIcon, provideIcons } from "@ng-icons/core";
+import { lucideCheck } from "@ng-icons/lucide";
 import { httpErrorMessage } from "../core/api/http-error";
-import { FORM_PAGE_IMPORTS } from "../shared/ui/form-page";
-import { ToastService } from "../shared/ui/toast";
 import { type Role, roleLabel } from "../core/auth/role";
 import { firstFieldError } from "../core/forms/first-field-error";
 import { fieldClasses, showFieldError } from "../core/forms/show-field-error";
+import { FORM_PAGE_IMPORTS } from "../shared/ui/form-page";
+import { ToastService } from "../shared/ui/toast";
 import {
   draftToWrite,
   emptyUtilisateurDraft,

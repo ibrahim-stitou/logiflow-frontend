@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, input } from "@angular/core";
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  input,
+} from "@angular/core";
 import { NgIcon, provideIcons } from "@ng-icons/core";
 import {
   lucideCircleCheck,
@@ -41,16 +46,6 @@ export function actifIcon(actif: boolean): string {
   },
   imports: [NgIcon],
   selector: "app-statut-chip",
-  viewProviders: [
-    provideIcons({ lucideCircleCheck, lucideCircleOff, lucideTag }),
-    LIST_STATUT_FILTER_ICON_PROVIDERS,
-  ],
-  template: `
-    @if (icon()) {
-    <ng-icon [name]="icon()!" aria-hidden="true" class="statut-chip__icon" />
-    }
-    <span>{{ label() }}</span>
-  `,
   styles: `
     :host {
       gap: 0.3125rem;
@@ -63,6 +58,16 @@ export function actifIcon(actif: boolean): string {
       opacity: 0.9;
     }
   `,
+  template: `
+    @if (icon()) {
+    <ng-icon [name]="icon()!" aria-hidden="true" class="statut-chip__icon" />
+    }
+    <span>{{ label() }}</span>
+  `,
+  viewProviders: [
+    provideIcons({ lucideCircleCheck, lucideCircleOff, lucideTag }),
+    LIST_STATUT_FILTER_ICON_PROVIDERS,
+  ],
 })
 export class StatutChip {
   readonly label = input.required<string>();

@@ -8,6 +8,6 @@ import { ChangeDetectionStrategy, Component } from "@angular/core";
     role: "list",
   },
   selector: "app-fiche-field-grid",
-  template: `<ng-content />`,
+  template: "<ng-content />",
 })
 export class FicheFieldGrid {}

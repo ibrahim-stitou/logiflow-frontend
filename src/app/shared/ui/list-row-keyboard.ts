@@ -93,7 +93,7 @@ export class ListRowKeyboard {
       }
       case "End": {
         event.preventDefault();
-        this.activeId.set(rows[rows.length - 1]?.id ?? null);
+        this.activeId.set(rows.at(-1)?.id ?? null);
         break;
       }
       default:

@@ -1,7 +1,7 @@
 import { TestBed } from "@angular/core/testing";
 import { provideRouter, Router } from "@angular/router";
-import { DEMO_PASSWORD } from "../core/auth/demo-identity";
 import { AUTH_DEMO_TEST_PROVIDERS } from "../core/auth/auth-test-providers";
+import { DEMO_PASSWORD } from "../core/auth/demo-identity";
 import {
   DEMO_SESSION_STORAGE_KEY,
   DemoSessionService,

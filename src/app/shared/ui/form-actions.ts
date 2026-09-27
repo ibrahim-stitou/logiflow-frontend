@@ -4,11 +4,11 @@ import { ChangeDetectionStrategy, Component, input } from "@angular/core";
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    class: "form-actions",
     "[class.form-actions--inline]": "inline()",
+    class: "form-actions",
   },
   selector: "app-form-actions",
-  template: `<ng-content />`,
+  template: "<ng-content />",
 })
 export class FormActions {
   readonly inline = input(false);

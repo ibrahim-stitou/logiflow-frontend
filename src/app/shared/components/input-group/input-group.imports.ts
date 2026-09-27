@@ -3,14 +3,14 @@ export {
   ZardInputGroupButtonDirective,
   ZardInputGroupComponent,
   ZardInputGroupTextComponent,
-} from './input-group.component';
+} from "./input-group.component";
 
 import {
   ZardInputGroupAddonComponent,
   ZardInputGroupButtonDirective,
   ZardInputGroupComponent,
   ZardInputGroupTextComponent,
-} from './input-group.component';
+} from "./input-group.component";
 
 export const ZardInputGroupImports = [
   ZardInputGroupComponent,

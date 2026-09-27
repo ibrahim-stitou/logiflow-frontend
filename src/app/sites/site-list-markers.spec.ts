@@ -1,6 +1,6 @@
-import { isValidLocalisation } from "./site-localisation";
 import type { Site } from "./site";
 import { siteListMarkers } from "./site-list-markers";
+import { isValidLocalisation } from "./site-localisation";
 
 describe("siteListMarkers", () => {
   const paris: Site = {
@@ -16,8 +16,8 @@ describe("siteListMarkers", () => {
 
   const invalid: Site = {
     ...paris,
-    id: "site-bad",
     code: "SITE-BAD",
+    id: "site-bad",
     localisation: { latitude: Number.NaN, longitude: 0 },
   };
 

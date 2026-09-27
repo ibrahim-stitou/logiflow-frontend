@@ -1,8 +1,11 @@
-import type { OverlayRef } from '@angular/cdk/overlay';
+import type { OverlayRef } from "@angular/cdk/overlay";
 
-import { ZardOverlayRefBase } from '@/shared/core';
+import { ZardOverlayRefBase } from "@/shared/core";
 
-import type { ZardDialogComponent, ZardDialogOptions } from './dialog.component';
+import type {
+  ZardDialogComponent,
+  ZardDialogOptions,
+} from "./dialog.component";
 
 /** How long the leave transition runs, in ms. Mirrors the CSS. */
 const DIALOG_DURATION = 100;
@@ -15,15 +18,23 @@ const DIALOG_DURATION = 100;
  * lives in {@link ZardOverlayRefBase}, shared with sheet, drawer and
  * alert-dialog, so Escape closes the topmost overlay of any kind.
  */
-export class ZardDialogRef<T = unknown, R = unknown, U = unknown> extends ZardOverlayRefBase<T, R> {
+export class ZardDialogRef<
+  T = unknown,
+  R = unknown,
+  U = unknown,
+> extends ZardOverlayRefBase<T, R> {
   constructor(
     overlayRef: OverlayRef | null,
     private readonly config: ZardDialogOptions<T, U>,
     private readonly containerInstance: ZardDialogComponent<T, U> | null,
-    platformId: object,
+    platformId: object
   ) {
     super(overlayRef, config, platformId);
-    this.attach(this.containerInstance ? ZardDialogRef.outputsOf(this.containerInstance) : null);
+    this.attach(
+      this.containerInstance
+        ? ZardDialogRef.outputsOf(this.containerInstance)
+        : null
+    );
   }
 
   protected override get defaultDuration(): number {
@@ -31,7 +42,7 @@ export class ZardDialogRef<T = unknown, R = unknown, U = unknown> extends ZardOv
   }
 
   protected override playLeaveAnimation(): void {
-    this.containerInstance?.getNativeElement().classList.add('dialog-leave');
+    this.containerInstance?.getNativeElement().classList.add("dialog-leave");
   }
 
   protected override closesOnOutsidePointer(): boolean {

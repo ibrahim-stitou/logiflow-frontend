@@ -8,10 +8,6 @@ import {
   output,
   signal,
 } from "@angular/core";
-import { environment } from "../../environments/environment";
-import { httpErrorMessage } from "../core/api/http-error";
-import type { PageResponse } from "../core/api/page-response";
-import type { Dossier } from "../dossiers/dossier";
 import { provideIcons } from "@ng-icons/core";
 import { lucideCircleAlert, lucideCircleCheck } from "@ng-icons/lucide";
 import { ZardAlertComponent } from "@/shared/components/alert";
@@ -24,6 +20,10 @@ import {
   ZardCardTitleComponent,
 } from "@/shared/components/card/card.component";
 import { ZardInputComponent } from "@/shared/components/input";
+import { environment } from "../../environments/environment";
+import { httpErrorMessage } from "../core/api/http-error";
+import type { PageResponse } from "../core/api/page-response";
+import type { Dossier } from "../dossiers/dossier";
 import {
   FieldSelectComponent,
   type FieldSelectOption,
@@ -32,13 +32,13 @@ import { FormActions } from "../shared/ui/form-actions";
 import { FormFieldShell } from "../shared/ui/form-field";
 import { ToastService } from "../shared/ui/toast";
 import { formatDossierVoyageLabel } from "./voyage";
-import { VoyageApi } from "./voyage-api";
 import {
+  type AjouterDossierVoyageWrite,
   capaciteAjoutDossierMessage,
   deviationAjoutDossierMessage,
-  type AjouterDossierVoyageWrite,
   type VerifierAjoutDossierResult,
 } from "./voyage-ajouter-dossier";
+import { VoyageApi } from "./voyage-api";
 import type { VoyageCapacite } from "./voyage-capacite";
 
 type ArretMode = "existing" | "new";
@@ -70,7 +70,8 @@ export class VoyageAjouterDossierForm {
   readonly dossierIdsOnVoyage = input<string[]>([]);
   readonly dossierAdded = output<void>();
 
-  protected readonly deviationAjoutDossierMessage = deviationAjoutDossierMessage;
+  protected readonly deviationAjoutDossierMessage =
+    deviationAjoutDossierMessage;
   protected readonly capaciteAjoutDossierMessage = capaciteAjoutDossierMessage;
 
   protected readonly dossierId = signal("");
@@ -104,25 +105,27 @@ export class VoyageAjouterDossierForm {
     url: `${environment.apiBaseUrl}/voyages/${this.voyageId()}/capacite`,
   }));
 
-  protected readonly dossierOptions = computed((): readonly FieldSelectOption[] => {
-    const dejaPlanifies = new Set(this.dossierIdsOnVoyage());
-    return (this.dossiers.value()?.content ?? [])
-      .filter(
-        (dossier) =>
-          dossier.statut === "CREE" && !dejaPlanifies.has(dossier.id)
-      )
-      .map((dossier) => ({
-        label: formatDossierVoyageLabel(dossier),
-        value: dossier.id,
-      }));
-  });
+  protected readonly dossierOptions = computed(
+    (): readonly FieldSelectOption[] => {
+      const dejaPlanifies = new Set(this.dossierIdsOnVoyage());
+      return (this.dossiers.value()?.content ?? [])
+        .filter(
+          (dossier) =>
+            dossier.statut === "CREE" && !dejaPlanifies.has(dossier.id)
+        )
+        .map((dossier) => ({
+          label: formatDossierVoyageLabel(dossier),
+          value: dossier.id,
+        }));
+    }
+  );
 
-  protected readonly arretOptions = computed((): readonly FieldSelectOption[] => {
-    return (this.capacite.value()?.arrets ?? []).map((arret) => ({
+  protected readonly arretOptions = computed((): readonly FieldSelectOption[] =>
+    (this.capacite.value()?.arrets ?? []).map((arret) => ({
       label: `${arret.libelle} (#${arret.indiceSequence})`,
       value: arret.id,
-    }));
-  });
+    }))
+  );
 
   protected readonly canSubmit = computed(() => {
     if (this.submitting() || this.checkPending()) {
@@ -247,7 +250,10 @@ export class VoyageAjouterDossierForm {
     this.checkPending.set(true);
     this.checkError.set(null);
     try {
-      const result = await this.api.verifierAjoutDossier(this.voyageId(), payload);
+      const result = await this.api.verifierAjoutDossier(
+        this.voyageId(),
+        payload
+      );
       this.checkResult.set(result);
     } catch (error) {
       this.checkResult.set(null);

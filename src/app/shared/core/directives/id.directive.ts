@@ -1,6 +1,6 @@
-import { computed, Directive, inject, Injectable, input } from '@angular/core';
+import { computed, Directive, Injectable, inject, input } from "@angular/core";
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 class ZardIdInternalService {
   private counter = 0;
 
@@ -21,8 +21,8 @@ class ZardIdInternalService {
  * ```
  */
 @Directive({
-  selector: '[zardId]',
-  exportAs: 'zardId',
+  exportAs: "zardId",
+  selector: "[zardId]",
 })
 export class ZardIdDirective {
   /**
@@ -36,7 +36,7 @@ export class ZardIdDirective {
   private readonly sequence = inject(ZardIdInternalService).next();
 
   /** Prefix for the generated id, so ids read as `checkbox-3` rather than `3`. */
-  readonly zardId = input('ssr');
+  readonly zardId = input("ssr");
 
   /** `<prefix>-<n>`, with `n` fixed for the life of the directive. */
   readonly id = computed(() => `${this.zardId()}-${this.sequence}`);

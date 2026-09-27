@@ -8,7 +8,6 @@ import {
   input,
   signal,
 } from "@angular/core";
-import { bindShellBreadcrumbLeaf } from "../core/nav/shell-breadcrumb-leaf";
 import {
   FormField,
   form,
@@ -17,20 +16,21 @@ import {
   required,
   submit,
 } from "@angular/forms/signals";
+import { NgIcon, provideIcons } from "@ng-icons/core";
+import { lucideCheck, lucideCircleOff } from "@ng-icons/lucide";
 import { environment } from "../../environments/environment";
 import { httpErrorMessage } from "../core/api/http-error";
-import { FICHE_PAGE_IMPORTS } from "../shared/ui/fiche-page";
-import { ToastService } from "../shared/ui/toast";
 import { firstFieldError } from "../core/forms/first-field-error";
 import { fieldClasses, showFieldError } from "../core/forms/show-field-error";
+import { bindShellBreadcrumbLeaf } from "../core/nav/shell-breadcrumb-leaf";
+import { FICHE_PAGE_IMPORTS } from "../shared/ui/fiche-page";
 import {
   actifIcon,
   actifLabel,
   actifTone,
   StatutChip,
 } from "../shared/ui/statut-chip";
-import { NgIcon, provideIcons } from "@ng-icons/core";
-import { lucideCheck, lucideCircleOff } from "@ng-icons/lucide";
+import { ToastService } from "../shared/ui/toast";
 import { draftToWrite, emptySiteDraft, type Site, siteToDraft } from "./site";
 import { SiteApi } from "./site-api";
 import {

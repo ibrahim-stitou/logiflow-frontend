@@ -1,34 +1,38 @@
-import { MediaMatcher } from '@angular/cdk/layout';
-import { isPlatformBrowser } from '@angular/common';
+import { MediaMatcher } from "@angular/cdk/layout";
+import { isPlatformBrowser } from "@angular/common";
 import {
   afterNextRender,
   computed,
   DestroyRef,
   DOCUMENT,
   effect,
-  inject,
   Injectable,
+  inject,
   PLATFORM_ID,
   signal,
-} from '@angular/core';
+} from "@angular/core";
 
 export enum EDarkModes {
-  LIGHT = 'light',
-  DARK = 'dark',
-  SYSTEM = 'system',
+  LIGHT = "light",
+  DARK = "dark",
+  SYSTEM = "system",
 }
-export type DarkModeOptions = EDarkModes.LIGHT | EDarkModes.DARK | EDarkModes.SYSTEM;
+export type DarkModeOptions =
+  | EDarkModes.LIGHT
+  | EDarkModes.DARK
+  | EDarkModes.SYSTEM;
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class ZardDarkMode {
   private readonly document = inject(DOCUMENT);
   private readonly destroyRef = inject(DestroyRef);
   private readonly mediaMatcher = inject(MediaMatcher);
 
-  private static readonly STORAGE_KEY = 'theme';
-  private handleThemeChange = (event: MediaQueryListEvent) => this.systemDark.set(event.matches);
+  private static readonly STORAGE_KEY = "theme";
+  private handleThemeChange = (event: MediaQueryListEvent) =>
+    this.systemDark.set(event.matches);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly themeSignal = signal<DarkModeOptions>(EDarkModes.SYSTEM);
   private _query?: MediaQueryList;
@@ -80,7 +84,10 @@ export class ZardDarkMode {
     if (targetMode) {
       this.applyTheme(targetMode);
     } else {
-      const next = this.themeMode() === EDarkModes.DARK ? EDarkModes.LIGHT : EDarkModes.DARK;
+      const next =
+        this.themeMode() === EDarkModes.DARK
+          ? EDarkModes.LIGHT
+          : EDarkModes.DARK;
       this.applyTheme(next);
     }
   }
@@ -96,15 +103,19 @@ export class ZardDarkMode {
 
   private ensureQueryInitialized(): void {
     if (!this._query) {
-      this._query = this.mediaMatcher.matchMedia('(prefers-color-scheme: dark)');
+      this._query = this.mediaMatcher.matchMedia(
+        "(prefers-color-scheme: dark)"
+      );
       this.systemDark.set(this._query.matches);
       this.destroyRef.onDestroy(() => this.handleSystemChanges(false));
     }
   }
 
   private get query(): MediaQueryList {
-    if (!this.isBrowser || !this._query) {
-      throw new Error('MediaQueryList not available: either running on server or not initialized');
+    if (!(this.isBrowser && this._query)) {
+      throw new Error(
+        "MediaQueryList not available: either running on server or not initialized"
+      );
     }
     return this._query;
   }
@@ -125,7 +136,7 @@ export class ZardDarkMode {
     try {
       localStorage.setItem(ZardDarkMode.STORAGE_KEY, theme);
     } catch (error) {
-      console.warn('Failed to save theme to localStorage:', error);
+      console.warn("Failed to save theme to localStorage:", error);
     }
     this.themeSignal.set(theme);
 
@@ -148,19 +159,23 @@ export class ZardDarkMode {
 
     try {
       const value = localStorage.getItem(ZardDarkMode.STORAGE_KEY);
-      if (value === EDarkModes.LIGHT || value === EDarkModes.DARK || value === EDarkModes.SYSTEM) {
+      if (
+        value === EDarkModes.LIGHT ||
+        value === EDarkModes.DARK ||
+        value === EDarkModes.SYSTEM
+      ) {
         return value;
       }
     } catch (error) {
-      console.warn('Failed to read theme from localStorage:', error);
+      console.warn("Failed to read theme from localStorage:", error);
     }
     return undefined;
   }
 
   private updateThemeMode(isDarkMode: boolean, themeMode: EDarkModes): void {
     const html = this.document.documentElement;
-    html.classList.toggle('dark', isDarkMode);
-    html.setAttribute('data-theme', themeMode);
+    html.classList.toggle("dark", isDarkMode);
+    html.setAttribute("data-theme", themeMode);
   }
 
   private isDarkModeActive(currentTheme: DarkModeOptions): boolean {
@@ -168,7 +183,10 @@ export class ZardDarkMode {
       return false;
     }
 
-    return currentTheme === EDarkModes.DARK || (currentTheme === EDarkModes.SYSTEM && this.systemDark());
+    return (
+      currentTheme === EDarkModes.DARK ||
+      (currentTheme === EDarkModes.SYSTEM && this.systemDark())
+    );
   }
 
   private handleSystemChanges(addListener = true): void {
@@ -178,12 +196,12 @@ export class ZardDarkMode {
 
     try {
       if (addListener) {
-        this.query.addEventListener('change', this.handleThemeChange);
+        this.query.addEventListener("change", this.handleThemeChange);
       } else {
-        this.query.removeEventListener('change', this.handleThemeChange);
+        this.query.removeEventListener("change", this.handleThemeChange);
       }
     } catch (error) {
-      console.warn('Failed to manage media query event listener:', error);
+      console.warn("Failed to manage media query event listener:", error);
     }
   }
 }

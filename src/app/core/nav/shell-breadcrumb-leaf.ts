@@ -1,9 +1,4 @@
-import {
-  DestroyRef,
-  effect,
-  inject,
-  type Signal,
-} from "@angular/core";
+import { type DestroyRef, effect, inject, type Signal } from "@angular/core";
 import { ShellBreadcrumbStore } from "./shell-breadcrumb-store";
 
 /** Binds a fiche primary label to the shell breadcrumb leaf while the page is active. */

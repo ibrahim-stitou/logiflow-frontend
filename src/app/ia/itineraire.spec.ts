@@ -1,9 +1,6 @@
 import type { Dossier } from "../dossiers/dossier";
 import type { Site } from "../sites/site";
-import {
-  buildItinerairePoints,
-  canCalculerItineraire,
-} from "./itineraire";
+import { buildItinerairePoints, canCalculerItineraire } from "./itineraire";
 
 describe("buildItinerairePoints", () => {
   const siteDepart: Site = {

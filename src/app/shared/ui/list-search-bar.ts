@@ -15,7 +15,6 @@ import {
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  selector: "app-list-search-bar",
   imports: [
     NgIcon,
     ZardInputComponent,
@@ -23,7 +22,25 @@ import {
     ZardInputGroupAddonComponent,
     ZardInputGroupButtonDirective,
   ],
-  viewProviders: [provideIcons({ lucideSearch, lucideX })],
+  selector: "app-list-search-bar",
+  styles: `
+    .list-search-bar {
+      display: block;
+      min-width: 0;
+      width: 100%;
+    }
+
+    .list-search-bar__field {
+      min-width: 0;
+      width: 100%;
+    }
+
+    :host ::ng-deep .list-search-bar__field--compact {
+      min-height: 2.25rem;
+      height: 2.25rem;
+      border-radius: var(--radius-lg);
+    }
+  `,
   template: `
     <form (submit)="onSubmit($event)" class="list-search-bar">
       <label class="sr-only" [attr.for]="inputId()">{{ label() }}</label>
@@ -57,24 +74,7 @@ import {
       </z-input-group>
     </form>
   `,
-  styles: `
-    .list-search-bar {
-      display: block;
-      min-width: 0;
-      width: 100%;
-    }
-
-    .list-search-bar__field {
-      min-width: 0;
-      width: 100%;
-    }
-
-    :host ::ng-deep .list-search-bar__field--compact {
-      min-height: 2.25rem;
-      height: 2.25rem;
-      border-radius: var(--radius-lg);
-    }
-  `,
+  viewProviders: [provideIcons({ lucideSearch, lucideX })],
 })
 export class ListSearchBar {
   readonly draft = model.required<string>();

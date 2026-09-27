@@ -1,11 +1,11 @@
 import { httpResource } from "@angular/common/http";
 import {
+  booleanAttribute,
   Component,
   computed,
   inject,
   input,
   signal,
-  booleanAttribute,
 } from "@angular/core";
 import { NgIcon, provideIcons } from "@ng-icons/core";
 import {
@@ -44,14 +44,6 @@ import { ToastService } from "./toast";
 @Component({
   imports: [NgIcon, StatutChip, ...FORM_PAGE_IMPORTS],
   selector: "app-documents-section",
-  viewProviders: [
-    provideIcons({
-      lucideExternalLink,
-      lucideFileText,
-      lucideTrash2,
-      lucideUpload,
-    }),
-  ],
   template: `
     <app-form-section [description]="description()" title="Documents">
       @if (documents.isLoading()) {
@@ -252,6 +244,14 @@ import { ToastService } from "./toast";
       }
     </app-form-section>
   `,
+  viewProviders: [
+    provideIcons({
+      lucideExternalLink,
+      lucideFileText,
+      lucideTrash2,
+      lucideUpload,
+    }),
+  ],
 })
 export class DocumentsSection {
   private readonly documentApi = inject(DocumentApi);
@@ -314,8 +314,10 @@ export class DocumentsSection {
 
   protected dateExpirationSuivie(document: Document): string | null {
     if (
-      !document.dateExpiration ||
-      !documentSuitExpiration(document.typeEntite, document.typeDocument)
+      !(
+        document.dateExpiration &&
+        documentSuitExpiration(document.typeEntite, document.typeDocument)
+      )
     ) {
       return null;
     }

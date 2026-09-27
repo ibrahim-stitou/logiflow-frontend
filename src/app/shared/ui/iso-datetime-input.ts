@@ -9,14 +9,14 @@ import {
   signal,
   ViewEncapsulation,
 } from "@angular/core";
-import { NG_VALUE_ACCESSOR, type ControlValueAccessor } from "@angular/forms";
+import { type ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { NgIcon, provideIcons } from "@ng-icons/core";
 import { lucideCalendar } from "@ng-icons/lucide";
 import type { ClassValue } from "clsx";
 import { ZardCalendarComponent } from "@/shared/components/calendar";
 import type { CalendarValue } from "@/shared/components/calendar/calendar.types";
-import { ZardInputGroupImports } from "@/shared/components/input-group";
 import { ZardInputComponent } from "@/shared/components/input";
+import { ZardInputGroupImports } from "@/shared/components/input-group";
 import {
   ZardPopoverComponent,
   ZardPopoverDirective,
@@ -25,9 +25,9 @@ import { mergeClasses } from "@/shared/utils/merge-classes";
 import {
   clampDatetimeLocal,
   combineDatetimeLocal,
+  DEFAULT_DATETIME_TIME,
   dateIsoFromDate,
   dateIsoToDisplay,
-  DEFAULT_DATETIME_TIME,
   localDateFromDateIso,
   resolveDateIsoFromDisplay,
   splitDatetimeLocal,
@@ -36,7 +36,6 @@ import {
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  selector: "app-iso-datetime-input",
   imports: [
     NgIcon,
     ZardCalendarComponent,
@@ -45,6 +44,14 @@ import {
     ZardPopoverComponent,
     ZardPopoverDirective,
   ],
+  providers: [
+    {
+      multi: true,
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => IsoDatetimeInputComponent),
+    },
+  ],
+  selector: "app-iso-datetime-input",
   template: `
     <div class="flex w-full flex-col gap-2 sm:flex-row sm:items-stretch">
       <z-input-group class="min-h-11 h-auto w-full flex-1">
@@ -109,13 +116,6 @@ import {
       </z-popover>
     </ng-template>
   `,
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => IsoDatetimeInputComponent),
-      multi: true,
-    },
-  ],
   viewProviders: [provideIcons({ lucideCalendar })],
 })
 export class IsoDatetimeInputComponent implements ControlValueAccessor {
@@ -156,7 +156,7 @@ export class IsoDatetimeInputComponent implements ControlValueAccessor {
   protected readonly timeMin = computed(() => {
     const minIso = this.minIsoDatetime();
     const selected = this.selectedDate();
-    if (!minIso || !selected) {
+    if (!(minIso && selected)) {
       return null;
     }
     const { date: minDateIso, time: minTime } = splitDatetimeLocal(minIso);
@@ -227,7 +227,10 @@ export class IsoDatetimeInputComponent implements ControlValueAccessor {
   }
 
   protected onDateBlur(): void {
-    const resolved = resolveDateIsoFromDisplay(this.displayDate(), this.dateIso);
+    const resolved = resolveDateIsoFromDisplay(
+      this.displayDate(),
+      this.dateIso
+    );
     if (resolved && resolved.length > 0) {
       this.displayDate.set(dateIsoToDisplay(resolved));
       this.commitFromParts(

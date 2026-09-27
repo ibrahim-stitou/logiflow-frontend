@@ -5,6 +5,10 @@ import {
   toIsoDateInput,
 } from "./iso-date";
 
+const DATE_HEURE_ISO = /^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})(?::\d{2})?/;
+const DATE_ISO = /^\d{4}-\d{2}-\d{2}$/;
+const HEURE = /^\d{2}:\d{2}$/;
+
 /** `datetime-local` value `yyyy-MM-ddTHH:mm` (local, no seconds). */
 
 export const DEFAULT_DATETIME_TIME = "08:00";
@@ -29,7 +33,7 @@ export function splitDatetimeLocal(value: string): DatetimeLocalParts {
     return { date: "", time: "" };
   }
 
-  const match = /^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})(?::\d{2})?/.exec(trimmed);
+  const match = DATE_HEURE_ISO.exec(trimmed);
   if (match) {
     return { date: match[1], time: match[2] };
   }
@@ -46,10 +50,7 @@ export function combineDatetimeLocal(date: string, time: string): string {
   if (normalizedDate.length === 0 || normalizedTime.length === 0) {
     return "";
   }
-  if (
-    !/^\d{4}-\d{2}-\d{2}$/.test(normalizedDate) ||
-    !/^\d{2}:\d{2}$/.test(normalizedTime)
-  ) {
+  if (!(DATE_ISO.test(normalizedDate) && HEURE.test(normalizedTime))) {
     return "";
   }
   return `${normalizedDate}T${normalizedTime}`;
@@ -83,7 +84,7 @@ export function isoInstantToDatetimeLocal(iso: string): string {
 export function compareDatetimeLocal(a: string, b: string): number {
   const left = datetimeLocalToDate(a);
   const right = datetimeLocalToDate(b);
-  if (!left && !right) {
+  if (!(left || right)) {
     return 0;
   }
   if (!left) {

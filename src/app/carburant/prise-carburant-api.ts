@@ -1,5 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import { inject, Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { firstValueFrom } from "rxjs";
 import { environment } from "../../environments/environment";
 import type { PageResponse } from "../core/api/page-response";
@@ -62,7 +62,9 @@ export class PriseCarburantApi {
   }
 
   get(id: string): Promise<PriseCarburant> {
-    return firstValueFrom(this.http.get<PriseCarburant>(`${this.baseUrl}/${id}`));
+    return firstValueFrom(
+      this.http.get<PriseCarburant>(`${this.baseUrl}/${id}`)
+    );
   }
 
   create(body: PriseCarburantWrite): Promise<PriseCarburant> {

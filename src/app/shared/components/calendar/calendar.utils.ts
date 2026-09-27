@@ -1,18 +1,23 @@
-import type { CalendarDay, CalendarDayConfig, CalendarMode, CalendarValue } from './calendar.types';
+import type {
+  CalendarDay,
+  CalendarDayConfig,
+  CalendarMode,
+  CalendarValue,
+} from "./calendar.types";
 
 export const calendarMonths = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
 ] as const;
 
 /**
@@ -21,21 +26,29 @@ export const calendarMonths = [
  * `toLocaleString` would follow the browser locale and mix languages inside the header.
  */
 export const calendarMonthsLong = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ] as const;
 
-export const calendarWeekdays = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'] as const;
+export const calendarWeekdays = [
+  "Su",
+  "Mo",
+  "Tu",
+  "We",
+  "Th",
+  "Fr",
+  "Sa",
+] as const;
 
 /**
  * Checks if two dates represent the same day (ignoring time)
@@ -56,20 +69,29 @@ export function isDateDisabled(
   date: Date,
   minDate: Date | null,
   maxDate: Date | null,
-  disabledDates?: Date[],
+  disabledDates?: Date[]
 ): boolean {
   if ((minDate && date < minDate) || (maxDate && date > maxDate)) {
     return true;
   }
 
-  return !!disabledDates?.some(disabledDate => isSameDay(date, disabledDate));
+  return !!disabledDates?.some((disabledDate) => isSameDay(date, disabledDate));
 }
 
 /**
  * Generates calendar days for a given month with all selection states
  */
 export function generateCalendarDays(config: CalendarDayConfig): CalendarDay[] {
-  const { year, month, mode, selectedDates, minDate, maxDate, disabled, disabledDates } = config;
+  const {
+    year,
+    month,
+    mode,
+    selectedDates,
+    minDate,
+    maxDate,
+    disabled,
+    disabledDates,
+  } = config;
 
   const today = new Date();
 
@@ -92,7 +114,7 @@ export function generateCalendarDays(config: CalendarDayConfig): CalendarDay[] {
   // For range mode, determine range start and end
   let rangeStart: Date | null = null;
   let rangeEnd: Date | null = null;
-  if (mode === 'range' && selectedDates.length > 0) {
+  if (mode === "range" && selectedDates.length > 0) {
     rangeStart = selectedDates[0];
     rangeEnd = selectedDates.length > 1 ? selectedDates[1] : null;
   }
@@ -101,7 +123,8 @@ export function generateCalendarDays(config: CalendarDayConfig): CalendarDay[] {
     const date = new Date(currentWeekDate);
     const isCurrentMonth = date.getMonth() === month;
     const isToday = isSameDay(date, today);
-    const isDisabledDate = disabled || isDateDisabled(date, minDate, maxDate, disabledDates);
+    const isDisabledDate =
+      disabled || isDateDisabled(date, minDate, maxDate, disabledDates);
 
     // Determine if date is selected
     let isSelected = false;
@@ -109,11 +132,12 @@ export function generateCalendarDays(config: CalendarDayConfig): CalendarDay[] {
     let isRangeEnd = false;
     let isInRange = false;
 
-    if (mode === 'single') {
-      isSelected = selectedDates.length > 0 && isSameDay(date, selectedDates[0]);
-    } else if (mode === 'multiple') {
-      isSelected = selectedDates.some(d => isSameDay(date, d));
-    } else if (mode === 'range') {
+    if (mode === "single") {
+      isSelected =
+        selectedDates.length > 0 && isSameDay(date, selectedDates[0]);
+    } else if (mode === "multiple") {
+      isSelected = selectedDates.some((d) => isSameDay(date, d));
+    } else if (mode === "range") {
       if (rangeStart && isSameDay(date, rangeStart)) {
         isRangeStart = true;
         isSelected = true;
@@ -134,12 +158,12 @@ export function generateCalendarDays(config: CalendarDayConfig): CalendarDay[] {
     days.push({
       date,
       isCurrentMonth,
-      isToday,
-      isSelected,
       isDisabled: isDisabledDate,
-      isRangeStart,
-      isRangeEnd,
       isInRange,
+      isRangeEnd,
+      isRangeStart,
+      isSelected,
+      isToday,
     });
 
     currentWeekDate.setDate(currentWeekDate.getDate() + 1);
@@ -151,16 +175,19 @@ export function generateCalendarDays(config: CalendarDayConfig): CalendarDay[] {
 /**
  * Converts CalendarValue to array of Dates for easier processing
  */
-export function getSelectedDatesArray(value: CalendarValue, mode: CalendarMode): Date[] {
+export function getSelectedDatesArray(
+  value: CalendarValue,
+  mode: CalendarMode
+): Date[] {
   if (!value) {
     return [];
   }
 
-  if (mode === 'single') {
+  if (mode === "single") {
     return [value as Date];
   }
 
-  if ((mode === 'multiple' || mode === 'range') && Array.isArray(value)) {
+  if ((mode === "multiple" || mode === "range") && Array.isArray(value)) {
     return value;
   }
 
@@ -172,32 +199,34 @@ export function getSelectedDatesArray(value: CalendarValue, mode: CalendarMode):
  * month is rendered, so the ids stay unique across the grids of a multi-month calendar.
  */
 export function getDayId(index: number, monthIndex = 0): string {
-  return monthIndex > 0 ? `calendar-m${monthIndex}-day-${index}` : `calendar-day-${index}`;
+  return monthIndex > 0
+    ? `calendar-m${monthIndex}-day-${index}`
+    : `calendar-day-${index}`;
 }
 
 /**
  * Generates an accessible ARIA label for a calendar day
  */
 export function getDayAriaLabel(day: CalendarDay): string {
-  const dateStr = day.date.toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+  const dateStr = day.date.toLocaleDateString("en-US", {
+    day: "numeric",
+    month: "long",
+    weekday: "long",
+    year: "numeric",
   });
 
   const labels = [
     dateStr,
-    day.isToday && 'Today',
-    day.isSelected && 'Selected',
-    day.isRangeStart && 'Range start',
-    day.isRangeEnd && 'Range end',
-    day.isInRange && 'In range',
-    !day.isCurrentMonth && 'Outside month',
-    day.isDisabled && 'Disabled',
+    day.isToday && "Today",
+    day.isSelected && "Selected",
+    day.isRangeStart && "Range start",
+    day.isRangeEnd && "Range end",
+    day.isInRange && "In range",
+    !day.isCurrentMonth && "Outside month",
+    day.isDisabled && "Disabled",
   ].filter(Boolean);
 
-  return labels.join(', ');
+  return labels.join(", ");
 }
 
 /**
@@ -250,7 +279,7 @@ export function toValidDate(value: unknown): Date | null {
     return isNaN(value.getTime()) ? null : value;
   }
 
-  if (typeof value === 'number' && value.toString().length === 8) {
+  if (typeof value === "number" && value.toString().length === 8) {
     const s = value.toString();
     const y = +s.slice(0, 4);
     const m = +s.slice(4, 6) - 1;
@@ -259,7 +288,7 @@ export function toValidDate(value: unknown): Date | null {
     return makeSafeDate(y, m, d);
   }
 
-  if (typeof value === 'string' && /^\d{8}$/.test(value)) {
+  if (typeof value === "string" && /^\d{8}$/.test(value)) {
     const y = +value.slice(0, 4);
     const m = +value.slice(4, 6) - 1;
     const d = +value.slice(6, 8);

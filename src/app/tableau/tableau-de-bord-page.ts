@@ -20,8 +20,8 @@ import { ZardChartTooltipComponent } from "@/shared/components/chart/chart-toolt
 import { environment } from "../../environments/environment";
 import type { PriseCarburant } from "../carburant/prise-carburant";
 import type { PageResponse } from "../core/api/page-response";
-import { SessionUtilisateur } from "../core/auth/session";
 import { roleLabel } from "../core/auth/role";
+import { SessionUtilisateur } from "../core/auth/session";
 import { DESTINATION_NAV_ICON } from "../core/nav/nav-icon";
 import { destinationsForRoles } from "../core/nav/work-destination";
 import type { OrdreTravail } from "../maintenance/maintenance";

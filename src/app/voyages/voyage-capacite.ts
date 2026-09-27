@@ -5,20 +5,20 @@ export interface VoyageCapaciteArret {
 }
 
 export interface VoyageCapaciteTroncon {
-  indiceTroncon: number;
-  arretDepartId: string;
   arretArriveeId: string;
+  arretDepartId: string;
+  indiceTroncon: number;
   poidsUtiliseKg: number;
-  volumeUtiliseM3: number;
+  pourcentageMax: number;
   pourcentagePoids: number;
   pourcentageVolume: number;
-  pourcentageMax: number;
+  volumeUtiliseM3: number;
 }
 
 export interface VoyageCapacite {
+  arrets: VoyageCapaciteArret[];
   capacitePoidsKg: number;
   capaciteVolumeM3: number;
-  arrets: VoyageCapaciteArret[];
   troncons: VoyageCapaciteTroncon[];
 }
 

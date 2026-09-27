@@ -1,10 +1,10 @@
-import type { EChartsOption } from 'echarts';
+import type { EChartsOption } from "echarts";
 
 /** The slice of an ECharts instance the server renderer uses. */
 interface ZardEchartsSsrInstance {
-  setOption(option: EChartsOption): void;
-  renderToSVGString(): string;
   dispose(): void;
+  renderToSVGString(): string;
+  setOption(option: EChartsOption): void;
 }
 
 /** The slice of `echarts/core` the server renderer uses. */
@@ -12,7 +12,7 @@ export interface ZardEchartsSsrApi {
   init(
     dom: null,
     theme: null,
-    opts: { renderer: 'svg'; ssr: true; width: number; height: number },
+    opts: { renderer: "svg"; ssr: true; width: number; height: number }
   ): ZardEchartsSsrInstance;
 }
 
@@ -22,7 +22,7 @@ export interface ZardEchartsSsrApi {
  */
 function makeResponsive(svg: string, width: number, height: number): string {
   return svg.replace(/^<svg([^>]*)>/, (_match, attributes: string) => {
-    const cleaned = attributes.replace(/\s(?:width|height)="[^"]*"/g, '');
+    const cleaned = attributes.replace(/\s(?:width|height)="[^"]*"/g, "");
     return `<svg${cleaned} width="100%" height="100%" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet">`;
   });
 }
@@ -37,20 +37,28 @@ export function renderChartToSvg(
   api: ZardEchartsSsrApi | null | undefined,
   option: EChartsOption,
   width: number,
-  height: number,
+  height: number
 ): string | null {
-  if (!api || typeof api.init !== 'function') {
+  if (!api || typeof api.init !== "function") {
     return null;
   }
 
   let instance: ZardEchartsSsrInstance | undefined;
 
   try {
-    instance = api.init(null, null, { renderer: 'svg', ssr: true, width, height });
+    instance = api.init(null, null, {
+      height,
+      renderer: "svg",
+      ssr: true,
+      width,
+    });
     instance.setOption(option);
     return makeResponsive(instance.renderToSVGString(), width, height);
   } catch (error) {
-    console.warn('[z-chart] server-side rendering failed; the chart will render on the client only.', error);
+    console.warn(
+      "[z-chart] server-side rendering failed; the chart will render on the client only.",
+      error
+    );
     return null;
   } finally {
     instance?.dispose();

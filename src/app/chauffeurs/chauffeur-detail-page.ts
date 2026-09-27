@@ -8,8 +8,8 @@ import { environment } from "../../environments/environment";
 import { httpErrorMessage } from "../core/api/http-error";
 import type { PageResponse } from "../core/api/page-response";
 import { DocumentsSection } from "../shared/ui/documents-section";
-import { enumToSelectOptions } from "../shared/ui/field-select";
 import { FICHE_PAGE_IMPORTS } from "../shared/ui/fiche-page";
+import { enumToSelectOptions } from "../shared/ui/field-select";
 import { statutOptionsFrom } from "../shared/ui/list-filter";
 import { statutIconForValue } from "../shared/ui/list-statut-filter";
 import {

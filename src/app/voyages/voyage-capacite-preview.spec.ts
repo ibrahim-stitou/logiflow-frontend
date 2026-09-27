@@ -52,17 +52,12 @@ describe("buildCapacitePreview", () => {
   ]);
 
   it("returns null when no dossier is selected", () => {
-    expect(
-      buildCapacitePreview(22_000, 96, [], new Map(), sites)
-    ).toBeNull();
+    expect(buildCapacitePreview(22_000, 96, [], new Map(), sites)).toBeNull();
   });
 
   it("computes leg utilization for one dossier across two stops", () => {
     const dossiers = new Map([
-      [
-        "d1",
-        dossier("d1", "site-a", "site-b", 800, 3),
-      ],
+      ["d1", dossier("d1", "site-a", "site-b", 800, 3)],
     ]);
 
     const preview = buildCapacitePreview(22_000, 96, ["d1"], dossiers, sites);

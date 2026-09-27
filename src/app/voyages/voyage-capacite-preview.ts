@@ -96,7 +96,9 @@ function buildDossiersSurTroncons(
   >,
   arrets: readonly PreviewStop[]
 ): DossierSurTroncon[] {
-  const indices = new Map(arrets.map((arret) => [arret.id, arret.indiceSequence]));
+  const indices = new Map(
+    arrets.map((arret) => [arret.id, arret.indiceSequence])
+  );
   const dossiers: DossierSurTroncon[] = [];
 
   for (const dossierId of dossierIds) {
@@ -108,11 +110,13 @@ function buildDossiersSurTroncons(
     const segments = [...dossier.segments].sort(
       (left, right) => left.ordre - right.ordre
     );
-    const chargement = segments.find((segment) => segment.type === "CHARGEMENT");
+    const chargement = segments.find(
+      (segment) => segment.type === "CHARGEMENT"
+    );
     const dechargement = segments.find(
       (segment) => segment.type === "DECHARGEMENT"
     );
-    if (!chargement || !dechargement) {
+    if (!(chargement && dechargement)) {
       continue;
     }
 

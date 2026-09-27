@@ -1,31 +1,64 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  // Templates HTML exclus : le support HTML de Biome est expérimental et ne comprend pas toute la
+  // syntaxe Angular (ex. liaisons [class.bg-pine-500/5]) ; il les réécrirait de façon invalide.
+  // Les templates sont validés par le compilateur Angular (build et tests).
+  "files": {
+    "includes": ["!**/*.html", "!**/*.svg"]
+  },
   "extends": [
     "ultracite/biome/core",
     "ultracite/biome/type-aware",
     "ultracite/biome/angular",
     "ultracite/biome/vitest"
   ],
-  "html": {
-    "experimentalFullSupportEnabled": true,
-    "linter": {
-      "enabled": false
-    },
-    "parser": {
-      "interpolation": true
-    }
-  },
   "linter": {
     "rules": {
       "correctness": {
         "noUnresolvedImports": "off",
         "useImportExtensions": "off"
+      },
+      "complexity": {
+        // Incompatible avec "noPropertyAccessFromIndexSignature" (tsconfig) : l'accès par
+        // crochets y est obligatoire pour les signatures d'index (paramètres de requête…).
+        "useLiteralKeys": "off",
+        // `void promesse` marque une promesse volontairement non attendue (navigation, rappels
+        // DOM) : c'est ce qu'exige noFloatingPromises, qui reste actif.
+        "noVoid": "off",
+        // Incompatible avec "noImplicitReturns" (tsconfig) : les validateurs de formulaires doivent
+        // retourner explicitement `undefined` sur chaque chemin.
+        "noUselessUndefined": "off"
+      },
+      "style": {
+        // Les fichiers de modèle (commande.ts, voyage.ts…) réexportent volontairement les types
+        // qu'ils composent : c'est l'API publique de chaque fonctionnalité.
+        "noExportedImports": "off",
+        // Incrément/décrément : choix purement stylistique.
+        "noIncrementDecrement": "off",
+        // Réordonner les règles CSS concernées changerait la cascade, donc le rendu.
+        "noDescendingSpecificity": "off"
+      },
+      "suspicious": {
+        // `x != null` est volontaire : l'API omet les champs nuls (undefined) et cette forme
+        // couvre null ET undefined ; la remplacer par !== changerait le comportement.
+        "noEqualsToNull": "off"
+      },
+      "performance": {
+        // Même raison que noExportedImports (réexports de types par fonctionnalité).
+        "noBarrelFile": "off"
       }
     }
   },
   "overrides": [
     {
       "includes": ["**/*.spec.ts"],
+      // Tests : assertions non nulles après expect(...).toBeTruthy() et doublures vides admises.
+      "linter": {
+        "rules": {
+          "style": { "noNonNullAssertion": "off" },
+          "suspicious": { "noEmptyBlockStatements": "off" }
+        }
+      },
       "javascript": {
         "globals": [
           "afterAll",
@@ -37,6 +70,19 @@
           "it",
           "vi"
         ]
+      }
+    },
+    {
+      // Bibliothèque UI Zard (zardui.com) copiée dans le projet : code tiers, mis à jour par sa
+      // CLI. Formaté, mais non soumis aux règles de lint du code applicatif.
+      "includes": [
+        "src/app/shared/components/**",
+        "src/app/shared/core/**",
+        "src/app/shared/services/**",
+        "src/app/shared/utils/**"
+      ],
+      "linter": {
+        "enabled": false
       }
     }
   ]

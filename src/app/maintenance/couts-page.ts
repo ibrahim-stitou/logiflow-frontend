@@ -64,12 +64,7 @@ export function avecParts(
 
 /** Coûts de maintenance et sinistralité sur une période. */
 @Component({
-  imports: [
-    RouterLink,
-    ListStatutFilter,
-    ListTableSkeleton,
-    MaintenanceTabs,
-  ],
+  imports: [RouterLink, ListStatutFilter, ListTableSkeleton, MaintenanceTabs],
   selector: "app-couts-page",
   templateUrl: "./couts-page.html",
 })

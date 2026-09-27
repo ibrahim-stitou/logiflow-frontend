@@ -9,14 +9,14 @@ import {
   signal,
   ViewEncapsulation,
 } from "@angular/core";
-import { NG_VALUE_ACCESSOR, type ControlValueAccessor } from "@angular/forms";
+import { type ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { NgIcon, provideIcons } from "@ng-icons/core";
 import { lucideCalendar } from "@ng-icons/lucide";
 import type { ClassValue } from "clsx";
 import { ZardCalendarComponent } from "@/shared/components/calendar";
 import type { CalendarValue } from "@/shared/components/calendar/calendar.types";
-import { ZardInputGroupImports } from "@/shared/components/input-group";
 import { ZardInputComponent } from "@/shared/components/input";
+import { ZardInputGroupImports } from "@/shared/components/input-group";
 import {
   ZardPopoverComponent,
   ZardPopoverDirective,
@@ -32,7 +32,6 @@ import {
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  selector: "app-iso-date-input",
   imports: [
     NgIcon,
     ZardCalendarComponent,
@@ -41,6 +40,14 @@ import {
     ZardPopoverComponent,
     ZardPopoverDirective,
   ],
+  providers: [
+    {
+      multi: true,
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => IsoDateInputComponent),
+    },
+  ],
+  selector: "app-iso-date-input",
   template: `
     <z-input-group class="min-h-11 h-auto w-full">
       <input
@@ -88,13 +95,6 @@ import {
       </z-popover>
     </ng-template>
   `,
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => IsoDateInputComponent),
-      multi: true,
-    },
-  ],
   viewProviders: [provideIcons({ lucideCalendar })],
 })
 export class IsoDateInputComponent implements ControlValueAccessor {

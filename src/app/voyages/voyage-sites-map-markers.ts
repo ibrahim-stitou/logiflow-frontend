@@ -1,6 +1,9 @@
 import type { Dossier } from "../dossiers/dossier";
 import { buildItinerairePoints, type ItinerairePoint } from "../ia/itineraire";
-import type { GeoMapMarker, GeoMapPathPoint } from "../shared/ui/geo-markers-map";
+import type {
+  GeoMapMarker,
+  GeoMapPathPoint,
+} from "../shared/ui/geo-markers-map";
 import type { Site } from "../sites/site";
 import type { Voyage } from "./voyage";
 
@@ -8,7 +11,10 @@ import type { Voyage } from "./voyage";
 export function voyageItinerairePoints(
   voyage: Voyage | null | undefined,
   dossiersById: ReadonlyMap<string, Pick<Dossier, "segments">>,
-  sitesById: ReadonlyMap<string, Pick<Site, "code" | "libelle" | "localisation">>
+  sitesById: ReadonlyMap<
+    string,
+    Pick<Site, "code" | "libelle" | "localisation">
+  >
 ): ItinerairePoint[] {
   if (!voyage) {
     return [];
@@ -19,7 +25,10 @@ export function voyageItinerairePoints(
 export function voyageItinerairePath(
   voyage: Voyage | null | undefined,
   dossiersById: ReadonlyMap<string, Pick<Dossier, "segments">>,
-  sitesById: ReadonlyMap<string, Pick<Site, "code" | "libelle" | "localisation">>
+  sitesById: ReadonlyMap<
+    string,
+    Pick<Site, "code" | "libelle" | "localisation">
+  >
 ): GeoMapPathPoint[] {
   return voyageItinerairePoints(voyage, dossiersById, sitesById);
 }
@@ -28,7 +37,10 @@ export function voyageItinerairePath(
 export function voyageSiteMarkers(
   voyage: Voyage | null | undefined,
   dossiersById: ReadonlyMap<string, Pick<Dossier, "segments">>,
-  sitesById: ReadonlyMap<string, Pick<Site, "code" | "libelle" | "localisation">>
+  sitesById: ReadonlyMap<
+    string,
+    Pick<Site, "code" | "libelle" | "localisation">
+  >
 ): GeoMapMarker[] {
   return voyageItinerairePoints(voyage, dossiersById, sitesById).map(
     (point, index) => ({

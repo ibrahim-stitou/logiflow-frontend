@@ -1,3 +1,4 @@
+import { httpResource } from "@angular/common/http";
 import {
   Component,
   computed,
@@ -7,16 +8,15 @@ import {
   input,
   signal,
 } from "@angular/core";
-import { bindShellBreadcrumbLeaf } from "../core/nav/shell-breadcrumb-leaf";
 import { FormField, form, required, submit } from "@angular/forms/signals";
-import { httpResource } from "@angular/common/http";
+import { NgIcon, provideIcons } from "@ng-icons/core";
+import { lucideCheck, lucideCircleOff } from "@ng-icons/lucide";
 import { environment } from "../../environments/environment";
 import { httpErrorMessage } from "../core/api/http-error";
 import { firstFieldError } from "../core/forms/first-field-error";
 import { fieldClasses, showFieldError } from "../core/forms/show-field-error";
+import { bindShellBreadcrumbLeaf } from "../core/nav/shell-breadcrumb-leaf";
 import { FICHE_PAGE_IMPORTS } from "../shared/ui/fiche-page";
-import { NgIcon, provideIcons } from "@ng-icons/core";
-import { lucideCheck, lucideCircleOff } from "@ng-icons/lucide";
 import {
   actifIcon,
   actifLabel,
@@ -24,7 +24,7 @@ import {
   StatutChip,
 } from "../shared/ui/statut-chip";
 import { ToastService } from "../shared/ui/toast";
-import { draftToMaj, stationToDraft, type Station } from "./station";
+import { draftToMaj, type Station, stationToDraft } from "./station";
 import { StationApi } from "./station-api";
 
 @Component({
@@ -53,13 +53,15 @@ export class StationDetailPage {
     url: `${environment.apiBaseUrl}/stations/${this.id()}`,
   }));
 
-  protected readonly draft = signal(stationToDraft({
-    actif: true,
-    adresse: null,
-    code: "",
-    id: "",
-    libelle: "",
-  }));
+  protected readonly draft = signal(
+    stationToDraft({
+      actif: true,
+      adresse: null,
+      code: "",
+      id: "",
+      libelle: "",
+    })
+  );
 
   protected readonly loadError = computed(() =>
     httpErrorMessage(this.station.error())

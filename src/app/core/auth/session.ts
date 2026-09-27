@@ -1,4 +1,4 @@
-import { type Signal } from "@angular/core";
+import type { Signal } from "@angular/core";
 import type { Role } from "./role";
 
 export interface UtilisateurConnecte {
@@ -23,6 +23,8 @@ export abstract class SessionUtilisateur {
 
   hasAnyRole(roles: readonly Role[]): boolean {
     const courant = this.utilisateur();
-    return courant !== null && roles.some((role) => courant.roles.includes(role));
+    return (
+      courant !== null && roles.some((role) => courant.roles.includes(role))
+    );
   }
 }

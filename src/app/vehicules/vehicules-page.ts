@@ -8,12 +8,13 @@ import {
   signal,
 } from "@angular/core";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
+import { NgIcon } from "@ng-icons/core";
+import { ZardTableImports } from "@/shared/components/table/table.imports";
 import { environment } from "../../environments/environment";
 import { httpErrorMessage } from "../core/api/http-error";
 import type { PageResponse } from "../core/api/page-response";
 import { ListEmptyState } from "../shared/ui/list-empty-state";
 import { filterByStatut, statutOptionsFrom } from "../shared/ui/list-filter";
-import { vehiculeStatutIcon } from "../shared/ui/list-statut-icons";
 import {
   DEFAULT_LIST_PAGE_SIZE,
   LIST_PAGE_SIZE_OPTIONS,
@@ -31,14 +32,13 @@ import {
   ListStatutFilter,
   statutIconForValue,
 } from "../shared/ui/list-statut-filter";
-import { NgIcon } from "@ng-icons/core";
+import { vehiculeStatutIcon } from "../shared/ui/list-statut-icons";
 import {
   DESTINATION_NAV_ICON,
   LIST_TABLE_ROW_ICON_PROVIDERS,
 } from "../shared/ui/list-table-row-icons";
-import { ListToolbarCta } from "../shared/ui/list-toolbar-cta";
-import { ZardTableImports } from "@/shared/components/table/table.imports";
 import { ListTableSkeleton } from "../shared/ui/list-table-skeleton";
+import { ListToolbarCta } from "../shared/ui/list-toolbar-cta";
 import { StatutChip } from "../shared/ui/statut-chip";
 import { vehiculeStatutTone } from "../tableau/apercu";
 import {

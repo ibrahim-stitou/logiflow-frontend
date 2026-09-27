@@ -14,9 +14,8 @@ import {
   ZardTabComponent,
   ZardTabGroupComponent,
 } from "@/shared/components/tabs";
-
-import { SessionUtilisateur } from "../core/auth/session";
 import { SITES_ALLOWED_ROLES } from "../core/auth/role";
+import { SessionUtilisateur } from "../core/auth/session";
 
 @Component({
   imports: [ZardTabComponent, ZardTabGroupComponent],
@@ -45,8 +44,10 @@ export class CarburantTabs {
 
     this.router.events
       .pipe(
-        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-        takeUntilDestroyed(this.destroyRef),
+        filter(
+          (event): event is NavigationEnd => event instanceof NavigationEnd
+        ),
+        takeUntilDestroyed(this.destroyRef)
       )
       .subscribe(() => syncActiveTab());
 
@@ -55,7 +56,7 @@ export class CarburantTabs {
 
   protected onTabChange(event: { index: number }): void {
     const target = event.index === 1 ? "/carburant/stations" : "/carburant";
-    const path = this.router.url.split("?")[0];
+    const [path] = this.router.url.split("?");
     if (path === target) {
       return;
     }
@@ -63,7 +64,7 @@ export class CarburantTabs {
   }
 
   private indexFromUrl(url: string): number {
-    const path = url.split("?")[0];
+    const [path] = url.split("?");
     if (
       path === "/carburant/stations" ||
       path.startsWith("/carburant/stations/")

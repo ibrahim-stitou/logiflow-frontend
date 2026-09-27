@@ -10,18 +10,8 @@ describe("buildPaginationRange", () => {
   });
 
   it("collapses distant pages with ellipsis", () => {
-    expect(buildPaginationRange(0, 10)).toEqual([
-      0,
-      1,
-      "ellipsis",
-      9,
-    ]);
-    expect(buildPaginationRange(9, 10)).toEqual([
-      0,
-      "ellipsis",
-      8,
-      9,
-    ]);
+    expect(buildPaginationRange(0, 10)).toEqual([0, 1, "ellipsis", 9]);
+    expect(buildPaginationRange(9, 10)).toEqual([0, "ellipsis", 8, 9]);
     expect(buildPaginationRange(4, 10)).toEqual([
       0,
       "ellipsis",

@@ -28,8 +28,8 @@ describe("VehiculesPage", () => {
     request.flush({
       content: [
         {
-            chargeUtileKg: 9000,
-            heuresMoteur: 12,
+          chargeUtileKg: 9000,
+          heuresMoteur: 12,
           id: "33333333-3333-3333-3333-333333333333",
           immatriculation: "AB-123-CD",
           kilometrage: 40_000,

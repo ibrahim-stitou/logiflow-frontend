@@ -4,9 +4,9 @@ import { ChangeDetectionStrategy, Component, input } from "@angular/core";
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
+    "[class.fiche-field-grid__item--span-2]": "span() === 2",
     class: "fiche-field-grid__item",
     role: "listitem",
-    "[class.fiche-field-grid__item--span-2]": "span() === 2",
   },
   selector: "app-fiche-field",
   template: `

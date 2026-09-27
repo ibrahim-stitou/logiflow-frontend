@@ -48,15 +48,12 @@ function evenementDetail(evenement: EvenementVoyage): string | null {
 }
 
 /** Planned schedule: départ, arrivée and étapes (ETA/ETD). */
-export function voyagePlannedTimelineEntries(voyage: Voyage): OpsTimelineEntry[] {
+export function voyagePlannedTimelineEntries(
+  voyage: Voyage
+): OpsTimelineEntry[] {
   const entries: SortableEntry[] = [
     dated("planned-depart", "planned", "Départ prévu", voyage.departPrevu),
-    dated(
-      "planned-arrivee",
-      "planned",
-      "Arrivée prévue",
-      voyage.arriveePrevue
-    ),
+    dated("planned-arrivee", "planned", "Arrivée prévue", voyage.arriveePrevue),
   ];
 
   for (const etape of voyage.trajet.etapes) {

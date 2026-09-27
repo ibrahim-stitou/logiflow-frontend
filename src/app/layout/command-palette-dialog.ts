@@ -1,9 +1,9 @@
 import {
-  AfterViewInit,
+  type AfterViewInit,
   Component,
   computed,
+  type ElementRef,
   effect,
-  ElementRef,
   inject,
   signal,
   viewChild,
@@ -15,6 +15,7 @@ import {
   lucideCornerDownLeft,
   lucideSearch,
 } from "@ng-icons/lucide";
+import { ZardDialogRef } from "@/shared/components/dialog/dialog-ref";
 import { SessionUtilisateur } from "../core/auth/session";
 import { PaletteEntitySearchStore } from "../core/nav/palette-entity-search-store";
 import {
@@ -23,115 +24,15 @@ import {
   type PaletteSection,
   paletteItemsForRoles,
 } from "../core/nav/palette-items";
-import { ZardDialogRef } from "@/shared/components/dialog/dialog-ref";
 
 interface PaletteListGroup {
-  section: PaletteSection;
   entries: readonly { item: PaletteItem; index: number }[];
+  section: PaletteSection;
 }
 
 @Component({
-  selector: "app-command-palette-dialog",
   imports: [NgIcon],
-  viewProviders: [
-    provideIcons({ lucideArrowRight, lucideCornerDownLeft, lucideSearch }),
-  ],
-  template: `
-    <div class="command-palette">
-      <div class="command-palette__search-wrap">
-        <label class="sr-only" for="command-palette-input"
-          >Aller à un module, une action ou une référence</label
-        >
-        <div class="command-palette__search">
-          <ng-icon
-            aria-hidden="true"
-            class="command-palette__search-icon"
-            name="lucideSearch"
-          />
-          <input
-            #queryInput
-            (input)="onInput($event)"
-            (keydown)="onKeydown($event)"
-            [value]="query()"
-            autocomplete="off"
-            class="command-palette__input"
-            id="command-palette-input"
-            placeholder="Rechercher…"
-            type="search"
-          />
-        </div>
-      </div>
-
-      <div
-        #listScroller
-        class="command-palette__scroller"
-        id="command-palette-list"
-        role="listbox"
-      >
-        @if (filteredTargets().length === 0) {
-        <p class="command-palette__empty" role="status">
-          @if (entityLoading()) {
-          Recherche…
-          } @else {
-          Aucun résultat.
-          }
-        </p>
-        } @else {
-        @for (group of listGroups(); track group.section; let gi = $index) {
-        @if (gi > 0) {
-        <div aria-hidden="true" class="command-palette__divider"></div>
-        }
-        <p class="command-palette__section-label">{{ group.section }}</p>
-        <ul class="command-palette__group">
-          @for (entry of group.entries; track entry.item.kind + ':' + entry.item.path) {
-          <li role="presentation">
-            <button
-              (click)="goTo(entry.item.path)"
-              [attr.aria-selected]="activeIndex() === entry.index"
-              [attr.data-palette-index]="entry.index"
-              [class.is-active]="activeIndex() === entry.index"
-              class="command-palette__item pressable"
-              type="button"
-              role="option"
-            >
-              <ng-icon
-                aria-hidden="true"
-                class="command-palette__item-arrow"
-                name="lucideArrowRight"
-              />
-              <span class="command-palette__item-label">{{
-                entry.item.label
-              }}</span>
-              @if (entry.item.badge; as badge) {
-              <span class="command-palette__item-badge">{{ badge }}</span>
-              }
-            </button>
-          </li>
-          }
-        </ul>
-        }
-        @if (entityLoading()) {
-        <p class="command-palette__loading" role="status">
-          Recherche de références…
-        </p>
-        }
-        }
-      </div>
-
-      <footer class="command-palette__footer">
-        <span class="command-palette__hint">
-          <kbd class="command-palette__kbd">
-            <ng-icon aria-hidden="true" name="lucideCornerDownLeft" />
-          </kbd>
-          <span>Aller à la page</span>
-        </span>
-        <span class="command-palette__hint command-palette__hint--muted">
-          <kbd class="command-palette__kbd">Esc</kbd>
-          <span>Fermer</span>
-        </span>
-      </footer>
-    </div>
-  `,
+  selector: "app-command-palette-dialog",
   styles: `
     :host {
       display: block;
@@ -341,6 +242,105 @@ interface PaletteListGroup {
       height: 0.75rem;
     }
   `,
+  template: `
+    <div class="command-palette">
+      <div class="command-palette__search-wrap">
+        <label class="sr-only" for="command-palette-input"
+          >Aller à un module, une action ou une référence</label
+        >
+        <div class="command-palette__search">
+          <ng-icon
+            aria-hidden="true"
+            class="command-palette__search-icon"
+            name="lucideSearch"
+          />
+          <input
+            #queryInput
+            (input)="onInput($event)"
+            (keydown)="onKeydown($event)"
+            [value]="query()"
+            autocomplete="off"
+            class="command-palette__input"
+            id="command-palette-input"
+            placeholder="Rechercher…"
+            type="search"
+          />
+        </div>
+      </div>
+
+      <div
+        #listScroller
+        class="command-palette__scroller"
+        id="command-palette-list"
+        role="listbox"
+      >
+        @if (filteredTargets().length === 0) {
+        <p class="command-palette__empty" role="status">
+          @if (entityLoading()) {
+          Recherche…
+          } @else {
+          Aucun résultat.
+          }
+        </p>
+        } @else {
+        @for (group of listGroups(); track group.section; let gi = $index) {
+        @if (gi > 0) {
+        <div aria-hidden="true" class="command-palette__divider"></div>
+        }
+        <p class="command-palette__section-label">{{ group.section }}</p>
+        <ul class="command-palette__group">
+          @for (entry of group.entries; track entry.item.kind + ':' + entry.item.path) {
+          <li role="presentation">
+            <button
+              (click)="goTo(entry.item.path)"
+              [attr.aria-selected]="activeIndex() === entry.index"
+              [attr.data-palette-index]="entry.index"
+              [class.is-active]="activeIndex() === entry.index"
+              class="command-palette__item pressable"
+              type="button"
+              role="option"
+            >
+              <ng-icon
+                aria-hidden="true"
+                class="command-palette__item-arrow"
+                name="lucideArrowRight"
+              />
+              <span class="command-palette__item-label">{{
+                entry.item.label
+              }}</span>
+              @if (entry.item.badge; as badge) {
+              <span class="command-palette__item-badge">{{ badge }}</span>
+              }
+            </button>
+          </li>
+          }
+        </ul>
+        }
+        @if (entityLoading()) {
+        <p class="command-palette__loading" role="status">
+          Recherche de références…
+        </p>
+        }
+        }
+      </div>
+
+      <footer class="command-palette__footer">
+        <span class="command-palette__hint">
+          <kbd class="command-palette__kbd">
+            <ng-icon aria-hidden="true" name="lucideCornerDownLeft" />
+          </kbd>
+          <span>Aller à la page</span>
+        </span>
+        <span class="command-palette__hint command-palette__hint--muted">
+          <kbd class="command-palette__kbd">Esc</kbd>
+          <span>Fermer</span>
+        </span>
+      </footer>
+    </div>
+  `,
+  viewProviders: [
+    provideIcons({ lucideArrowRight, lucideCornerDownLeft, lucideSearch }),
+  ],
 })
 export class CommandPaletteDialogComponent implements AfterViewInit {
   private readonly session = inject(SessionUtilisateur);
@@ -375,10 +375,10 @@ export class CommandPaletteDialogComponent implements AfterViewInit {
     for (let index = 0; index < items.length; index += 1) {
       const item = items[index];
       if (!current || current.section !== item.section) {
-        current = { section: item.section, entries: [] };
+        current = { entries: [], section: item.section };
         groups.push(current);
       }
-      current.entries = [...current.entries, { item, index }];
+      current.entries = [...current.entries, { index, item }];
     }
 
     return groups;

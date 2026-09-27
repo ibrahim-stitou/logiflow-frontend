@@ -3,16 +3,16 @@ import { inject, Service } from "@angular/core";
 import { firstValueFrom } from "rxjs";
 import { environment } from "../../environments/environment";
 import type {
-  AjouterDossierVoyageWrite,
-  VerifierAjoutDossierResult,
-} from "./voyage-ajouter-dossier";
-import type {
   EvenementVoyage,
   EvenementVoyageWrite,
   StatutVoyage,
   Voyage,
   VoyageWrite,
 } from "./voyage";
+import type {
+  AjouterDossierVoyageWrite,
+  VerifierAjoutDossierResult,
+} from "./voyage-ajouter-dossier";
 
 /**
  * Voyage HTTP surface: POST create, GET list/detail, PUT statut, POST événements.

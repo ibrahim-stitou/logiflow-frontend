@@ -2,7 +2,11 @@ import { HttpClient, HttpParams } from "@angular/common/http";
 import { inject, Service } from "@angular/core";
 import { firstValueFrom } from "rxjs";
 import { environment } from "../../environments/environment";
-import type { Document, DocumentType, TypeEntiteDocumentable } from "./document";
+import type {
+  Document,
+  DocumentType,
+  TypeEntiteDocumentable,
+} from "./document";
 
 /**
  * Document HTTP surface: multipart POST upload, GET list by entity, DELETE,
@@ -73,7 +77,11 @@ export class DocumentApi {
     anchor.target = "_blank";
     anchor.rel = "noopener";
     // Keep the name for download fallbacks (some browsers ignore inline PDFs).
-    if (blob.type && !blob.type.includes("pdf") && !blob.type.startsWith("image/")) {
+    if (
+      blob.type &&
+      !blob.type.includes("pdf") &&
+      !blob.type.startsWith("image/")
+    ) {
       anchor.download = "document";
     }
     document.body.appendChild(anchor);

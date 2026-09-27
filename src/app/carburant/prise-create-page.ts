@@ -1,9 +1,9 @@
 import { httpResource } from "@angular/common/http";
 import { Component, computed, effect, inject, signal } from "@angular/core";
-import { NgIcon, provideIcons } from "@ng-icons/core";
-import { lucideCheck, lucidePlus } from "@ng-icons/lucide";
 import { FormField, form, required, submit } from "@angular/forms/signals";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
+import { NgIcon, provideIcons } from "@ng-icons/core";
+import { lucideCheck, lucidePlus } from "@ng-icons/lucide";
 import { environment } from "../../environments/environment";
 import { httpErrorMessage } from "../core/api/http-error";
 import type { PageResponse } from "../core/api/page-response";
@@ -16,17 +16,17 @@ import {
 import { FORM_PAGE_IMPORTS } from "../shared/ui/form-page";
 import { ToastService } from "../shared/ui/toast";
 import type { Voyage } from "../voyages/voyage";
-import { PriseCarburantApi } from "./prise-carburant-api";
 import {
   draftToWrite,
   emptyPriseCarburantDraft,
   TYPE_CARBURANTS,
   typeCarburantLabel,
 } from "./prise-carburant";
+import { PriseCarburantApi } from "./prise-carburant-api";
 import {
-  draftToWrite as stationDraftToWrite,
   emptyStationDraft,
   type Station,
+  draftToWrite as stationDraftToWrite,
 } from "./station";
 import { StationApi } from "./station-api";
 
@@ -82,20 +82,21 @@ export class PriseCreatePage {
   }));
 
   protected readonly selectedVoyage = computed(() => {
-    const voyageId = this.draft().voyageId;
+    const { voyageId } = this.draft();
     const page = this.voyages.value();
-    if (!voyageId || !page) {
+    if (!(voyageId && page)) {
       return null;
     }
     return page.content.find((voyage) => voyage.id === voyageId) ?? null;
   });
 
-  protected readonly voyageSelectOptions = computed<readonly FieldSelectOption[]>(
-    () =>
-      (this.voyages.value()?.content ?? []).map((voyage) => ({
-        label: voyage.reference,
-        value: voyage.id,
-      }))
+  protected readonly voyageSelectOptions = computed<
+    readonly FieldSelectOption[]
+  >(() =>
+    (this.voyages.value()?.content ?? []).map((voyage) => ({
+      label: voyage.reference,
+      value: voyage.id,
+    }))
   );
 
   protected readonly activeStations = computed(() => {
@@ -113,19 +114,19 @@ export class PriseCreatePage {
     () => this.stations.hasValue() && this.activeStations().length === 0
   );
 
-  protected readonly stationSelectOptions = computed<readonly FieldSelectOption[]>(
-    () => [
-      ...this.activeStations().map((station) => ({
-        label: `${station.code} — ${station.libelle}`,
-        value: station.id,
-      })),
-      {
-        icon: "lucidePlus",
-        label: "Créer une nouvelle station…",
-        value: STATION_SELECT_NEW,
-      },
-    ]
-  );
+  protected readonly stationSelectOptions = computed<
+    readonly FieldSelectOption[]
+  >(() => [
+    ...this.activeStations().map((station) => ({
+      label: `${station.code} — ${station.libelle}`,
+      value: station.id,
+    })),
+    {
+      icon: "lucidePlus",
+      label: "Créer une nouvelle station…",
+      value: STATION_SELECT_NEW,
+    },
+  ]);
 
   protected readonly stationSelectValue = computed(() =>
     this.stationCreateOpen() ? STATION_SELECT_NEW : this.draft().stationId
@@ -140,28 +141,28 @@ export class PriseCreatePage {
     });
   }
 
-  protected readonly enginOptions = computed<readonly FieldSelectOption[]>(() => {
-    const voyage = this.selectedVoyage();
-    if (!voyage) {
-      return [];
+  protected readonly enginOptions = computed<readonly FieldSelectOption[]>(
+    () => {
+      const voyage = this.selectedVoyage();
+      if (!voyage) {
+        return [];
+      }
+      const options: FieldSelectOption[] = [
+        { label: "Véhicule du voyage", value: "vehicule" },
+      ];
+      if (voyage.remorqueId) {
+        options.push({ label: "Remorque du voyage", value: "remorque" });
+      }
+      return options;
     }
-    const options: FieldSelectOption[] = [
-      { label: "Véhicule du voyage", value: "vehicule" },
-    ];
-    if (voyage.remorqueId) {
-      options.push({ label: "Remorque du voyage", value: "remorque" });
-    }
-    return options;
-  });
+  );
 
   protected readonly voyageLocked = computed(
     () => this.voyageIdFromQuery().length > 0
   );
 
   protected readonly backLink = computed(() =>
-    this.voyageLocked()
-      ? `/voyages/${this.draft().voyageId}`
-      : "/carburant"
+    this.voyageLocked() ? `/voyages/${this.draft().voyageId}` : "/carburant"
   );
 
   protected readonly createForm = form(this.draft, (path) => {
@@ -213,7 +214,7 @@ export class PriseCreatePage {
     field: "code" | "libelle" | "adresse",
     event: Event
   ): void {
-    const value = (event.target as HTMLInputElement).value;
+    const { value } = event.target as HTMLInputElement;
     this.stationDraft.update((current) => ({ ...current, [field]: value }));
   }
 
@@ -269,7 +270,9 @@ export class PriseCreatePage {
     }
     await submit(this.createForm, async () => {
       try {
-        const created = await this.api.create(draftToWrite(this.draft(), voyage));
+        const created = await this.api.create(
+          draftToWrite(this.draft(), voyage)
+        );
         this.toast.success("Prise enregistrée en brouillon.");
         await this.router.navigate(["/carburant", created.id]);
       } catch (error) {

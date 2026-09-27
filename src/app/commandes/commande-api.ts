@@ -2,8 +2,8 @@ import { HttpClient } from "@angular/common/http";
 import { inject, Service } from "@angular/core";
 import { firstValueFrom } from "rxjs";
 import { environment } from "../../environments/environment";
-import { ClientApi } from "../clients/client-api";
 import type { Client, ClientWrite } from "../clients/client";
+import { ClientApi } from "../clients/client-api";
 import type { Commande, CommandeWrite } from "./commande";
 
 /**

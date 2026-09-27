@@ -4,9 +4,9 @@ import {
   Overlay,
   OverlayPositionBuilder,
   type OverlayRef,
-} from '@angular/cdk/overlay';
-import { TemplatePortal } from '@angular/cdk/portal';
-import { isPlatformBrowser } from '@angular/common';
+} from "@angular/cdk/overlay";
+import { TemplatePortal } from "@angular/cdk/portal";
+import { isPlatformBrowser } from "@angular/common";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -27,28 +27,34 @@ import {
   RendererStyleFlags2,
   signal,
   type TemplateRef,
-  viewChild,
   ViewContainerRef,
   ViewEncapsulation,
-} from '@angular/core';
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+  viewChild,
+} from "@angular/core";
+import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 
-import type { ClassValue } from 'clsx';
-import { filter, type Subscription } from 'rxjs';
+import type { ClassValue } from "clsx";
+import { filter, type Subscription } from "rxjs";
 
-import { ZardIdDirective } from '@/shared/core';
-import { mergeClasses } from '@/shared/utils/merge-classes';
+import { ZardIdDirective } from "@/shared/core";
+import { mergeClasses } from "@/shared/utils/merge-classes";
 
 import {
   popoverDescriptionVariants,
   popoverHeaderVariants,
   popoverTitleVariants,
   popoverVariants,
-} from './popover.variants';
+} from "./popover.variants";
 
-export type ZardPopoverTrigger = 'click' | 'hover' | null;
-export type ZardPopoverPlacement = 'top' | 'bottom' | 'left' | 'right' | 'inline-start' | 'inline-end';
-export type ZardPopoverAlign = 'start' | 'center' | 'end';
+export type ZardPopoverTrigger = "click" | "hover" | null;
+export type ZardPopoverPlacement =
+  | "top"
+  | "bottom"
+  | "left"
+  | "right"
+  | "inline-start"
+  | "inline-end";
+export type ZardPopoverAlign = "start" | "center" | "end";
 
 /**
  * Kept in sync with the `duration-100` utility of `popoverVariants`. The exit animation runs for this long
@@ -58,65 +64,83 @@ export const ZARD_POPOVER_ANIMATION_DURATION = 100;
 
 const CONTENT_SELECTOR = '[data-slot="popover-content"]';
 
-const FALLBACK_PLACEMENTS: Record<ZardPopoverPlacement, ZardPopoverPlacement[]> = {
-  top: ['bottom', 'right', 'left'],
-  bottom: ['top', 'right', 'left'],
-  left: ['right', 'bottom', 'top'],
-  right: ['left', 'bottom', 'top'],
-  'inline-start': ['inline-end', 'bottom', 'top'],
-  'inline-end': ['inline-start', 'bottom', 'top'],
+const FALLBACK_PLACEMENTS: Record<
+  ZardPopoverPlacement,
+  ZardPopoverPlacement[]
+> = {
+  bottom: ["top", "right", "left"],
+  "inline-end": ["inline-start", "bottom", "top"],
+  "inline-start": ["inline-end", "bottom", "top"],
+  left: ["right", "bottom", "top"],
+  right: ["left", "bottom", "top"],
+  top: ["bottom", "right", "left"],
 };
 
-const ALIGN_TO_VERTICAL = { start: 'top', center: 'center', end: 'bottom' } as const;
-const ALIGN_TO_ORIGIN_X = { start: 'left', center: 'center', end: 'right' } as const;
-const ALIGN_TO_ORIGIN_Y = { start: 'top', center: 'center', end: 'bottom' } as const;
+const ALIGN_TO_VERTICAL = {
+  center: "center",
+  end: "bottom",
+  start: "top",
+} as const;
+const ALIGN_TO_ORIGIN_X = {
+  center: "center",
+  end: "right",
+  start: "left",
+} as const;
+const ALIGN_TO_ORIGIN_Y = {
+  center: "center",
+  end: "bottom",
+  start: "top",
+} as const;
 
 function isVerticalPlacement(placement: ZardPopoverPlacement): boolean {
-  return placement === 'top' || placement === 'bottom';
+  return placement === "top" || placement === "bottom";
 }
 
 function isInlinePlacement(placement: ZardPopoverPlacement): boolean {
-  return placement === 'inline-start' || placement === 'inline-end';
+  return placement === "inline-start" || placement === "inline-end";
 }
 
 function buildPosition(
   placement: ZardPopoverPlacement,
   align: ZardPopoverAlign,
   sideOffset: number,
-  alignOffset: number,
+  alignOffset: number
 ): ConnectedPosition {
   if (isVerticalPlacement(placement)) {
-    const isTop = placement === 'top';
+    const isTop = placement === "top";
     return {
-      originX: align,
-      originY: isTop ? 'top' : 'bottom',
-      overlayX: align,
-      overlayY: isTop ? 'bottom' : 'top',
       offsetX: alignOffset,
       offsetY: isTop ? -sideOffset : sideOffset,
+      originX: align,
+      originY: isTop ? "top" : "bottom",
+      overlayX: align,
+      overlayY: isTop ? "bottom" : "top",
     };
   }
 
-  const isStart = placement === 'left' || placement === 'inline-start';
+  const isStart = placement === "left" || placement === "inline-start";
   const verticalAlign = ALIGN_TO_VERTICAL[align];
   return {
-    originX: isStart ? 'start' : 'end',
-    originY: verticalAlign,
-    overlayX: isStart ? 'end' : 'start',
-    overlayY: verticalAlign,
     offsetX: isStart ? -sideOffset : sideOffset,
     offsetY: alignOffset,
+    originX: isStart ? "start" : "end",
+    originY: verticalAlign,
+    overlayX: isStart ? "end" : "start",
+    overlayY: verticalAlign,
   };
 }
 
-function transformOriginFor(side: ZardPopoverPlacement, align: ZardPopoverAlign): string {
+function transformOriginFor(
+  side: ZardPopoverPlacement,
+  align: ZardPopoverAlign
+): string {
   switch (side) {
-    case 'top':
+    case "top":
       return `${ALIGN_TO_ORIGIN_X[align]} bottom`;
-    case 'bottom':
+    case "bottom":
       return `${ALIGN_TO_ORIGIN_X[align]} top`;
-    case 'left':
-    case 'inline-start':
+    case "left":
+    case "inline-start":
       return `right ${ALIGN_TO_ORIGIN_Y[align]}`;
     default:
       return `left ${ALIGN_TO_ORIGIN_Y[align]}`;
@@ -124,14 +148,14 @@ function transformOriginFor(side: ZardPopoverPlacement, align: ZardPopoverAlign)
 }
 
 @Directive({
-  selector: '[zPopover]',
+  exportAs: "zPopover",
   host: {
-    'data-slot': 'popover-trigger',
-    '[attr.aria-haspopup]': '"dialog"',
-    '[attr.aria-expanded]': 'isVisible()',
-    '[attr.aria-controls]': 'contentId()',
+    "[attr.aria-controls]": "contentId()",
+    "[attr.aria-expanded]": "isVisible()",
+    "[attr.aria-haspopup]": '"dialog"',
+    "data-slot": "popover-trigger",
   },
-  exportAs: 'zPopover',
+  selector: "[zPopover]",
 })
 export class ZardPopoverDirective implements OnInit, OnDestroy {
   private readonly destroyRef = inject(DestroyRef);
@@ -150,10 +174,10 @@ export class ZardPopoverDirective implements OnInit, OnDestroy {
   private animationListener?: () => void;
   private detachTimer?: ReturnType<typeof setTimeout>;
 
-  readonly zTrigger = input<ZardPopoverTrigger>('click');
+  readonly zTrigger = input<ZardPopoverTrigger>("click");
   readonly zContent = input.required<TemplateRef<unknown>>();
-  readonly zPlacement = input<ZardPopoverPlacement>('bottom');
-  readonly zAlign = input<ZardPopoverAlign>('center');
+  readonly zPlacement = input<ZardPopoverPlacement>("bottom");
+  readonly zAlign = input<ZardPopoverAlign>("center");
   readonly zSideOffset = input(4, { transform: numberAttribute });
   readonly zAlignOffset = input(0, { transform: numberAttribute });
   readonly zOrigin = input<ElementRef>();
@@ -171,7 +195,7 @@ export class ZardPopoverDirective implements OnInit, OnDestroy {
   constructor() {
     toObservable(this.zVisible)
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(visible => {
+      .subscribe((visible) => {
         const currentlyVisible = this.isVisible();
         if (visible && !currentlyVisible) {
           this.show();
@@ -182,14 +206,14 @@ export class ZardPopoverDirective implements OnInit, OnDestroy {
 
     toObservable(this.zTrigger)
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(trigger => {
+      .subscribe((trigger) => {
         if (this.listeners.length) {
           this.unlistenAll();
         }
         this.setupTriggers();
         this.overlayRefSubscription?.unsubscribe();
         this.overlayRefSubscription = undefined;
-        if (trigger === 'click') {
+        if (trigger === "click") {
           this.subscribeToOverlayRef();
         }
       });
@@ -226,7 +250,9 @@ export class ZardPopoverDirective implements OnInit, OnDestroy {
     if (reopening) {
       this.overlayRef?.updatePosition();
     } else {
-      this.overlayRef?.attach(new TemplatePortal(this.zContent(), this.viewContainerRef));
+      this.overlayRef?.attach(
+        new TemplatePortal(this.zContent(), this.viewContainerRef)
+      );
     }
 
     this.isVisible.set(true);
@@ -253,8 +279,8 @@ export class ZardPopoverDirective implements OnInit, OnDestroy {
 
     const content = this.contentElement();
     if (content) {
-      this.renderer.removeAttribute(content, 'data-open');
-      this.renderer.setAttribute(content, 'data-closed', '');
+      this.renderer.removeAttribute(content, "data-open");
+      this.renderer.setAttribute(content, "data-closed", "");
     }
 
     this.isVisible.set(false);
@@ -283,25 +309,25 @@ export class ZardPopoverDirective implements OnInit, OnDestroy {
     this.positionStrategy = positionStrategy;
 
     this.overlayRef = this.overlay.create({
-      positionStrategy,
       hasBackdrop: false,
+      positionStrategy,
       scrollStrategy: this.overlay.scrollStrategies.reposition(),
     });
 
     // Mirrors the `isolate z-50` the shadcn positioner puts on its own wrapper.
-    this.overlayRef.addPanelClass(['isolate', 'z-50']);
+    this.overlayRef.addPanelClass(["isolate", "z-50"]);
 
     positionStrategy.positionChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(change => this.applyPosition(change.connectionPair));
+      .subscribe((change) => this.applyPosition(change.connectionPair));
 
     this.overlayRef
       .keydownEvents()
       .pipe(
-        filter(event => event.key === 'Escape' && this.isVisible()),
-        takeUntilDestroyed(this.destroyRef),
+        filter((event) => event.key === "Escape" && this.isVisible()),
+        takeUntilDestroyed(this.destroyRef)
       )
-      .subscribe(event => {
+      .subscribe((event) => {
         event.preventDefault();
         event.stopPropagation();
         this.close(true);
@@ -311,13 +337,13 @@ export class ZardPopoverDirective implements OnInit, OnDestroy {
   private subscribeToOverlayRef(): void {
     if (
       this.zOverlayClickable() &&
-      this.zTrigger() === 'click' &&
+      this.zTrigger() === "click" &&
       isPlatformBrowser(this.platformId) &&
       this.overlayRef
     ) {
       this.overlayRefSubscription = this.overlayRef
         .outsidePointerEvents()
-        .pipe(filter(event => !this.nativeElement.contains(event.target)))
+        .pipe(filter((event) => !this.nativeElement.contains(event.target)))
         .subscribe(() => this.hide());
     }
   }
@@ -328,12 +354,24 @@ export class ZardPopoverDirective implements OnInit, OnDestroy {
       return;
     }
 
-    if (trigger === 'click') {
-      this.listeners.push(this.renderer.listen(this.nativeElement, 'click.stop', () => this.toggle()));
-    } else if (trigger === 'hover') {
-      this.listeners.push(this.renderer.listen(this.nativeElement, 'mouseenter', () => this.show()));
+    if (trigger === "click") {
+      this.listeners.push(
+        this.renderer.listen(this.nativeElement, "click.stop", () =>
+          this.toggle()
+        )
+      );
+    } else if (trigger === "hover") {
+      this.listeners.push(
+        this.renderer.listen(this.nativeElement, "mouseenter", () =>
+          this.show()
+        )
+      );
 
-      this.listeners.push(this.renderer.listen(this.nativeElement, 'mouseleave', () => this.hide()));
+      this.listeners.push(
+        this.renderer.listen(this.nativeElement, "mouseleave", () =>
+          this.hide()
+        )
+      );
     }
   }
 
@@ -350,8 +388,8 @@ export class ZardPopoverDirective implements OnInit, OnDestroy {
     const sideOffset = this.zSideOffset();
     const alignOffset = this.zAlignOffset();
 
-    return [placement, ...FALLBACK_PLACEMENTS[placement]].map(fallback =>
-      buildPosition(fallback, align, sideOffset, alignOffset),
+    return [placement, ...FALLBACK_PLACEMENTS[placement]].map((fallback) =>
+      buildPosition(fallback, align, sideOffset, alignOffset)
     );
   }
 
@@ -373,15 +411,15 @@ export class ZardPopoverDirective implements OnInit, OnDestroy {
       return;
     }
 
-    this.renderer.removeAttribute(content, 'data-closed');
-    this.renderer.setAttribute(content, 'data-open', '');
+    this.renderer.removeAttribute(content, "data-closed");
+    this.renderer.setAttribute(content, "data-open", "");
 
-    if (!content.hasAttribute('data-side')) {
+    if (!content.hasAttribute("data-side")) {
       const [primary] = this.getPositions();
       this.applyPosition(primary);
     }
 
-    this.contentId.set(content.getAttribute('id'));
+    this.contentId.set(content.getAttribute("id"));
   }
 
   private applyPosition(position: ConnectedPosition): void {
@@ -393,42 +431,45 @@ export class ZardPopoverDirective implements OnInit, OnDestroy {
     const side = this.resolveSide(position);
     const align = this.resolveAlign(position, side);
 
-    this.renderer.setAttribute(content, 'data-side', side);
-    this.renderer.setAttribute(content, 'data-align', align);
+    this.renderer.setAttribute(content, "data-side", side);
+    this.renderer.setAttribute(content, "data-align", align);
     this.renderer.setStyle(
       content,
-      '--transform-origin',
+      "--transform-origin",
       transformOriginFor(side, align),
-      RendererStyleFlags2.DashCase,
+      RendererStyleFlags2.DashCase
     );
   }
 
   private resolveSide(position: ConnectedPosition): ZardPopoverPlacement {
     const inline = isInlinePlacement(this.zPlacement());
 
-    if (position.originY === 'top' && position.overlayY === 'bottom') {
-      return 'top';
+    if (position.originY === "top" && position.overlayY === "bottom") {
+      return "top";
     }
-    if (position.originY === 'bottom' && position.overlayY === 'top') {
-      return 'bottom';
+    if (position.originY === "bottom" && position.overlayY === "top") {
+      return "bottom";
     }
-    if (position.originX === 'start' && position.overlayX === 'end') {
-      return inline ? 'inline-start' : 'left';
+    if (position.originX === "start" && position.overlayX === "end") {
+      return inline ? "inline-start" : "left";
     }
-    return inline ? 'inline-end' : 'right';
+    return inline ? "inline-end" : "right";
   }
 
-  private resolveAlign(position: ConnectedPosition, side: ZardPopoverPlacement): ZardPopoverAlign {
+  private resolveAlign(
+    position: ConnectedPosition,
+    side: ZardPopoverPlacement
+  ): ZardPopoverAlign {
     if (isVerticalPlacement(side)) {
       return position.overlayX;
     }
-    if (position.overlayY === 'top') {
-      return 'start';
+    if (position.overlayY === "top") {
+      return "start";
     }
-    if (position.overlayY === 'bottom') {
-      return 'end';
+    if (position.overlayY === "bottom") {
+      return "end";
     }
-    return 'center';
+    return "center";
   }
 
   private isFocusWithinOverlay(): boolean {
@@ -449,14 +490,21 @@ export class ZardPopoverDirective implements OnInit, OnDestroy {
       return;
     }
 
-    this.animationListener = this.renderer.listen(content, 'animationend', (event: AnimationEvent) => {
-      if (event.target === content) {
-        this.detachNow();
+    this.animationListener = this.renderer.listen(
+      content,
+      "animationend",
+      (event: AnimationEvent) => {
+        if (event.target === content) {
+          this.detachNow();
+        }
       }
-    });
+    );
 
     // happy-dom never fires `animationend`, so the timer is the only guaranteed path in tests.
-    this.detachTimer = setTimeout(() => this.detachNow(), ZARD_POPOVER_ANIMATION_DURATION);
+    this.detachTimer = setTimeout(
+      () => this.detachNow(),
+      ZARD_POPOVER_ANIMATION_DURATION
+    );
   }
 
   private detachNow(): void {
@@ -477,111 +525,125 @@ export class ZardPopoverDirective implements OnInit, OnDestroy {
     if (!isPlatformBrowser(this.platformId)) {
       return true;
     }
-    return this.document.defaultView?.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+    return (
+      this.document.defaultView?.matchMedia?.(
+        "(prefers-reduced-motion: reduce)"
+      ).matches ?? false
+    );
   }
 }
 
 @Component({
-  selector: 'z-popover-title, [z-popover-title]',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  exportAs: "zPopoverTitle",
+  host: {
+    "[attr.id]": "id()",
+    "[class]": "classes()",
+    "data-slot": "popover-title",
+  },
   imports: [ZardIdDirective],
+  selector: "z-popover-title, [z-popover-title]",
   template: `
     <ng-container zardId="popover-title" #uniqueId="zardId" />
     <ng-content />
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
-  host: {
-    'data-slot': 'popover-title',
-    '[attr.id]': 'id()',
-    '[class]': 'classes()',
-  },
-  exportAs: 'zPopoverTitle',
 })
 export class ZardPopoverTitleComponent {
-  readonly class = input<ClassValue>('');
+  readonly class = input<ClassValue>("");
 
-  private readonly uniqueId = viewChild<ZardIdDirective>('uniqueId');
+  private readonly uniqueId = viewChild<ZardIdDirective>("uniqueId");
 
   readonly id = computed(() => this.uniqueId()?.id() ?? null);
 
-  protected readonly classes = computed(() => mergeClasses(popoverTitleVariants(), this.class()));
+  protected readonly classes = computed(() =>
+    mergeClasses(popoverTitleVariants(), this.class())
+  );
 }
 
 @Component({
-  selector: 'z-popover-description, [z-popover-description]',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  exportAs: "zPopoverDescription",
+  host: {
+    "[attr.id]": "id()",
+    "[class]": "classes()",
+    "data-slot": "popover-description",
+  },
   imports: [ZardIdDirective],
+  selector: "z-popover-description, [z-popover-description]",
   template: `
     <ng-container zardId="popover-description" #uniqueId="zardId" />
     <ng-content />
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
-  host: {
-    'data-slot': 'popover-description',
-    '[attr.id]': 'id()',
-    '[class]': 'classes()',
-  },
-  exportAs: 'zPopoverDescription',
 })
 export class ZardPopoverDescriptionComponent {
-  readonly class = input<ClassValue>('');
+  readonly class = input<ClassValue>("");
 
-  private readonly uniqueId = viewChild<ZardIdDirective>('uniqueId');
+  private readonly uniqueId = viewChild<ZardIdDirective>("uniqueId");
 
   readonly id = computed(() => this.uniqueId()?.id() ?? null);
 
-  protected readonly classes = computed(() => mergeClasses(popoverDescriptionVariants(), this.class()));
+  protected readonly classes = computed(() =>
+    mergeClasses(popoverDescriptionVariants(), this.class())
+  );
 }
 
 @Component({
-  selector: 'z-popover-header, [z-popover-header]',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  exportAs: "zPopoverHeader",
+  host: {
+    "[class]": "classes()",
+    "data-slot": "popover-header",
+  },
+  selector: "z-popover-header, [z-popover-header]",
   template: `
     <ng-content />
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
-  host: {
-    'data-slot': 'popover-header',
-    '[class]': 'classes()',
-  },
-  exportAs: 'zPopoverHeader',
 })
 export class ZardPopoverHeaderComponent {
-  readonly class = input<ClassValue>('');
+  readonly class = input<ClassValue>("");
 
-  protected readonly classes = computed(() => mergeClasses(popoverHeaderVariants(), this.class()));
+  protected readonly classes = computed(() =>
+    mergeClasses(popoverHeaderVariants(), this.class())
+  );
 }
 
 @Component({
-  selector: 'z-popover, [z-popover]',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  exportAs: "zPopoverContent",
+  host: {
+    "[attr.aria-describedby]": "describedBy()",
+    "[attr.aria-labelledby]": "labelledBy()",
+    "[attr.id]": "id()",
+    "[class]": "classes()",
+    "data-slot": "popover-content",
+    role: "dialog",
+  },
   imports: [ZardIdDirective],
+  selector: "z-popover, [z-popover]",
   template: `
     <ng-container zardId="popover" #uniqueId="zardId" />
     <ng-content />
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
-  host: {
-    'data-slot': 'popover-content',
-    role: 'dialog',
-    '[attr.id]': 'id()',
-    '[attr.aria-labelledby]': 'labelledBy()',
-    '[attr.aria-describedby]': 'describedBy()',
-    '[class]': 'classes()',
-  },
-  exportAs: 'zPopoverContent',
 })
 export class ZardPopoverComponent {
-  readonly class = input<ClassValue>('');
+  readonly class = input<ClassValue>("");
 
-  private readonly uniqueId = viewChild<ZardIdDirective>('uniqueId');
+  private readonly uniqueId = viewChild<ZardIdDirective>("uniqueId");
   private readonly title = contentChild(ZardPopoverTitleComponent);
   private readonly description = contentChild(ZardPopoverDescriptionComponent);
 
   readonly id = computed(() => this.uniqueId()?.id() ?? null);
 
   protected readonly labelledBy = computed(() => this.title()?.id() ?? null);
-  protected readonly describedBy = computed(() => this.description()?.id() ?? null);
+  protected readonly describedBy = computed(
+    () => this.description()?.id() ?? null
+  );
 
-  protected readonly classes = computed(() => mergeClasses(popoverVariants(), this.class()));
+  protected readonly classes = computed(() =>
+    mergeClasses(popoverVariants(), this.class())
+  );
 }

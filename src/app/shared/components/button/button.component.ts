@@ -1,63 +1,65 @@
 import {
   afterNextRender,
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   computed,
-  type OnDestroy,
   ElementRef,
   inject,
   input,
+  type OnDestroy,
   signal,
   ViewEncapsulation,
-  booleanAttribute,
-} from '@angular/core';
+} from "@angular/core";
 
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import { lucideLoaderCircle } from '@ng-icons/lucide';
-import type { ClassValue } from 'clsx';
+import { NgIcon, provideIcons } from "@ng-icons/core";
+import { lucideLoaderCircle } from "@ng-icons/lucide";
+import type { ClassValue } from "clsx";
 
-import { mergeClasses } from '@/shared/utils/merge-classes';
+import { mergeClasses } from "@/shared/utils/merge-classes";
 
 import {
   buttonVariants,
   type ZardButtonShapeVariants,
   type ZardButtonSizeVariants,
   type ZardButtonTypeVariants,
-} from './button.variants';
+} from "./button.variants";
 
 @Component({
-  selector: 'z-button, button[z-button], a[z-button]',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  exportAs: "zButton",
+  host: {
+    "[attr.aria-disabled]":
+      "isNotInsideOfButtonOrLink() && zDisabled() || null",
+    "[attr.data-disabled]":
+      "isNotInsideOfButtonOrLink() && zDisabled() || null",
+    "[attr.data-icon-only]": "iconOnly() || null",
+    "[attr.data-size]": "zSize()",
+    "[attr.data-variant]": "zType()",
+    "[attr.disabled]": 'isNotInsideOfButtonOrLink() && zDisabled() ? "" : null',
+    "[attr.role]": 'isNotInsideOfButtonOrLink() ? "button" : null',
+    "[attr.tabindex]": 'isNotInsideOfButtonOrLink() ? "0" : null',
+    "[class]": "classes()",
+    "data-slot": "button",
+  },
   imports: [NgIcon],
+  selector: "z-button, button[z-button], a[z-button]",
   template: `
     @if (zLoading()) {
       <ng-icon name="lucideLoaderCircle" class="animate-spin duration-2000" />
     }
     <ng-content />
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
   viewProviders: [provideIcons({ lucideLoaderCircle })],
-  host: {
-    'data-slot': 'button',
-    '[class]': 'classes()',
-    '[attr.data-disabled]': 'isNotInsideOfButtonOrLink() && zDisabled() || null',
-    '[attr.data-icon-only]': 'iconOnly() || null',
-    '[attr.data-size]': 'zSize()',
-    '[attr.data-variant]': 'zType()',
-    '[attr.aria-disabled]': 'isNotInsideOfButtonOrLink() && zDisabled() || null',
-    '[attr.disabled]': 'isNotInsideOfButtonOrLink() && zDisabled() ? "" : null',
-    '[attr.role]': 'isNotInsideOfButtonOrLink() ? "button" : null',
-    '[attr.tabindex]': 'isNotInsideOfButtonOrLink() ? "0" : null',
-  },
-  exportAs: 'zButton',
 })
 export class ZardButtonComponent implements OnDestroy {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
-  readonly zType = input<ZardButtonTypeVariants>('default');
-  readonly zSize = input<ZardButtonSizeVariants>('default');
-  readonly zShape = input<ZardButtonShapeVariants>('default');
-  readonly class = input<ClassValue>('');
+  readonly zType = input<ZardButtonTypeVariants>("default");
+  readonly zSize = input<ZardButtonSizeVariants>("default");
+  readonly zShape = input<ZardButtonShapeVariants>("default");
+  readonly class = input<ClassValue>("");
   readonly zLoading = input(false, { transform: booleanAttribute });
   readonly zDisabled = input(false, { transform: booleanAttribute });
 
@@ -68,24 +70,27 @@ export class ZardButtonComponent implements OnDestroy {
 
   constructor() {
     afterNextRender(() => {
-      if (typeof window === 'undefined' || typeof MutationObserver === 'undefined') {
+      if (
+        typeof window === "undefined" ||
+        typeof MutationObserver === "undefined"
+      ) {
         return;
       }
 
       const check = () => {
         const el = this.elementRef.nativeElement;
-        const hasIcon = el.querySelector('ng-icon') !== null;
+        const hasIcon = el.querySelector("ng-icon") !== null;
         const children = Array.from<Node>(el.childNodes);
-        const hasText = children.some(node => {
+        const hasText = children.some((node) => {
           if (node.nodeType === 3) {
-            return node.textContent?.trim() !== '';
+            return node.textContent?.trim() !== "";
           }
           if (node.nodeType === 1) {
             const element = node as HTMLElement;
-            if (element.matches('ng-icon')) {
+            if (element.matches("ng-icon")) {
               return false;
             }
-            return element.textContent?.trim() !== '';
+            return element.textContent?.trim() !== "";
           }
           return false;
         });
@@ -96,8 +101,8 @@ export class ZardButtonComponent implements OnDestroy {
       check();
       this._mutationObserver = new MutationObserver(check);
       this._mutationObserver.observe(this.elementRef.nativeElement, {
-        childList: true,
         characterData: true,
+        childList: true,
         subtree: true,
       });
     });
@@ -113,14 +118,14 @@ export class ZardButtonComponent implements OnDestroy {
   protected readonly classes = computed(() =>
     mergeClasses(
       buttonVariants({
-        zType: this.zType(),
-        zSize: this.zSize(),
-        zShape: this.zShape(),
-        zLoading: this.zLoading(),
         zDisabled: this.zDisabled(),
+        zLoading: this.zLoading(),
+        zShape: this.zShape(),
+        zSize: this.zSize(),
+        zType: this.zType(),
       }),
-      this.class(),
-    ),
+      this.class()
+    )
   );
 
   protected readonly isNotInsideOfButtonOrLink = computed(() => {
@@ -128,7 +133,7 @@ export class ZardButtonComponent implements OnDestroy {
     const zardButtonElement = this.elementRef.nativeElement;
     if (zardButtonElement.parentElement) {
       const { tagName } = zardButtonElement.parentElement;
-      return tagName !== 'BUTTON' && tagName !== 'A';
+      return tagName !== "BUTTON" && tagName !== "A";
     }
     return true;
   });

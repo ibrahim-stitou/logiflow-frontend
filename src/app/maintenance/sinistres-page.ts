@@ -6,8 +6,8 @@ import { ZardTableImports } from "@/shared/components/table/table.imports";
 import { environment } from "../../environments/environment";
 import { httpErrorMessage } from "../core/api/http-error";
 import type { PageResponse } from "../core/api/page-response";
-import { statutOptionsFrom } from "../shared/ui/list-filter";
 import { ListEmptyState } from "../shared/ui/list-empty-state";
+import { statutOptionsFrom } from "../shared/ui/list-filter";
 import { ListPagination } from "../shared/ui/list-pagination";
 import { ListSearchBar } from "../shared/ui/list-search-bar";
 import { ListStatutFilter } from "../shared/ui/list-statut-filter";
@@ -54,7 +54,10 @@ export class SinistresPage {
   protected readonly formatDateHeure = formatDateHeure;
   protected readonly toneStatutSinistre = toneStatutSinistre;
 
-  protected readonly statutOptions = statutOptionsFrom(STATUTS_SINISTRE, libelle);
+  protected readonly statutOptions = statutOptionsFrom(
+    STATUTS_SINISTRE,
+    libelle
+  );
   protected readonly typeOptions = statutOptionsFrom(TYPES_SINISTRE, libelle);
 
   protected readonly searchDraft = signal("");

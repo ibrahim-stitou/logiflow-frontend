@@ -1,19 +1,16 @@
 import { httpResource } from "@angular/common/http";
 import { Component, computed, effect, inject, signal } from "@angular/core";
-import { NgIcon, provideIcons } from "@ng-icons/core";
-import { lucideCheck } from "@ng-icons/lucide";
 import { FormField, form, min, required, submit } from "@angular/forms/signals";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
+import { NgIcon, provideIcons } from "@ng-icons/core";
+import { lucideCheck } from "@ng-icons/lucide";
 import { environment } from "../../environments/environment";
+import { type Commande, formatCommandeLabel } from "../commandes/commande";
 import { httpErrorMessage } from "../core/api/http-error";
 import type { PageResponse } from "../core/api/page-response";
 import { firstFieldError } from "../core/forms/first-field-error";
 import { fieldClasses, showFieldError } from "../core/forms/show-field-error";
 import { validateTimeWindowEndAfterStart } from "../core/forms/time-window-validation";
-import {
-  formatCommandeLabel,
-  type Commande,
-} from "../commandes/commande";
 import {
   formatMarchandiseLabel,
   type Marchandise,
@@ -28,11 +25,11 @@ import { ToastService } from "../shared/ui/toast";
 import {
   CARROSSERIES_REQUISES,
   carrosserieRequiseLabel,
+  type DossierLookupSite,
   draftToWrite,
   emptyDossierDraft,
   emptyLigneMarchandiseDraft,
   formatSiteLabel,
-  type DossierLookupSite,
   TYPE_TRANSPORTS,
   typeTransportLabel,
   validateLignesMarchandise,
@@ -82,11 +79,13 @@ export class DossierCreatePage {
 
   constructor() {
     effect(() => {
-      const commandeId = this.draft().commandeId;
+      const { commandeId } = this.draft();
       if (
-        !commandeId ||
-        !this.commandes.hasValue() ||
-        !this.marchandises.hasValue()
+        !(
+          commandeId &&
+          this.commandes.hasValue() &&
+          this.marchandises.hasValue()
+        )
       ) {
         if (!commandeId) {
           this.lastPrefilledCommandeId = "";
@@ -146,15 +145,19 @@ export class DossierCreatePage {
     url: `${environment.apiBaseUrl}/commandes`,
   }));
 
-  protected readonly sites = httpResource<PageResponse<DossierLookupSite>>(() => ({
-    params: { page: 0, q: "", size: LOOKUP_PAGE_SIZE },
-    url: `${environment.apiBaseUrl}/sites`,
-  }));
+  protected readonly sites = httpResource<PageResponse<DossierLookupSite>>(
+    () => ({
+      params: { page: 0, q: "", size: LOOKUP_PAGE_SIZE },
+      url: `${environment.apiBaseUrl}/sites`,
+    })
+  );
 
-  protected readonly marchandises = httpResource<PageResponse<Marchandise>>(() => ({
-    params: { page: 0, size: LOOKUP_PAGE_SIZE },
-    url: `${environment.apiBaseUrl}/marchandises`,
-  }));
+  protected readonly marchandises = httpResource<PageResponse<Marchandise>>(
+    () => ({
+      params: { page: 0, size: LOOKUP_PAGE_SIZE },
+      url: `${environment.apiBaseUrl}/marchandises`,
+    })
+  );
 
   protected readonly commandeOptions = computed(() =>
     (this.commandes.value()?.content ?? []).filter(
@@ -172,12 +175,13 @@ export class DossierCreatePage {
     )
   );
 
-  protected readonly commandeSelectOptions = computed<readonly FieldSelectOption[]>(
-    () =>
-      this.commandeOptions().map((commande) => ({
-        label: formatCommandeLabel(commande),
-        value: commande.id,
-      }))
+  protected readonly commandeSelectOptions = computed<
+    readonly FieldSelectOption[]
+  >(() =>
+    this.commandeOptions().map((commande) => ({
+      label: formatCommandeLabel(commande),
+      value: commande.id,
+    }))
   );
 
   protected readonly siteSelectOptions = computed<readonly FieldSelectOption[]>(
@@ -226,7 +230,9 @@ export class DossierCreatePage {
   });
 
   private applyCommandePrefill(commandeId: string): void {
-    const commande = this.commandeOptions().find((item) => item.id === commandeId);
+    const commande = this.commandeOptions().find(
+      (item) => item.id === commandeId
+    );
     if (!commande || commande.lignes.length === 0) {
       return;
     }
@@ -274,10 +280,10 @@ export class DossierCreatePage {
         ligneIndex === index
           ? {
               ...ligne,
-              marchandiseId,
               classeAdr: marchandise?.classeAdr ?? ligne.classeAdr,
-              numeroOnu: marchandise?.numeroOnu ?? ligne.numeroOnu,
               gerbable: marchandise?.gerbable ?? ligne.gerbable,
+              marchandiseId,
+              numeroOnu: marchandise?.numeroOnu ?? ligne.numeroOnu,
             }
           : ligne
       ),

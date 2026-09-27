@@ -15,7 +15,10 @@ describe("list query parsers", () => {
 
   it("ignores unknown statut values when an allow-list is provided", () => {
     expect(
-      parseListStatut(convertToParamMap({ statut: "CREE" }), ["CREE", "PLANIFIE"])
+      parseListStatut(convertToParamMap({ statut: "CREE" }), [
+        "CREE",
+        "PLANIFIE",
+      ])
     ).toBe("CREE");
     expect(
       parseListStatut(convertToParamMap({ statut: "INVALID" }), ["CREE"])
@@ -29,9 +32,7 @@ describe("list query parsers", () => {
 
 describe("buildListQueryParams", () => {
   it("omits default values from the URL", () => {
-    expect(
-      buildListQueryParams({ page: 0, statut: null, q: "" })
-    ).toEqual({
+    expect(buildListQueryParams({ page: 0, q: "", statut: null })).toEqual({
       page: null,
       q: null,
       statut: null,
@@ -40,7 +41,7 @@ describe("buildListQueryParams", () => {
 
   it("serializes active filters", () => {
     expect(
-      buildListQueryParams({ page: 1, statut: "CREE", q: "paris" })
+      buildListQueryParams({ page: 1, q: "paris", statut: "CREE" })
     ).toEqual({
       page: "2",
       q: "paris",

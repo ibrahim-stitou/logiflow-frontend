@@ -2,9 +2,9 @@ import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { provideRouter, Router } from "@angular/router";
 import {
-  listKeyboardRows,
-  ListKeyboardRow,
+  type ListKeyboardRow,
   ListRowKeyboard,
+  listKeyboardRows,
 } from "./list-row-keyboard";
 
 @Component({
@@ -51,8 +51,8 @@ describe("ListRowKeyboard", () => {
       imports: [Host],
       providers: [
         provideRouter([
-          { path: "a", component: Host },
-          { path: "b", component: Host },
+          { component: Host, path: "a" },
+          { component: Host, path: "b" },
         ]),
       ],
     }).compileComponents();
@@ -66,13 +66,13 @@ describe("ListRowKeyboard", () => {
     shell.focus();
 
     shell.dispatchEvent(
-      new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true })
+      new KeyboardEvent("keydown", { bubbles: true, key: "ArrowDown" })
     );
     fixture.detectChanges();
     expect(fixture.componentInstance.activeId()).toBe("b");
 
     shell.dispatchEvent(
-      new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
+      new KeyboardEvent("keydown", { bubbles: true, key: "Enter" })
     );
     await fixture.whenStable();
     expect(TestBed.inject(Router).url).toBe("/b");

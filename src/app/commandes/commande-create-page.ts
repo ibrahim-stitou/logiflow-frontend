@@ -1,7 +1,5 @@
 import { httpResource } from "@angular/common/http";
 import { Component, computed, inject, signal } from "@angular/core";
-import { NgIcon, provideIcons } from "@ng-icons/core";
-import { lucideCheck } from "@ng-icons/lucide";
 import {
   FormField,
   form,
@@ -11,14 +9,19 @@ import {
   validate,
 } from "@angular/forms/signals";
 import { Router, RouterLink } from "@angular/router";
+import { NgIcon, provideIcons } from "@ng-icons/core";
+import { lucideCheck } from "@ng-icons/lucide";
 import { environment } from "../../environments/environment";
+import { type Client, formatClientLabel } from "../clients/client";
 import { httpErrorMessage } from "../core/api/http-error";
 import type { PageResponse } from "../core/api/page-response";
 import { firstFieldError } from "../core/forms/first-field-error";
 import { fieldClasses, showFieldError } from "../core/forms/show-field-error";
-import { formatClientLabel, type Client } from "../clients/client";
-import { formatMarchandiseLabel, type Marchandise } from "../marchandises/marchandise";
-import { type FieldSelectOption } from "../shared/ui/field-select";
+import {
+  formatMarchandiseLabel,
+  type Marchandise,
+} from "../marchandises/marchandise";
+import type { FieldSelectOption } from "../shared/ui/field-select";
 import { FORM_PAGE_IMPORTS } from "../shared/ui/form-page";
 import { startOfToday } from "../shared/ui/iso-date";
 import { ToastService } from "../shared/ui/toast";
@@ -76,18 +79,18 @@ export class CommandeCreatePage {
     (this.clients.value()?.content ?? []).filter((client) => client.actif)
   );
 
-  protected readonly clientSelectOptions = computed<readonly FieldSelectOption[]>(
-    () => [
-      ...this.clientOptions().map((client) => ({
-        label: formatClientLabel(client),
-        value: client.id,
-      })),
-      {
-        label: "Créer un nouveau client…",
-        value: CLIENT_SELECT_NEW,
-      },
-    ]
-  );
+  protected readonly clientSelectOptions = computed<
+    readonly FieldSelectOption[]
+  >(() => [
+    ...this.clientOptions().map((client) => ({
+      label: formatClientLabel(client),
+      value: client.id,
+    })),
+    {
+      label: "Créer un nouveau client…",
+      value: CLIENT_SELECT_NEW,
+    },
+  ]);
 
   protected readonly clientSelectValue = computed(() =>
     this.draft().nouveauClient ? CLIENT_SELECT_NEW : this.draft().clientId
@@ -124,15 +127,15 @@ export class CommandeCreatePage {
   protected readonly createForm = form(this.draft, (path) => {
     required(path.clientId, {
       message: "Sélectionnez un client.",
-      when: ({ valueOf }) => !valueOf(path.nouveauClient),
+      when: ({ valueOf: valeur }) => !valeur(path.nouveauClient),
     });
     required(path.clientCode, {
       message: "Le code client est obligatoire.",
-      when: ({ valueOf }) => valueOf(path.nouveauClient),
+      when: ({ valueOf: valeur }) => valeur(path.nouveauClient),
     });
     required(path.clientRaisonSociale, {
       message: "La raison sociale est obligatoire.",
-      when: ({ valueOf }) => valueOf(path.nouveauClient),
+      when: ({ valueOf: valeur }) => valeur(path.nouveauClient),
     });
     required(path.dateSouhaitee, {
       message: "La date souhaitée est obligatoire.",
@@ -140,7 +143,7 @@ export class CommandeCreatePage {
     validate(path.dateSouhaitee, (ctx) => {
       const value = ctx.value();
       if (value.length === 0 || isDateTodayOrFuture(value)) {
-        return undefined;
+        return;
       }
       return {
         kind: "datePast",
@@ -176,9 +179,7 @@ export class CommandeCreatePage {
     this.draft.update((current) => ({
       ...current,
       lignes: current.lignes.map((ligne, ligneIndex) =>
-        ligneIndex === index
-          ? { ...ligne, marchandiseId }
-          : ligne
+        ligneIndex === index ? { ...ligne, marchandiseId } : ligne
       ),
     }));
   }

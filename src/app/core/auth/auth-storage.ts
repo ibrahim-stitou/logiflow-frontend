@@ -1,4 +1,5 @@
-import { DEMO_SESSION_STORAGE_KEY } from "./demo-session";
+/** Clé de la session du mode démo (sessionStorage). */
+export const DEMO_SESSION_STORAGE_KEY = "logiflow.demo-session";
 
 export const AUTH_RETURN_URL_KEY = "logiflow.retour";
 export const AUTH_BROADCAST_CHANNEL = "logiflow-auth";
@@ -17,7 +18,7 @@ export function lireRetourConnexion(defaut = "/"): string {
   }
   const retour = sessionStorage.getItem(AUTH_RETURN_URL_KEY);
   sessionStorage.removeItem(AUTH_RETURN_URL_KEY);
-  if (!retour || !retour.startsWith("/")) {
+  if (!retour?.startsWith("/")) {
     return defaut;
   }
   return retour;

@@ -7,23 +7,20 @@ import {
   input,
   signal,
 } from "@angular/core";
-import { bindShellBreadcrumbLeaf } from "../core/nav/shell-breadcrumb-leaf";
+import { NgIcon, provideIcons } from "@ng-icons/core";
+import { lucideCircleOff } from "@ng-icons/lucide";
 import { environment } from "../../environments/environment";
 import { httpErrorMessage } from "../core/api/http-error";
+import { bindShellBreadcrumbLeaf } from "../core/nav/shell-breadcrumb-leaf";
 import { FICHE_PAGE_IMPORTS } from "../shared/ui/fiche-page";
-import { ToastService } from "../shared/ui/toast";
 import {
   actifIcon,
   actifLabel,
   actifTone,
   StatutChip,
 } from "../shared/ui/statut-chip";
-import { NgIcon, provideIcons } from "@ng-icons/core";
-import { lucideCircleOff } from "@ng-icons/lucide";
-import {
-  gerbableLabel,
-  type Marchandise,
-} from "./marchandise";
+import { ToastService } from "../shared/ui/toast";
+import { gerbableLabel, type Marchandise } from "./marchandise";
 import { MarchandiseApi } from "./marchandise-api";
 
 @Component({

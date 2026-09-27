@@ -1,5 +1,5 @@
 import { isFieldSelectNone } from "../shared/ui/field-select";
-import { vehiculeStatutTone, type ApercuTone } from "../tableau/apercu";
+import { type ApercuTone, vehiculeStatutTone } from "../tableau/apercu";
 import {
   computeVolumeUtileM3,
   formatMarqueModele,
@@ -172,11 +172,8 @@ export function draftToWrite(draft: RemorqueDraft): RemorqueWrite {
     type: isFieldSelectNone(draft.type) ? null : (draft.type as RemorqueType),
     vin: blankToNull(draft.vin)?.toUpperCase() ?? null,
     volumeUtileM3:
-      computeVolumeUtileM3(
-        draft.longueurM,
-        draft.largeurM,
-        draft.hauteurM
-      ) ?? 0,
+      computeVolumeUtileM3(draft.longueurM, draft.largeurM, draft.hauteurM) ??
+      0,
   };
 }
 
@@ -234,7 +231,7 @@ export function carrosserieDisplay(carrosserie: string | null): string {
   return carrosserie;
 }
 
-export { VEHICULE_STATUTS, formatMarqueModele };
+export { formatMarqueModele, VEHICULE_STATUTS };
 
 export const formatRemorqueDate = formatVehiculeDate;
 

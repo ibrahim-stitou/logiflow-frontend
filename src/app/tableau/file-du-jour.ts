@@ -1,3 +1,4 @@
+import type { PriseCarburant } from "../carburant/prise-carburant";
 import type { Commande } from "../commandes/commande";
 import { DESTINATION_NAV_ICON } from "../core/nav/nav-icon";
 import {
@@ -6,9 +7,10 @@ import {
 } from "../core/nav/work-destination";
 import type { Dossier } from "../dossiers/dossier";
 import type { Vehicule } from "../vehicules/vehicule";
-import type { PriseCarburant } from "../carburant/prise-carburant";
 import type { Voyage } from "../voyages/voyage";
 import type { ApercuTone } from "./apercu";
+
+const BARRE_INITIALE = /^\//;
 
 export const FILE_DU_JOUR_SECTION_ID = "file-du-jour";
 
@@ -37,11 +39,11 @@ export interface FileDuJourInput {
 }
 
 const TONE_RANK: Record<ApercuTone, number> = {
-  brake: 0,
   amber: 1,
+  brake: 0,
   ink: 2,
-  pine: 3,
   muted: 4,
+  pine: 3,
 };
 
 const TONE_SECTION_LABEL: Record<ApercuTone, string> = {
@@ -80,8 +82,8 @@ export function groupFileDuJourByTone(
   let currentTone: ApercuTone | null = null;
   let currentItems: FileDuJourItem[] = [];
 
-  for (const item of items) {
-    if (item.tone !== currentTone) {
+  for (const entree of items) {
+    if (entree.tone !== currentTone) {
       if (currentTone !== null && currentItems.length > 0) {
         tiers.push({
           compact: COMPACT_TONES.has(currentTone),
@@ -90,11 +92,11 @@ export function groupFileDuJourByTone(
           tone: currentTone,
         });
       }
-      currentTone = item.tone;
-      currentItems = [item];
+      currentTone = entree.tone;
+      currentItems = [entree];
       continue;
     }
-    currentItems.push(item);
+    currentItems.push(entree);
   }
 
   if (currentTone !== null && currentItems.length > 0) {
@@ -115,8 +117,8 @@ export function fileDuJourToneCounts(
 ): FileDuJourToneCount[] {
   const totals = new Map<ApercuTone, number>();
 
-  for (const item of items) {
-    totals.set(item.tone, (totals.get(item.tone) ?? 0) + item.count);
+  for (const entree of items) {
+    totals.set(entree.tone, (totals.get(entree.tone) ?? 0) + entree.count);
   }
 
   return Array.from(totals.entries())
@@ -130,7 +132,7 @@ export function fileDuJourToneCounts(
 
 /** Lucide icon for a file-du-jour deep link path. */
 export function fileDuJourIcon(path: string): string {
-  const segment = path.replace(/^\//, "").split("/")[0];
+  const [segment] = path.replace(BARRE_INITIALE, "").split("/");
   if (
     segment &&
     (WORK_DESTINATION_IDS as readonly string[]).includes(segment)
@@ -171,18 +173,22 @@ function item(
  * Builds the role-scoped “file du jour”: exceptions first, then work waiting.
  * Aggregates from list pages already loaded for the Aperçu — no extra API.
  */
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: une section linéaire par liste chargée (dossiers, voyages, véhicules…), sans imbrication métier.
 export function buildFileDuJour(input: FileDuJourInput): FileDuJourItem[] {
   const items: FileDuJourItem[] = [];
 
   if (input.allowedIds.has("dossiers") && input.dossiers) {
-    const dossiers = input.dossiers;
+    const { dossiers } = input;
     const incident = item(
       "dossiers-incident",
       "Dossiers en incident",
       "À traiter en priorité",
       "/dossiers",
       "brake",
-      countBy(dossiers.map((d) => d.statut), new Set(["INCIDENT"]))
+      countBy(
+        dossiers.map((d) => d.statut),
+        new Set(["INCIDENT"])
+      )
     );
     const aPlanifier = item(
       "dossiers-creer",
@@ -190,7 +196,10 @@ export function buildFileDuJour(input: FileDuJourInput): FileDuJourItem[] {
       "Statut Créé — pas encore sur un voyage",
       "/dossiers",
       "muted",
-      countBy(dossiers.map((d) => d.statut), new Set(["CREE"]))
+      countBy(
+        dossiers.map((d) => d.statut),
+        new Set(["CREE"])
+      )
     );
     const enCours = item(
       "dossiers-en-cours",
@@ -203,20 +212,29 @@ export function buildFileDuJour(input: FileDuJourInput): FileDuJourItem[] {
         new Set(["EN_CHARGEMENT", "CHARGE", "EN_TRANSIT", "EN_LIVRAISON"])
       )
     );
-    if (incident) items.push(incident);
-    if (aPlanifier) items.push(aPlanifier);
-    if (enCours) items.push(enCours);
+    if (incident) {
+      items.push(incident);
+    }
+    if (aPlanifier) {
+      items.push(aPlanifier);
+    }
+    if (enCours) {
+      items.push(enCours);
+    }
   }
 
   if (input.allowedIds.has("voyages") && input.voyages) {
-    const voyages = input.voyages;
+    const { voyages } = input;
     const enCours = item(
       "voyages-en-cours",
       "Voyages en cours",
       "Exécution terrain",
       "/voyages",
       "pine",
-      countBy(voyages.map((v) => v.statut), new Set(["EN_COURS"]))
+      countBy(
+        voyages.map((v) => v.statut),
+        new Set(["EN_COURS"])
+      )
     );
     const aDemarrer = item(
       "voyages-a-demarrer",
@@ -224,10 +242,17 @@ export function buildFileDuJour(input: FileDuJourInput): FileDuJourItem[] {
       "Planifiés ou affectés",
       "/voyages",
       "amber",
-      countBy(voyages.map((v) => v.statut), new Set(["PLANIFIE", "AFFECTE"]))
+      countBy(
+        voyages.map((v) => v.statut),
+        new Set(["PLANIFIE", "AFFECTE"])
+      )
     );
-    if (enCours) items.push(enCours);
-    if (aDemarrer) items.push(aDemarrer);
+    if (enCours) {
+      items.push(enCours);
+    }
+    if (aDemarrer) {
+      items.push(aDemarrer);
+    }
   }
 
   if (input.allowedIds.has("commandes") && input.commandes) {
@@ -242,7 +267,9 @@ export function buildFileDuJour(input: FileDuJourInput): FileDuJourItem[] {
         new Set(["RECUE"])
       )
     );
-    if (aConfirmer) items.push(aConfirmer);
+    if (aConfirmer) {
+      items.push(aConfirmer);
+    }
   }
 
   if (input.allowedIds.has("carburant") && input.prisesCarburant) {
@@ -263,7 +290,7 @@ export function buildFileDuJour(input: FileDuJourInput): FileDuJourItem[] {
   }
 
   if (input.allowedIds.has("vehicules") && input.vehicules) {
-    const vehicules = input.vehicules;
+    const { vehicules } = input;
     const bloque = item(
       "vehicules-bloque",
       "Véhicules indisponibles",
@@ -281,10 +308,17 @@ export function buildFileDuJour(input: FileDuJourInput): FileDuJourItem[] {
       "Indisponibles pour l’exploitation",
       "/vehicules",
       "amber",
-      countBy(vehicules.map((v) => v.statut), new Set(["EN_MAINTENANCE"]))
+      countBy(
+        vehicules.map((v) => v.statut),
+        new Set(["EN_MAINTENANCE"])
+      )
     );
-    if (bloque) items.push(bloque);
-    if (atelier) items.push(atelier);
+    if (bloque) {
+      items.push(bloque);
+    }
+    if (atelier) {
+      items.push(atelier);
+    }
   }
 
   return items.sort((a, b) => {
@@ -306,7 +340,7 @@ export function fileDuJourSummary(
   return {
     categoryCount: items.length,
     topTone: items[0]?.tone ?? null,
-    totalCount: items.reduce((sum, item) => sum + item.count, 0),
+    totalCount: items.reduce((sum, entree) => sum + entree.count, 0),
   };
 }
 

@@ -136,16 +136,16 @@ describe("PaletteEntitySearchStore", () => {
         {
           provide: SessionUtilisateur,
           useValue: {
+            connecter: async () => {},
+            deconnecter: async () => {},
+            hasAnyRole: () => true,
+            isSignedIn: () => true,
+            jetonAcces: async () => null,
             utilisateur: () => ({
               login: "admin",
               nom: null,
               roles: ["ADMINISTRATEUR"],
             }),
-            isSignedIn: () => true,
-            connecter: async () => {},
-            deconnecter: async () => {},
-            jetonAcces: async () => null,
-            hasAnyRole: () => true,
           },
         },
       ],

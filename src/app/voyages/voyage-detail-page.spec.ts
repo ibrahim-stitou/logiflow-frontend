@@ -20,12 +20,16 @@ const EMPTY_PAGE = {
 function flushDetailPageRequest(
   req: ReturnType<HttpTestingController["match"]>[number]
 ): void {
-  const url = req.request.url;
+  const { url } = req.request;
   if (url.includes("/dossiers") || url.includes("/sites")) {
     req.flush(EMPTY_PAGE);
     return;
   }
-  if (url.includes("/vehicules") || url.includes("/remorques") || url.includes("/chauffeurs")) {
+  if (
+    url.includes("/vehicules") ||
+    url.includes("/remorques") ||
+    url.includes("/chauffeurs")
+  ) {
     req.flush({ ...EMPTY_PAGE, pageSize: 50 });
     return;
   }

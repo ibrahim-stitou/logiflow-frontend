@@ -50,13 +50,6 @@ const PALETTE_ENTITY_SOURCES: readonly PaletteEntitySource[] = [
   { badge: "Utilisateur", id: "utilisateurs", serverSearch: true },
 ];
 
-function roleAllowed(
-  roles: readonly Role[],
-  allowed: readonly Role[]
-): boolean {
-  return roles.some((role) => allowed.includes(role));
-}
-
 /** Role-scoped entity list endpoints to query from the palette. */
 export function paletteEntitySourcesForRoles(
   roles: readonly Role[]
@@ -207,9 +200,9 @@ export function utilisateurToPaletteItem(
 export function paletteItemsFromPage(
   source: PaletteEntitySource,
   page: PageResponse<unknown>,
-  query: string
+  _query: string
 ): PaletteItem[] {
-  const content = page.content;
+  const { content } = page;
   switch (source.id) {
     case "sites":
       return content

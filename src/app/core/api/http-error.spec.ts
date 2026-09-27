@@ -3,7 +3,10 @@ import { httpErrorMessage } from "./http-error";
 
 describe("httpErrorMessage", () => {
   it("explains when the backend is unreachable", () => {
-    const error = new HttpErrorResponse({ status: 0, statusText: "Unknown Error" });
+    const error = new HttpErrorResponse({
+      status: 0,
+      statusText: "Unknown Error",
+    });
     expect(httpErrorMessage(error)).toContain("Backend injoignable");
   });
 
@@ -57,13 +60,15 @@ describe("httpErrorMessage", () => {
       status: 503,
       statusText: "Service Unavailable",
     });
-    expect(httpErrorMessage(error)).toContain("Réessaie dans quelques instants");
+    expect(httpErrorMessage(error)).toContain(
+      "Réessaie dans quelques instants"
+    );
     expect(httpErrorMessage(error)).toContain("itinéraire");
   });
 
   it("passes through local Error messages", () => {
-    expect(httpErrorMessage(new Error("L'identifiant client est obligatoire."))).toBe(
-      "L'identifiant client est obligatoire."
-    );
+    expect(
+      httpErrorMessage(new Error("L'identifiant client est obligatoire."))
+    ).toBe("L'identifiant client est obligatoire.");
   });
 });

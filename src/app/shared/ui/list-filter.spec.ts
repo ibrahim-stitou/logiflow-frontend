@@ -58,6 +58,6 @@ describe("statutOptionsFrom", () => {
         (value) => value,
         () => "lucideInbox"
       )
-    ).toEqual([{ label: "A", value: "A", icon: "lucideInbox" }]);
+    ).toEqual([{ icon: "lucideInbox", label: "A", value: "A" }]);
   });
 });

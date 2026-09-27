@@ -1,9 +1,9 @@
-import { inject, Injectable, Injector } from "@angular/core";
+import { Injectable, Injector, inject } from "@angular/core";
 import { toObservable } from "@angular/core/rxjs-interop";
 import { filter, take } from "rxjs";
-import { CopiloteStore } from "../ia/copilote-store";
 import { ZardSheetService } from "@/shared/components/sheet/sheet.service";
 import type { ZardSheetRef } from "@/shared/components/sheet/sheet-ref";
+import { CopiloteStore } from "../ia/copilote-store";
 import { CopilotePanel } from "./copilote-panel";
 
 /**
@@ -33,19 +33,19 @@ export class CopiloteSheetService {
     this.store.ouvrirPanneau();
 
     const ref = this.sheets.create({
+      zCancelText: null,
       zClosable: true,
       zContent: CopilotePanel,
+      zCustomClasses:
+        "h-dvh max-h-dvh min-h-0 gap-0 overflow-hidden p-0 shadow-lg [&_main]:flex [&_main]:min-h-0 [&_main]:flex-1 [&_main]:flex-col [&_main]:gap-0 [&_main]:space-y-0 [&_main]:overflow-hidden [&_main>app-copilote-panel]:flex [&_main>app-copilote-panel]:min-h-0 [&_main>app-copilote-panel]:flex-1 [&_main>app-copilote-panel]:overflow-hidden",
       zHideFooter: true,
       zMaskClosable: true,
       zOkText: null,
-      zCancelText: null,
-      zSide: "right",
-      zWidth: "min(52rem, 100vw)",
-      zCustomClasses:
-        "h-dvh max-h-dvh min-h-0 gap-0 overflow-hidden p-0 shadow-lg [&_main]:flex [&_main]:min-h-0 [&_main]:flex-1 [&_main]:flex-col [&_main]:gap-0 [&_main]:space-y-0 [&_main]:overflow-hidden [&_main>app-copilote-panel]:flex [&_main>app-copilote-panel]:min-h-0 [&_main>app-copilote-panel]:flex-1 [&_main>app-copilote-panel]:overflow-hidden",
       zOnCancel: () => {
         this.syncClosed(ref);
       },
+      zSide: "right",
+      zWidth: "min(52rem, 100vw)",
     });
 
     this.ref = ref;
@@ -58,7 +58,7 @@ export class CopiloteSheetService {
   }
 
   fermer(): void {
-    const ref = this.ref;
+    const { ref } = this;
     if (ref !== null && !ref.isClosing()) {
       ref.close();
       return;

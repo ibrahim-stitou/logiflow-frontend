@@ -74,7 +74,5 @@ export function marchandiseLabelFromLookup(
   marchandisesById: ReadonlyMap<string, Pick<Marchandise, "code" | "libelle">>
 ): string {
   const marchandise = marchandisesById.get(marchandiseId);
-  return marchandise
-    ? formatMarchandiseLabel(marchandise)
-    : marchandiseId;
+  return marchandise ? formatMarchandiseLabel(marchandise) : marchandiseId;
 }

@@ -6,15 +6,22 @@ import {
   input,
   output,
   ViewEncapsulation,
-} from '@angular/core';
+} from "@angular/core";
 
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import { lucideChevronDown, lucideChevronLeft, lucideChevronRight } from '@ng-icons/lucide';
-
-import type { ZardCalendarCaptionLayout } from '@/shared/components/calendar/calendar.types';
-import { calendarMonths, calendarMonthsLong } from '@/shared/components/calendar/calendar.utils';
-import { mergeClasses } from '@/shared/utils/merge-classes';
-
+import { NgIcon, provideIcons } from "@ng-icons/core";
+import {
+  lucideChevronDown,
+  lucideChevronLeft,
+  lucideChevronRight,
+} from "@ng-icons/lucide";
+import { ZardButtonComponent } from "@/shared/components/button/button.component";
+import type { ZardButtonTypeVariants } from "@/shared/components/button/button.variants";
+import type { ZardCalendarCaptionLayout } from "@/shared/components/calendar/calendar.types";
+import {
+  calendarMonths,
+  calendarMonthsLong,
+} from "@/shared/components/calendar/calendar.utils";
+import { mergeClasses } from "@/shared/utils/merge-classes";
 import {
   calendarCaptionLabelVariants,
   calendarCaptionVariants,
@@ -24,13 +31,17 @@ import {
   calendarNavButtonVariants,
   calendarNavSpacerVariants,
   calendarNavVariants,
-} from './calendar.variants';
-import { ZardButtonComponent } from '@/shared/components/button/button.component';
-import type { ZardButtonTypeVariants } from '@/shared/components/button/button.variants';
+} from "./calendar.variants";
 
 @Component({
-  selector: 'z-calendar-navigation',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  exportAs: "zCalendarNavigation",
+  host: {
+    class: "block w-full",
+  },
   imports: [ZardButtonComponent, NgIcon],
+  selector: "z-calendar-navigation",
   template: `
     <div [class]="navClasses()">
       @if (zShowPreviousButton()) {
@@ -122,13 +133,9 @@ import type { ZardButtonTypeVariants } from '@/shared/components/button/button.v
       }
     </div>
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
-  viewProviders: [provideIcons({ lucideChevronDown, lucideChevronLeft, lucideChevronRight })],
-  host: {
-    class: 'block w-full',
-  },
-  exportAs: 'zCalendarNavigation',
+  viewProviders: [
+    provideIcons({ lucideChevronDown, lucideChevronLeft, lucideChevronRight }),
+  ],
 })
 export class ZardCalendarNavigationComponent {
   // Inputs
@@ -137,8 +144,8 @@ export class ZardCalendarNavigationComponent {
   readonly minDate = input<Date | null>(null);
   readonly maxDate = input<Date | null>(null);
   readonly disabled = input<boolean>(false);
-  readonly zCaptionLayout = input<ZardCalendarCaptionLayout>('label');
-  readonly zButtonVariant = input<ZardButtonTypeVariants>('ghost');
+  readonly zCaptionLayout = input<ZardCalendarCaptionLayout>("label");
+  readonly zButtonVariant = input<ZardButtonTypeVariants>("ghost");
   /**
    * In a multi-month calendar only the first month owns the previous arrow and only the last
    * one owns the next arrow. The hidden side keeps a spacer so the caption stays centered.
@@ -153,30 +160,50 @@ export class ZardCalendarNavigationComponent {
   readonly nextMonth = output<void>();
   readonly months = calendarMonths;
 
-  protected readonly navClasses = computed(() => mergeClasses(calendarNavVariants()));
-  protected readonly navButtonClasses = computed(() => mergeClasses(calendarNavButtonVariants()));
-  protected readonly navSpacerClasses = computed(() => mergeClasses(calendarNavSpacerVariants()));
-  protected readonly captionClasses = computed(() => mergeClasses(calendarCaptionVariants()));
-  protected readonly dropdownsClasses = computed(() => mergeClasses(calendarDropdownsVariants()));
-  protected readonly dropdownRootClasses = computed(() => mergeClasses(calendarDropdownRootVariants()));
-  protected readonly dropdownClasses = computed(() => mergeClasses(calendarDropdownVariants()));
+  protected readonly navClasses = computed(() =>
+    mergeClasses(calendarNavVariants())
+  );
+  protected readonly navButtonClasses = computed(() =>
+    mergeClasses(calendarNavButtonVariants())
+  );
+  protected readonly navSpacerClasses = computed(() =>
+    mergeClasses(calendarNavSpacerVariants())
+  );
+  protected readonly captionClasses = computed(() =>
+    mergeClasses(calendarCaptionVariants())
+  );
+  protected readonly dropdownsClasses = computed(() =>
+    mergeClasses(calendarDropdownsVariants())
+  );
+  protected readonly dropdownRootClasses = computed(() =>
+    mergeClasses(calendarDropdownRootVariants())
+  );
+  protected readonly dropdownClasses = computed(() =>
+    mergeClasses(calendarDropdownVariants())
+  );
   protected readonly captionLabelClasses = computed(() =>
-    mergeClasses(calendarCaptionLabelVariants({ layout: this.zCaptionLayout() === 'label' ? 'label' : 'dropdown' })),
+    mergeClasses(
+      calendarCaptionLabelVariants({
+        layout: this.zCaptionLayout() === "label" ? "label" : "dropdown",
+      })
+    )
   );
 
   protected readonly showMonthDropdown = computed(() => {
     const layout = this.zCaptionLayout();
-    return layout === 'dropdown' || layout === 'dropdown-months';
+    return layout === "dropdown" || layout === "dropdown-months";
   });
 
   protected readonly showYearDropdown = computed(() => {
     const layout = this.zCaptionLayout();
-    return layout === 'dropdown' || layout === 'dropdown-years';
+    return layout === "dropdown" || layout === "dropdown-years";
   });
 
   protected readonly availableYears = computed(() => {
-    const minYear = this.minDate()?.getFullYear() ?? new Date().getFullYear() - 10;
-    const maxYear = this.maxDate()?.getFullYear() ?? new Date().getFullYear() + 10;
+    const minYear =
+      this.minDate()?.getFullYear() ?? new Date().getFullYear() - 10;
+    const maxYear =
+      this.maxDate()?.getFullYear() ?? new Date().getFullYear() + 10;
     const years = [];
     for (let i = minYear; i <= maxYear; i++) {
       years.push(i);
@@ -187,20 +214,30 @@ export class ZardCalendarNavigationComponent {
   /** Index of the month the caption points at, falling back to the current one. */
   protected readonly selectedMonthIndex = computed(() => {
     const selectedMonth = Number.parseInt(this.currentMonth());
-    return !Number.isNaN(selectedMonth) && this.months[selectedMonth] ? selectedMonth : new Date().getMonth();
+    return !Number.isNaN(selectedMonth) && this.months[selectedMonth]
+      ? selectedMonth
+      : new Date().getMonth();
   });
 
-  protected readonly currentMonthName = computed(() => this.months[this.selectedMonthIndex()]);
+  protected readonly currentMonthName = computed(
+    () => this.months[this.selectedMonthIndex()]
+  );
 
   /** Full month name, used by the `label`, `dropdown-years` and `dropdown-months` captions. */
   protected readonly longMonthName = computed(() => {
     const parsedMonth = Number.parseInt(this.currentMonth());
-    const month = Number.isNaN(parsedMonth) ? new Date().getMonth() : parsedMonth;
+    const month = Number.isNaN(parsedMonth)
+      ? new Date().getMonth()
+      : parsedMonth;
 
-    return calendarMonthsLong[month] ?? calendarMonthsLong[new Date().getMonth()];
+    return (
+      calendarMonthsLong[month] ?? calendarMonthsLong[new Date().getMonth()]
+    );
   });
 
-  protected readonly monthYearLabel = computed(() => `${this.longMonthName()} ${this.currentYear()}`);
+  protected readonly monthYearLabel = computed(
+    () => `${this.longMonthName()} ${this.currentYear()}`
+  );
 
   protected readonly isPreviousDisabled = computed(() => {
     if (this.disabled()) {

@@ -1,12 +1,12 @@
-import { A11yModule } from '@angular/cdk/a11y';
-import { OverlayModule } from '@angular/cdk/overlay';
+import { A11yModule } from "@angular/cdk/a11y";
+import { OverlayModule } from "@angular/cdk/overlay";
 import {
   BasePortalOutlet,
   CdkPortalOutlet,
   type ComponentPortal,
   PortalModule,
   type TemplatePortal,
-} from '@angular/cdk/portal';
+} from "@angular/cdk/portal";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -19,28 +19,26 @@ import {
   output,
   type TemplateRef,
   type Type,
-  viewChild,
   type ViewContainerRef,
   ViewEncapsulation,
-} from '@angular/core';
+  viewChild,
+} from "@angular/core";
 
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import { lucideX } from '@ng-icons/lucide';
-import type { ClassValue } from 'clsx';
-
-import { ZardIdDirective } from '@/shared/core';
-import { mergeClasses } from '@/shared/utils/merge-classes';
-import { noopFn } from '@/shared/utils/noop';
-
-import type { ZardDialogRef } from './dialog-ref';
+import { NgIcon, provideIcons } from "@ng-icons/core";
+import { lucideX } from "@ng-icons/lucide";
+import type { ClassValue } from "clsx";
+import { ZardButtonComponent } from "@/shared/components/button/button.component";
+import { ZardIdDirective } from "@/shared/core";
+import { mergeClasses } from "@/shared/utils/merge-classes";
+import { noopFn } from "@/shared/utils/noop";
 import {
   dialogDescriptionVariants,
   dialogFooterVariants,
   dialogHeaderVariants,
   dialogTitleVariants,
   dialogVariants,
-} from './dialog.variants';
-import { ZardButtonComponent } from '@/shared/components/button/button.component';
+} from "./dialog.variants";
+import type { ZardDialogRef } from "./dialog-ref";
 
 export type OnClickCallback<T> = (instance: T) => false | void | object;
 export class ZardDialogOptions<T, U> {
@@ -72,8 +70,55 @@ export class ZardDialogOptions<T, U> {
 }
 
 @Component({
-  selector: 'z-dialog',
-  imports: [A11yModule, OverlayModule, PortalModule, ZardButtonComponent, ZardIdDirective, NgIcon],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  exportAs: "zDialog",
+  host: {
+    "[attr.aria-describedby]": "descriptionId()",
+    "[attr.aria-labelledby]": "titleId()",
+    "[class]": "classes()",
+    "[style.--z-dialog-duration]": "durationCss()",
+    "[style.width]": "config.zWidth ? config.zWidth : null",
+    "aria-modal": "true",
+    cdkTrapFocus: "true",
+    cdkTrapFocusAutoCapture: "true",
+    "data-slot": "dialog-content",
+    role: "dialog",
+  },
+  imports: [
+    A11yModule,
+    OverlayModule,
+    PortalModule,
+    ZardButtonComponent,
+    ZardIdDirective,
+    NgIcon,
+  ],
+  selector: "z-dialog",
+  styles: `
+    :host {
+      --z-dialog-duration: 100ms;
+      opacity: 1;
+      transform: scale(1);
+      transition:
+        opacity var(--z-dialog-duration) ease-out,
+        transform var(--z-dialog-duration) ease-out;
+    }
+
+    @starting-style {
+      :host {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+    }
+
+    :host.dialog-leave {
+      opacity: 0;
+      transform: scale(0.9);
+      transition:
+        opacity var(--z-dialog-duration) ease-in,
+        transform var(--z-dialog-duration) ease-in;
+    }
+  `,
   template: `
     <ng-container zardId="z-dialog" #idRef="zardId">
       @if (config.zClosable || config.zClosable === undefined) {
@@ -162,69 +207,37 @@ export class ZardDialogOptions<T, U> {
       }
     </ng-container>
   `,
-  styles: `
-    :host {
-      --z-dialog-duration: 100ms;
-      opacity: 1;
-      transform: scale(1);
-      transition:
-        opacity var(--z-dialog-duration) ease-out,
-        transform var(--z-dialog-duration) ease-out;
-    }
-
-    @starting-style {
-      :host {
-        opacity: 0;
-        transform: scale(0.9);
-      }
-    }
-
-    :host.dialog-leave {
-      opacity: 0;
-      transform: scale(0.9);
-      transition:
-        opacity var(--z-dialog-duration) ease-in,
-        transform var(--z-dialog-duration) ease-in;
-    }
-  `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
   viewProviders: [provideIcons({ lucideX })],
-  host: {
-    '[class]': 'classes()',
-    '[style.width]': 'config.zWidth ? config.zWidth : null',
-    '[style.--z-dialog-duration]': 'durationCss()',
-    'data-slot': 'dialog-content',
-    role: 'dialog',
-    'aria-modal': 'true',
-    '[attr.aria-labelledby]': 'titleId()',
-    '[attr.aria-describedby]': 'descriptionId()',
-    cdkTrapFocus: 'true',
-    cdkTrapFocusAutoCapture: 'true',
-  },
-  exportAs: 'zDialog',
 })
 export class ZardDialogComponent<T, U> extends BasePortalOutlet {
   private readonly host = inject(ElementRef<HTMLElement>);
   protected readonly config = inject(ZardDialogOptions<T, U>);
-  private readonly idRef = viewChild.required<ZardIdDirective>('idRef');
+  private readonly idRef = viewChild.required<ZardIdDirective>("idRef");
 
-  protected readonly classes = computed(() => mergeClasses(dialogVariants(), this.config.zCustomClasses));
+  protected readonly classes = computed(() =>
+    mergeClasses(dialogVariants(), this.config.zCustomClasses)
+  );
   protected readonly headerClasses = computed(() =>
-    mergeClasses(dialogHeaderVariants(), this.config.zHideHeader && 'sr-only'),
+    mergeClasses(dialogHeaderVariants(), this.config.zHideHeader && "sr-only")
   );
 
   protected readonly titleClasses = computed(() => dialogTitleVariants());
-  protected readonly descriptionClasses = computed(() => dialogDescriptionVariants());
+  protected readonly descriptionClasses = computed(() =>
+    dialogDescriptionVariants()
+  );
   protected readonly footerClasses = computed(() => dialogFooterVariants());
-  protected readonly isStringContent = computed(() => typeof this.config.zContent === 'string');
-  protected readonly titleId = computed(() => (this.config.zTitle ? `${this.idRef().id()}-title` : null));
+  protected readonly isStringContent = computed(
+    () => typeof this.config.zContent === "string"
+  );
+  protected readonly titleId = computed(() =>
+    this.config.zTitle ? `${this.idRef().id()}-title` : null
+  );
   protected readonly descriptionId = computed(() =>
-    this.config.zDescription ? `${this.idRef().id()}-description` : null,
+    this.config.zDescription ? `${this.idRef().id()}-description` : null
   );
 
   protected readonly durationCss = computed(() =>
-    this.config.zDuration !== undefined ? `${this.config.zDuration}ms` : null,
+    this.config.zDuration !== undefined ? `${this.config.zDuration}ms` : null
   );
 
   protected isSvgString(icon: string): boolean {
@@ -244,14 +257,18 @@ export class ZardDialogComponent<T, U> extends BasePortalOutlet {
 
   attachComponentPortal<C>(portal: ComponentPortal<C>): ComponentRef<C> {
     if (this.portalOutlet().hasAttached()) {
-      throw new Error('Attempting to attach modal content after content is already attached');
+      throw new Error(
+        "Attempting to attach modal content after content is already attached"
+      );
     }
     return this.portalOutlet().attachComponentPortal(portal);
   }
 
   attachTemplatePortal<C>(portal: TemplatePortal<C>): EmbeddedViewRef<C> {
     if (this.portalOutlet().hasAttached()) {
-      throw new Error('Attempting to attach modal content after content is already attached');
+      throw new Error(
+        "Attempting to attach modal content after content is already attached"
+      );
     }
     return this.portalOutlet().attachTemplatePortal(portal);
   }

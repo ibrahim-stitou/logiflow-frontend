@@ -11,10 +11,6 @@ import { LIST_TABLE_ROW_ICON_PROVIDERS } from "./list-table-row-icons";
   },
   imports: [NgIcon],
   selector: "app-inner-page-header",
-  viewProviders: [
-    provideIcons({ lucideLayoutDashboard }),
-    LIST_TABLE_ROW_ICON_PROVIDERS,
-  ],
   template: `
     <div class="inner-page-header__row">
       @if (icon()) {
@@ -38,6 +34,10 @@ import { LIST_TABLE_ROW_ICON_PROVIDERS } from "./list-table-row-icons";
       </div>
     </div>
   `,
+  viewProviders: [
+    provideIcons({ lucideLayoutDashboard }),
+    LIST_TABLE_ROW_ICON_PROVIDERS,
+  ],
 })
 export class InnerPageHeader {
   readonly description = input<string>();

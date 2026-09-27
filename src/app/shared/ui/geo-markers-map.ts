@@ -224,9 +224,9 @@ export class GeoMarkersMap implements AfterViewInit {
       }
       const latLng = L.latLng(marker.latitude, marker.longitude);
       boundsPoints.push(latLng);
-      const leafletMarker = L.marker(latLng, { icon: GEO_MARKER_ICON }).bindPopup(
-        marker.label
-      );
+      const leafletMarker = L.marker(latLng, {
+        icon: GEO_MARKER_ICON,
+      }).bindPopup(marker.label);
       leafletMarker.addTo(this.layer);
       if (marker.id) {
         this.markersById.set(marker.id, leafletMarker);

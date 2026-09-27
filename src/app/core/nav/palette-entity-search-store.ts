@@ -4,15 +4,15 @@ import { firstValueFrom } from "rxjs";
 import { environment } from "../../../environments/environment";
 import type { PageResponse } from "../api/page-response";
 import { SessionUtilisateur } from "../auth/session";
-import type { PaletteItem } from "./palette-items";
 import {
   PALETTE_ENTITY_CLIENT_SCAN_SIZE,
   PALETTE_ENTITY_PAGE_SIZE,
+  type PaletteEntitySource,
   paletteEntityQueryReady,
   paletteEntitySourcesForRoles,
   paletteItemsFromPage,
-  type PaletteEntitySource,
 } from "./palette-entity-search";
+import type { PaletteItem } from "./palette-items";
 
 const PALETTE_ENTITY_DEBOUNCE_MS = 200;
 

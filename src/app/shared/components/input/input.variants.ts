@@ -13,9 +13,9 @@ export const inputVariants = cva(
     "aria-invalid:border-destructive/55 aria-invalid:bg-destructive/4 aria-invalid:ring-0",
     "aria-invalid:focus-visible:border-destructive aria-invalid:focus-visible:shadow-[0_0_0_3px_color-mix(in_oklch,var(--color-brake)_12%,transparent)]",
     "sm:text-sm",
-  ].join(" "),
+  ].join(" ")
 );
 
 export const inputGroupInputVariants = cva(
-  "flex-1 rounded-none border-0 bg-transparent shadow-none ring-0 focus-visible:ring-0 disabled:bg-transparent aria-invalid:ring-0 dark:bg-transparent dark:disabled:bg-transparent",
+  "flex-1 rounded-none border-0 bg-transparent shadow-none ring-0 focus-visible:ring-0 disabled:bg-transparent aria-invalid:ring-0 dark:bg-transparent dark:disabled:bg-transparent"
 );

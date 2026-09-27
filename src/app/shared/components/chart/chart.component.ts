@@ -1,4 +1,4 @@
-import { isPlatformBrowser } from '@angular/common';
+import { isPlatformBrowser } from "@angular/common";
 import {
   afterRenderEffect,
   booleanAttribute,
@@ -7,8 +7,8 @@ import {
   computed,
   contentChild,
   DestroyRef,
-  effect,
   ElementRef,
+  effect,
   forwardRef,
   inject,
   input,
@@ -19,30 +19,16 @@ import {
   signal,
   untracked,
   ViewEncapsulation,
-} from '@angular/core';
-import { DomSanitizer, type SafeHtml } from '@angular/platform-browser';
+} from "@angular/core";
+import { DomSanitizer, type SafeHtml } from "@angular/platform-browser";
 
-import type { ClassValue } from 'clsx';
-import type { EChartsOption } from 'echarts';
-import type { ECElementEvent, EChartsType } from 'echarts/core';
-import { NgxEchartsDirective } from 'ngx-echarts';
+import type { ClassValue } from "clsx";
+import type { EChartsOption } from "echarts";
+import type { ECElementEvent, EChartsType } from "echarts/core";
+import { NgxEchartsDirective } from "ngx-echarts";
 
-import { EDarkModes, ZardDarkMode } from '@/shared/services/dark-mode';
-import { mergeClasses } from '@/shared/utils/merge-classes';
-
-import { resolveChartChrome, resolveChartColors, resolveCssColor } from './chart-colors.util';
-import { ZARD_CHART, type ZardChartHost } from './chart-context';
-import { ZardChartLegendComponent } from './chart-legend.component';
-import {
-  buildChartOption,
-  buildLegendEntries,
-  deepMerge,
-  normalizeSeries,
-  resolveOptionColors,
-  type ZardChartBuildContext,
-} from './chart-option.builder';
-import { renderChartToSvg, type ZardEchartsSsrApi } from './chart-ssr.util';
-import { ZardChartTooltipComponent } from './chart-tooltip.component';
+import { EDarkModes, ZardDarkMode } from "@/shared/services/dark-mode";
+import { mergeClasses } from "@/shared/utils/merge-classes";
 import type {
   ZardChartConfig,
   ZardChartDatum,
@@ -55,8 +41,25 @@ import type {
   ZardChartSeriesInput,
   ZardChartStackOffset,
   ZardChartType,
-} from './chart.types';
-import { chartCanvasVariants, chartVariants } from './chart.variants';
+} from "./chart.types";
+import { chartCanvasVariants, chartVariants } from "./chart.variants";
+import {
+  resolveChartChrome,
+  resolveChartColors,
+  resolveCssColor,
+} from "./chart-colors.util";
+import { ZARD_CHART, type ZardChartHost } from "./chart-context";
+import { ZardChartLegendComponent } from "./chart-legend.component";
+import {
+  buildChartOption,
+  buildLegendEntries,
+  deepMerge,
+  normalizeSeries,
+  resolveOptionColors,
+  type ZardChartBuildContext,
+} from "./chart-option.builder";
+import { renderChartToSvg, type ZardEchartsSsrApi } from "./chart-ssr.util";
+import { ZardChartTooltipComponent } from "./chart-tooltip.component";
 
 /**
  * `numberAttribute` answers `NaN` for anything it cannot read — `undefined`, `null`, or a
@@ -70,17 +73,31 @@ function optionalNumberAttribute(value: unknown): number | undefined {
 
 /** Same guard, for the inputs that must always end up with a number. */
 function numberAttributeOr(fallback: number): (value: unknown) => number {
-  return value => numberAttribute(value, fallback);
+  return (value) => numberAttribute(value, fallback);
 }
 
 /** The canvas is measured on every resize; only a real change should redraw the chart. */
-function sameSize(a: { width: number; height: number }, b: { width: number; height: number }): boolean {
+function sameSize(
+  a: { width: number; height: number },
+  b: { width: number; height: number }
+): boolean {
   return a.width === b.width && a.height === b.height;
 }
 
 @Component({
-  selector: 'z-chart',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  exportAs: "zChart",
+  host: {
+    "[class]": "classes()",
+    "data-slot": "chart",
+    ngSkipHydration: "true",
+  },
   imports: [NgxEchartsDirective],
+  providers: [
+    { provide: ZARD_CHART, useExisting: forwardRef(() => ZardChartComponent) },
+  ],
+  selector: "z-chart",
   template: `
     @if (ssrSvg(); as svg) {
       <div [class]="canvasClasses()" [attr.role]="hostRole()" [attr.aria-label]="ariaLabel()" [innerHTML]="svg"></div>
@@ -101,15 +118,6 @@ function sameSize(a: { width: number; height: number }, b: { width: number; heig
     }
     <ng-content />
   `,
-  providers: [{ provide: ZARD_CHART, useExisting: forwardRef(() => ZardChartComponent) }],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None,
-  host: {
-    'data-slot': 'chart',
-    ngSkipHydration: 'true',
-    '[class]': 'classes()',
-  },
-  exportAs: 'zChart',
 })
 export class ZardChartComponent implements ZardChartHost {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
@@ -119,24 +127,24 @@ export class ZardChartComponent implements ZardChartHost {
   private readonly destroyRef = inject(DestroyRef);
   private readonly pendingTasks = inject(PendingTasks);
 
-  readonly class = input<ClassValue>('');
+  readonly class = input<ClassValue>("");
   readonly zConfig = input<ZardChartConfig>({});
   readonly zData = input<readonly ZardChartDatum[]>([]);
-  readonly zType = input<ZardChartType>('bar');
+  readonly zType = input<ZardChartType>("bar");
   readonly zSeries = input<ZardChartSeriesInput>([]);
   readonly zXAxisKey = input<string>();
   readonly zNameKey = input<string>();
   readonly zStacked = input(false, { transform: booleanAttribute });
-  readonly zStackOffset = input<ZardChartStackOffset>('none');
+  readonly zStackOffset = input<ZardChartStackOffset>("none");
   readonly zHorizontal = input(false, { transform: booleanAttribute });
-  readonly zGrid = input<ZardChartGrid>('horizontal');
+  readonly zGrid = input<ZardChartGrid>("horizontal");
   readonly zXAxis = input(true, { transform: booleanAttribute });
   readonly zYAxis = input(false, { transform: booleanAttribute });
   readonly zXAxisFormatter = input<(value: string) => string>();
   readonly zYAxisFormatter = input<(value: number) => string>();
   readonly zInnerRadius = input<string | number>();
   readonly zOuterRadius = input<string | number>();
-  readonly zRadialVariant = input<ZardChartRadialVariant>('bar');
+  readonly zRadialVariant = input<ZardChartRadialVariant>("bar");
   readonly zTrack = input(true, { transform: booleanAttribute });
   /** Radial only: writes each category's name along its own ring, like Recharts' `<LabelList>`. */
   readonly zRadialLabel = input(false, { transform: booleanAttribute });
@@ -145,10 +153,14 @@ export class ZardChartComponent implements ZardChartHost {
    * where someone can see it. Turn off to draw as soon as the component is created.
    */
   readonly zLazyRender = input(true, { transform: booleanAttribute });
-  readonly zRadarShape = input<ZardChartRadarShape>('polygon');
+  readonly zRadarShape = input<ZardChartRadarShape>("polygon");
   readonly zRadarRadialLines = input(true, { transform: booleanAttribute });
-  readonly zStartAngle = input<number | undefined>(undefined, { transform: optionalNumberAttribute });
-  readonly zEndAngle = input<number | undefined>(undefined, { transform: optionalNumberAttribute });
+  readonly zStartAngle = input<number | undefined>(undefined, {
+    transform: optionalNumberAttribute,
+  });
+  readonly zEndAngle = input<number | undefined>(undefined, {
+    transform: optionalNumberAttribute,
+  });
   readonly zPadAngle = input(0, { transform: numberAttributeOr(0) });
   readonly zGradient = input(false, { transform: booleanAttribute });
   readonly zLabel = input(false, { transform: booleanAttribute });
@@ -159,7 +171,7 @@ export class ZardChartComponent implements ZardChartHost {
   readonly zDataZoom = input(false, { transform: booleanAttribute });
   readonly zBrush = input(false, { transform: booleanAttribute });
   readonly zToolbox = input(false, { transform: booleanAttribute });
-  readonly zRenderer = input<ZardChartRenderer>('canvas');
+  readonly zRenderer = input<ZardChartRenderer>("canvas");
   readonly zSsrWidth = input(600, { transform: numberAttributeOr(600) });
   readonly zSsrHeight = input(300, { transform: numberAttributeOr(300) });
   readonly zOption = input<ZardChartOptionOverride>({});
@@ -181,7 +193,10 @@ export class ZardChartComponent implements ZardChartHost {
    * re-applies it with `notMerge`, which replays the entry animation and clears the legend
    * selection the HTML legend is holding.
    */
-  private readonly canvasSize = signal({ width: 0, height: 0 }, { equal: sameSize });
+  private readonly canvasSize = signal(
+    { height: 0, width: 0 },
+    { equal: sameSize }
+  );
   private readonly coarsePointer = signal(false);
   /** Flips once, the first time the chart is scrolled into view. */
   private readonly seen = signal(false);
@@ -210,25 +225,32 @@ export class ZardChartComponent implements ZardChartHost {
 
   /** The chart inherits the page's typeface, so the arc labels have to measure with it too. */
   private hostFontFamily(): string {
-    if (!this.isBrowser || typeof globalThis.getComputedStyle !== 'function') {
-      return 'sans-serif';
+    if (!this.isBrowser || typeof globalThis.getComputedStyle !== "function") {
+      return "sans-serif";
     }
 
     try {
-      return globalThis.getComputedStyle(this.elementRef.nativeElement as HTMLElement).fontFamily || 'sans-serif';
+      return (
+        globalThis.getComputedStyle(
+          this.elementRef.nativeElement as HTMLElement
+        ).fontFamily || "sans-serif"
+      );
     } catch {
-      return 'sans-serif';
+      return "sans-serif";
     }
   }
 
   private watchCanvasSize(): void {
-    if (!this.isBrowser || typeof globalThis.ResizeObserver !== 'function') {
+    if (!this.isBrowser || typeof globalThis.ResizeObserver !== "function") {
       return;
     }
 
     const host = this.elementRef.nativeElement as HTMLElement;
     const observer = new globalThis.ResizeObserver(() =>
-      this.canvasSize.set({ width: host.clientWidth, height: host.clientHeight }),
+      this.canvasSize.set({
+        height: host.clientHeight,
+        width: host.clientWidth,
+      })
     );
     observer.observe(host);
     this.destroyRef.onDestroy(() => observer.disconnect());
@@ -236,26 +258,31 @@ export class ZardChartComponent implements ZardChartHost {
 
   // The live chart is a browser affair: on the server the SVG below is all there is, and
   // instantiating the ngx-echarts directive there would ask for a ResizeObserver that is absent.
-  protected readonly onScreen = computed(() => this.isBrowser && (this.seen() || !this.zLazyRender()));
+  protected readonly onScreen = computed(
+    () => this.isBrowser && (this.seen() || !this.zLazyRender())
+  );
 
   private watchVisibility(): void {
     const host = this.elementRef.nativeElement as HTMLElement;
 
-    if (!this.isBrowser || typeof globalThis.IntersectionObserver !== 'function') {
+    if (
+      !this.isBrowser ||
+      typeof globalThis.IntersectionObserver !== "function"
+    ) {
       this.seen.set(true);
       return;
     }
 
     const observer = new globalThis.IntersectionObserver(
-      entries => {
-        if (!entries.some(entry => entry.isIntersecting)) {
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) {
           return;
         }
         this.seen.set(true);
         observer.disconnect();
       },
       // A sliver on screen is enough: the chart should be drawing as it comes up, not after.
-      { threshold: 0.1 },
+      { threshold: 0.1 }
     );
 
     observer.observe(host);
@@ -263,15 +290,19 @@ export class ZardChartComponent implements ZardChartHost {
   }
 
   private watchPointerType(): void {
-    this.watchMedia('(pointer: coarse)', matches => this.coarsePointer.set(matches));
+    this.watchMedia("(pointer: coarse)", (matches) =>
+      this.coarsePointer.set(matches)
+    );
   }
 
   private watchMotionPreference(): void {
-    this.watchMedia('(prefers-reduced-motion: reduce)', matches => this.reducedMotion.set(matches));
+    this.watchMedia("(prefers-reduced-motion: reduce)", (matches) =>
+      this.reducedMotion.set(matches)
+    );
   }
 
   private watchMedia(query: string, apply: (matches: boolean) => void): void {
-    if (!this.isBrowser || typeof globalThis.matchMedia !== 'function') {
+    if (!this.isBrowser || typeof globalThis.matchMedia !== "function") {
       return;
     }
 
@@ -279,14 +310,16 @@ export class ZardChartComponent implements ZardChartHost {
     apply(media.matches);
 
     const listener = (event: MediaQueryListEvent) => apply(event.matches);
-    media.addEventListener('change', listener);
-    this.destroyRef.onDestroy(() => media.removeEventListener('change', listener));
+    media.addEventListener("change", listener);
+    this.destroyRef.onDestroy(() =>
+      media.removeEventListener("change", listener)
+    );
   }
 
   private scheduleColorRefresh(): void {
-    const bump = () => this.colorRevision.update(value => value + 1);
+    const bump = () => this.colorRevision.update((value) => value + 1);
 
-    if (typeof globalThis.requestAnimationFrame === 'function') {
+    if (typeof globalThis.requestAnimationFrame === "function") {
       globalThis.requestAnimationFrame(bump);
       return;
     }
@@ -295,76 +328,80 @@ export class ZardChartComponent implements ZardChartHost {
   }
 
   /** Flattens the declarative `z-chart-tooltip` child into plain data for the builder. */
-  private readonly tooltipContext = computed<ZardChartBuildContext['tooltip']>(() => {
-    const tooltip = this.tooltipRef();
-    if (!tooltip) {
-      return null;
-    }
+  private readonly tooltipContext = computed<ZardChartBuildContext["tooltip"]>(
+    () => {
+      const tooltip = this.tooltipRef();
+      if (!tooltip) {
+        return null;
+      }
 
-    return {
-      indicator: tooltip.zIndicator(),
-      trigger: tooltip.zTrigger(),
-      hideLabel: tooltip.zHideLabel(),
-      hideIndicator: tooltip.zHideIndicator(),
-      labelKey: tooltip.zLabelKey(),
-      nameKey: tooltip.zNameKey(),
-      labelFormatter: tooltip.zLabelFormatter(),
-      valueFormatter: tooltip.zValueFormatter(),
-      class: mergeClasses(tooltip.class()),
-      labelClass: mergeClasses(tooltip.zLabelClass()),
-      cursor: tooltip.zCursor(),
-    };
-  });
+      return {
+        class: mergeClasses(tooltip.class()),
+        cursor: tooltip.zCursor(),
+        hideIndicator: tooltip.zHideIndicator(),
+        hideLabel: tooltip.zHideLabel(),
+        indicator: tooltip.zIndicator(),
+        labelClass: mergeClasses(tooltip.zLabelClass()),
+        labelFormatter: tooltip.zLabelFormatter(),
+        labelKey: tooltip.zLabelKey(),
+        nameKey: tooltip.zNameKey(),
+        trigger: tooltip.zTrigger(),
+        valueFormatter: tooltip.zValueFormatter(),
+      };
+    }
+  );
 
   private readonly buildContext = computed<ZardChartBuildContext>(() => {
     this.colorRevision();
 
-    const host = this.isBrowser ? (this.elementRef.nativeElement as HTMLElement) : null;
+    const host = this.isBrowser
+      ? (this.elementRef.nativeElement as HTMLElement)
+      : null;
     const isDark = this.darkMode.themeMode() === EDarkModes.DARK;
     const config = this.zConfig();
 
     return {
-      type: this.zType(),
-      data: this.zData(),
-      config,
-      series: this.zSeries(),
-      xAxisKey: this.zXAxisKey(),
-      nameKey: this.zNameKey(),
-      stacked: this.zStacked(),
-      stackOffset: this.zStackOffset(),
-      horizontal: this.zHorizontal(),
-      grid: this.zGrid(),
-      xAxis: this.zXAxis(),
-      yAxis: this.zYAxis(),
-      xAxisFormatter: this.zXAxisFormatter(),
-      yAxisFormatter: this.zYAxisFormatter(),
-      innerRadius: this.zInnerRadius(),
-      outerRadius: this.zOuterRadius(),
-      radialVariant: this.zRadialVariant(),
-      track: this.zTrack(),
-      radialLabel: this.zRadialLabel(),
-      size: this.canvasSize(),
-      fontFamily: this.hostFontFamily(),
-      coarsePointer: this.coarsePointer(),
-      radarShape: this.zRadarShape(),
-      radarRadialLines: this.zRadarRadialLines(),
-      startAngle: this.zStartAngle(),
-      endAngle: this.zEndAngle(),
-      padAngle: this.zPadAngle(),
-      gradient: this.zGradient(),
-      label: this.zLabel(),
-      centerValue: this.zCenterValue(),
-      centerLabel: this.zCenterLabel(),
       accessibility: this.zAccessibility(),
       animation: this.zAnimation() && !this.reducedMotion(),
-      dataZoom: this.zDataZoom(),
       brush: this.zBrush(),
-      toolbox: this.zToolbox(),
-      colors: resolveChartColors(host, config, isDark),
+      centerLabel: this.zCenterLabel(),
+      centerValue: this.zCenterValue(),
       chrome: resolveChartChrome(host),
+      coarsePointer: this.coarsePointer(),
+      colors: resolveChartColors(host, config, isDark),
+      config,
+      data: this.zData(),
+      dataZoom: this.zDataZoom(),
+      endAngle: this.zEndAngle(),
+      fontFamily: this.hostFontFamily(),
+      gradient: this.zGradient(),
+      grid: this.zGrid(),
       hasLegend: !!this.legendRef(),
+      horizontal: this.zHorizontal(),
+      innerRadius: this.zInnerRadius(),
+      label: this.zLabel(),
+      nameKey: this.zNameKey(),
+      outerRadius: this.zOuterRadius(),
+      padAngle: this.zPadAngle(),
+      radarRadialLines: this.zRadarRadialLines(),
+      radarShape: this.zRadarShape(),
+      radialLabel: this.zRadialLabel(),
+      radialVariant: this.zRadialVariant(),
       resolveColor: (value: string) => resolveCssColor(host, value),
+      series: this.zSeries(),
+      size: this.canvasSize(),
+      stacked: this.zStacked(),
+      stackOffset: this.zStackOffset(),
+      startAngle: this.zStartAngle(),
+      toolbox: this.zToolbox(),
       tooltip: this.tooltipContext(),
+      track: this.zTrack(),
+      type: this.zType(),
+      xAxis: this.zXAxis(),
+      xAxisFormatter: this.zXAxisFormatter(),
+      xAxisKey: this.zXAxisKey(),
+      yAxis: this.zYAxis(),
+      yAxisFormatter: this.zYAxisFormatter(),
     };
   });
 
@@ -374,9 +411,13 @@ export class ZardChartComponent implements ZardChartHost {
     return resolveOptionColors(merged, context.resolveColor);
   });
 
-  readonly legendEntries = computed<ZardChartLegendEntry[]>(() => buildLegendEntries(this.buildContext()));
+  readonly legendEntries = computed<ZardChartLegendEntry[]>(() =>
+    buildLegendEntries(this.buildContext())
+  );
 
-  protected readonly initOpts = computed(() => ({ renderer: this.zRenderer() }));
+  protected readonly initOpts = computed(() => ({
+    renderer: this.zRenderer(),
+  }));
 
   /** The static picture the server paints. Always null in the browser. */
   protected readonly ssrSvg = signal<SafeHtml | null>(null);
@@ -394,14 +435,21 @@ export class ZardChartComponent implements ZardChartHost {
     }
 
     this.pendingTasks.run(async () => {
-      const { zardEcharts } = await import('./chart-echarts.registry');
+      const { zardEcharts } = await import("./chart-echarts.registry");
       const api = zardEcharts as unknown as ZardEchartsSsrApi;
-      const svg = renderChartToSvg(api, this.option(), this.zSsrWidth(), this.zSsrHeight());
+      const svg = renderChartToSvg(
+        api,
+        this.option(),
+        this.zSsrWidth(),
+        this.zSsrHeight()
+      );
       this.ssrSvg.set(svg ? this.sanitizer.bypassSecurityTrustHtml(svg) : null);
     });
   }
 
-  protected readonly hostRole = computed(() => (this.zAccessibility() ? 'img' : null));
+  protected readonly hostRole = computed(() =>
+    this.zAccessibility() ? "img" : null
+  );
 
   protected readonly ariaLabel = computed(() => {
     if (!this.zAccessibility()) {
@@ -410,15 +458,23 @@ export class ZardChartComponent implements ZardChartHost {
 
     const config = this.zConfig();
     const labels = normalizeSeries(this.zSeries())
-      .map(definition => config[definition.dataKey]?.label ?? definition.dataKey)
+      .map(
+        (definition) => config[definition.dataKey]?.label ?? definition.dataKey
+      )
       .filter(Boolean);
 
-    return labels.length > 0 ? `${this.zType()} chart of ${labels.join(', ')}` : `${this.zType()} chart`;
+    return labels.length > 0
+      ? `${this.zType()} chart of ${labels.join(", ")}`
+      : `${this.zType()} chart`;
   });
 
-  protected readonly classes = computed(() => mergeClasses(chartVariants({ zType: this.zType() }), this.class()));
+  protected readonly classes = computed(() =>
+    mergeClasses(chartVariants({ zType: this.zType() }), this.class())
+  );
 
-  protected readonly canvasClasses = computed(() => mergeClasses(chartCanvasVariants()));
+  protected readonly canvasClasses = computed(() =>
+    mergeClasses(chartCanvasVariants())
+  );
 
   protected onChartInit(instance: EChartsType): void {
     this.chartInstance.set(instance);
@@ -447,7 +503,7 @@ export class ZardChartComponent implements ZardChartHost {
       }
 
       for (const name of hidden) {
-        instance.dispatchAction({ type: 'legendUnSelect', name });
+        instance.dispatchAction({ name, type: "legendUnSelect" });
       }
     });
   }
@@ -461,14 +517,16 @@ export class ZardChartComponent implements ZardChartHost {
 
     // Cleared on destroy: the chart can be torn down in the same tick it was created — a route
     // change, a category switch — and ECharts throws when an action reaches a disposed instance.
-    const timer = setTimeout(() => instance.dispatchAction({ type: 'showTip', seriesIndex: 0, dataIndex }));
+    const timer = setTimeout(() =>
+      instance.dispatchAction({ dataIndex, seriesIndex: 0, type: "showTip" })
+    );
     this.destroyRef.onDestroy(() => clearTimeout(timer));
   }
 
   toggleSeries(name: string): void {
-    this.chartInstance()?.dispatchAction({ type: 'legendToggleSelect', name });
+    this.chartInstance()?.dispatchAction({ name, type: "legendToggleSelect" });
 
-    this.hiddenSeries.update(current => {
+    this.hiddenSeries.update((current) => {
       const next = new Set(current);
       if (next.has(name)) {
         next.delete(name);

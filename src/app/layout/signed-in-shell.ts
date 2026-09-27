@@ -37,9 +37,9 @@ import {
   lucideX,
 } from "@ng-icons/lucide";
 import { filter } from "rxjs";
-import { SessionUtilisateur } from "../core/auth/session";
 import { environment } from "../../environments/environment";
 import { roleLabel } from "../core/auth/role";
+import { SessionUtilisateur } from "../core/auth/session";
 import { DESTINATION_NAV_ICON, TABLEAU_NAV_ICON } from "../core/nav/nav-icon";
 import {
   destinationNavGroupsForRoles,
@@ -119,7 +119,7 @@ export class SignedInShell {
   });
 
   protected readonly navGroups = computed(() =>
-    destinationNavGroupsForRoles(this.session.utilisateur()?.roles ?? []),
+    destinationNavGroupsForRoles(this.session.utilisateur()?.roles ?? [])
   );
 
   protected readonly fileDuJourSectionId = FILE_DU_JOUR_SECTION_ID;

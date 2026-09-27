@@ -7,18 +7,25 @@ import {
   input,
   signal,
 } from "@angular/core";
-import { bindShellBreadcrumbLeaf } from "../core/nav/shell-breadcrumb-leaf";
 import { RouterLink } from "@angular/router";
 import { environment } from "../../environments/environment";
 import { httpErrorMessage } from "../core/api/http-error";
 import type { PageResponse } from "../core/api/page-response";
-import { SessionUtilisateur } from "../core/auth/session";
 import { DOSSIERS_PLAN_ROLES } from "../core/auth/role";
-import { statutDossierLabel, type Dossier } from "../dossiers/dossier";
+import { SessionUtilisateur } from "../core/auth/session";
+import { bindShellBreadcrumbLeaf } from "../core/nav/shell-breadcrumb-leaf";
+import { type Dossier, statutDossierLabel } from "../dossiers/dossier";
 import {
-  marchandiseLabelFromLookup,
   type Marchandise,
+  marchandiseLabelFromLookup,
 } from "../marchandises/marchandise";
+import { FICHE_PAGE_IMPORTS } from "../shared/ui/fiche-page";
+import { statutOptionsFrom } from "../shared/ui/list-filter";
+import { statutIconForValue } from "../shared/ui/list-statut-filter";
+import { commandeStatutIcon } from "../shared/ui/list-statut-icons";
+import { StatutChip } from "../shared/ui/statut-chip";
+import { ToastService } from "../shared/ui/toast";
+import { commandeStatutTone } from "../tableau/apercu";
 import {
   type Client,
   type Commande,
@@ -28,13 +35,6 @@ import {
   STATUT_COMMANDES,
   statutCommandeLabel,
 } from "./commande";
-import { statutOptionsFrom } from "../shared/ui/list-filter";
-import { commandeStatutIcon } from "../shared/ui/list-statut-icons";
-import { statutIconForValue } from "../shared/ui/list-statut-filter";
-import { FICHE_PAGE_IMPORTS } from "../shared/ui/fiche-page";
-import { ToastService } from "../shared/ui/toast";
-import { StatutChip } from "../shared/ui/statut-chip";
-import { commandeStatutTone } from "../tableau/apercu";
 import { CommandeApi } from "./commande-api";
 
 @Component({
@@ -93,15 +93,17 @@ export class CommandeDetailPage {
   protected readonly client = computed(() => {
     const clientId = this.commande.value()?.clientId;
     if (!clientId) {
-      return undefined;
+      return;
     }
     return this.clients.value()?.content.find((entry) => entry.id === clientId);
   });
 
-  protected readonly marchandises = httpResource<PageResponse<Marchandise>>(() => ({
-    params: { page: 0, size: 50 },
-    url: `${environment.apiBaseUrl}/marchandises`,
-  }));
+  protected readonly marchandises = httpResource<PageResponse<Marchandise>>(
+    () => ({
+      params: { page: 0, size: 50 },
+      url: `${environment.apiBaseUrl}/marchandises`,
+    })
+  );
 
   protected readonly marchandisesById = computed(() => {
     const map = new Map<string, Pick<Marchandise, "code" | "libelle">>();
@@ -114,10 +116,12 @@ export class CommandeDetailPage {
   protected readonly marchandiseLabel = (marchandiseId: string): string =>
     marchandiseLabelFromLookup(marchandiseId, this.marchandisesById());
 
-  protected readonly dossiersLiees = httpResource<PageResponse<Dossier>>(() => ({
-    params: { commandeId: this.id() },
-    url: `${environment.apiBaseUrl}/dossiers`,
-  }));
+  protected readonly dossiersLiees = httpResource<PageResponse<Dossier>>(
+    () => ({
+      params: { commandeId: this.id() },
+      url: `${environment.apiBaseUrl}/dossiers`,
+    })
+  );
 
   protected readonly dossiersList = computed(
     () => this.dossiersLiees.value()?.content ?? []

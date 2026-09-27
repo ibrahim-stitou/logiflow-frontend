@@ -1,8 +1,9 @@
 import { Component, inject, signal } from "@angular/core";
 import { FormField, form, required, submit } from "@angular/forms/signals";
+import { ActivatedRoute, Router } from "@angular/router";
 import { NgIcon, provideIcons } from "@ng-icons/core";
 import { lucideTruck } from "@ng-icons/lucide";
-import { ActivatedRoute, Router } from "@angular/router";
+import { environment } from "../../environments/environment";
 import {
   DEMO_IDENTITIES,
   DEMO_PASSWORD,
@@ -13,7 +14,6 @@ import { roleLabel } from "../core/auth/role";
 import { SessionUtilisateur } from "../core/auth/session";
 import { firstFieldError } from "../core/forms/first-field-error";
 import { fieldClasses, showFieldError } from "../core/forms/show-field-error";
-import { environment } from "../../environments/environment";
 
 @Component({
   imports: [FormField, NgIcon],
@@ -80,9 +80,7 @@ export class SignInPage {
       }
       const retour =
         this.route.snapshot.queryParamMap.get("retour")?.trim() || "/";
-      await this.router.navigateByUrl(
-        retour.startsWith("/") ? retour : "/"
-      );
+      await this.router.navigateByUrl(retour.startsWith("/") ? retour : "/");
     });
   }
 }

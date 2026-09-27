@@ -1,7 +1,7 @@
 import { inject } from "@angular/core";
 import { type CanActivateFn, Router } from "@angular/router";
-import { SessionUtilisateur } from "./session";
 import { isRole, type Role } from "./role";
+import { SessionUtilisateur } from "./session";
 
 export const signedInGuard: CanActivateFn = (_route, state) => {
   const session = inject(SessionUtilisateur);

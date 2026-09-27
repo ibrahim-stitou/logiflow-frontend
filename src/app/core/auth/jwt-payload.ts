@@ -22,7 +22,9 @@ export function decoderPayloadJwt(
   }
 }
 
-export function lireRealmRoles(payload: Record<string, unknown> | null): string[] {
+export function lireRealmRoles(
+  payload: Record<string, unknown> | null
+): string[] {
   if (!payload) {
     return [];
   }

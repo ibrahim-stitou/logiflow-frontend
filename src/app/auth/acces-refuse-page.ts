@@ -2,9 +2,9 @@ import { Component, computed, inject } from "@angular/core";
 import { Router, RouterLink } from "@angular/router";
 import { NgIcon, provideIcons } from "@ng-icons/core";
 import { lucideLayoutDashboard, lucideLogOut } from "@ng-icons/lucide";
-import { SessionUtilisateur } from "../core/auth/session";
 import { environment } from "../../environments/environment";
 import { roleLabel } from "../core/auth/role";
+import { SessionUtilisateur } from "../core/auth/session";
 
 @Component({
   imports: [NgIcon, RouterLink],

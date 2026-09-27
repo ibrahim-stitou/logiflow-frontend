@@ -53,7 +53,6 @@ describe("DossierCreatePage", () => {
             clientId: "11111111-1111-1111-1111-111111111111",
             dateSouhaitee: "2026-09-10",
             id: "cccccccc-cccc-cccc-cccc-cccccccccccc",
-            prixNegocie: { devise: "EUR", montant: 1500 },
             lignes: [
               {
                 marchandiseId: "dddddddd-dddd-dddd-dddd-dddddddddddd",
@@ -62,6 +61,7 @@ describe("DossierCreatePage", () => {
                 volumeM3: 2.5,
               },
             ],
+            prixNegocie: { devise: "EUR", montant: 1500 },
             reference: "CMD-2026-00001",
             statut: "CONFIRMEE",
           },
@@ -100,17 +100,19 @@ describe("DossierCreatePage", () => {
       siteSelectOptions: () => readonly { label: string }[];
     };
     expect(
-      page.commandeSelectOptions().some((option) =>
-        option.label.includes("CMD-2026-00001")
-      )
+      page
+        .commandeSelectOptions()
+        .some((option) => option.label.includes("CMD-2026-00001"))
     ).toBe(true);
     expect(
-      page.siteSelectOptions().some((option) => option.label.includes("SITE-PARIS"))
+      page
+        .siteSelectOptions()
+        .some((option) => option.label.includes("SITE-PARIS"))
     ).toBe(true);
     expect(
-      page.marchandiseSelectOptions().some((option) =>
-        option.label.includes("MARCH-PAL")
-      )
+      page
+        .marchandiseSelectOptions()
+        .some((option) => option.label.includes("MARCH-PAL"))
     ).toBe(true);
     http.verify();
   });
@@ -197,7 +199,6 @@ describe("DossierCreatePage", () => {
             clientId: "11111111-1111-1111-1111-111111111111",
             dateSouhaitee: "2026-09-10",
             id: "cccccccc-cccc-cccc-cccc-cccccccccccc",
-            prixNegocie: { devise: "EUR", montant: 1500 },
             lignes: [
               {
                 marchandiseId: "dddddddd-dddd-dddd-dddd-dddddddddddd",
@@ -206,6 +207,7 @@ describe("DossierCreatePage", () => {
                 volumeM3: 2.5,
               },
             ],
+            prixNegocie: { devise: "EUR", montant: 1500 },
             reference: "CMD-2026-00001",
             statut: "CONFIRMEE",
           },
@@ -246,9 +248,7 @@ describe("DossierCreatePage", () => {
     await fixture.whenStable();
     fixture.detectChanges();
 
-    expect(compiled.textContent).toContain(
-      "Certains champs sont à corriger."
-    );
+    expect(compiled.textContent).toContain("Certains champs sont à corriger.");
     expect(compiled.textContent).toContain(
       "La commande confirmée est obligatoire."
     );

@@ -202,7 +202,7 @@ export interface NavDestinationGroup {
 }
 
 export function destinationNavGroupsForRoles(
-  roles: readonly Role[],
+  roles: readonly Role[]
 ): NavDestinationGroup[] {
   const buckets = new Map<NavSectionName, WorkDestination[]>();
 
@@ -215,6 +215,6 @@ export function destinationNavGroupsForRoles(
 
   return NAV_SECTION_DISPLAY_ORDER.flatMap((section) => {
     const items = buckets.get(section);
-    return items && items.length > 0 ? [{ section, items }] : [];
+    return items && items.length > 0 ? [{ items, section }] : [];
   });
 }

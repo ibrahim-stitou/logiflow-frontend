@@ -40,7 +40,8 @@ export interface VerifierAjoutDossierResult {
 export function deviationAjoutDossierMessage(
   deviation: VerifierAjoutDossierDeviation
 ): string {
-  const libellePoint = deviation.point === "pickup" ? "chargement" : "déchargement";
+  const libellePoint =
+    deviation.point === "pickup" ? "chargement" : "déchargement";
   return `Ce point de ${libellePoint} est à ${deviation.detourKm.toFixed(1)} km / ${deviation.detourPercent.toFixed(1)} % hors itinéraire, au-delà de la limite de ${deviation.maxAllowedPercent.toFixed(1)} %.`;
 }
 

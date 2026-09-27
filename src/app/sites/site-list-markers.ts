@@ -1,6 +1,6 @@
+import type { GeoMapMarker } from "../shared/ui/geo-markers-map";
 import type { Site } from "./site";
 import { isValidLocalisation } from "./site-localisation";
-import type { GeoMapMarker } from "../shared/ui/geo-markers-map";
 
 /** Builds map markers for the sites currently visible on the list page. */
 export function siteListMarkers(sites: readonly Site[]): GeoMapMarker[] {

@@ -7,11 +7,11 @@ import {
   inject,
   input,
   ViewEncapsulation,
-} from '@angular/core';
+} from "@angular/core";
 
-import type { ClassValue } from 'clsx';
+import type { ClassValue } from "clsx";
 
-import { mergeClasses } from '@/shared/utils/merge-classes';
+import { mergeClasses } from "@/shared/utils/merge-classes";
 
 import {
   inputGroupAddonVariants,
@@ -21,93 +21,108 @@ import {
   type ZardInputGroupAddonAlignVariants,
   type ZardInputGroupButtonSizeVariants,
   type ZardInputGroupButtonVariantVariants,
-} from './input-group.variants';
+} from "./input-group.variants";
 
 @Component({
-  selector: 'z-input-group, [z-input-group]',
-  template: '<ng-content />',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
+  exportAs: "zInputGroup",
   host: {
-    role: 'group',
-    'data-slot': 'input-group',
-    '[class]': 'classes()',
+    "[class]": "classes()",
+    "data-slot": "input-group",
+    role: "group",
   },
-  exportAs: 'zInputGroup',
+  selector: "z-input-group, [z-input-group]",
+  template: "<ng-content />",
 })
 export class ZardInputGroupComponent {
-  readonly class = input<ClassValue>('');
+  readonly class = input<ClassValue>("");
 
-  protected readonly classes = computed(() => mergeClasses(inputGroupVariants(), this.class()));
+  protected readonly classes = computed(() =>
+    mergeClasses(inputGroupVariants(), this.class())
+  );
 }
 
 @Component({
-  selector: 'z-input-group-addon, [z-input-group-addon]',
-  template: '<ng-content />',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
+  exportAs: "zInputGroupAddon",
   host: {
-    role: 'group',
-    'data-slot': 'input-group-addon',
-    '[attr.data-align]': 'zAlign()',
-    '[class]': 'classes()',
-    '(click)': 'onClick($event)',
+    "(click)": "onClick($event)",
+    "[attr.data-align]": "zAlign()",
+    "[class]": "classes()",
+    "data-slot": "input-group-addon",
+    role: "group",
   },
-  exportAs: 'zInputGroupAddon',
+  selector: "z-input-group-addon, [z-input-group-addon]",
+  template: "<ng-content />",
 })
 export class ZardInputGroupAddonComponent {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
-  readonly class = input<ClassValue>('');
-  readonly zAlign = input<ZardInputGroupAddonAlignVariants>('inline-start');
+  readonly class = input<ClassValue>("");
+  readonly zAlign = input<ZardInputGroupAddonAlignVariants>("inline-start");
 
   protected readonly classes = computed(() =>
-    mergeClasses(inputGroupAddonVariants({ zAlign: this.zAlign() }), this.class()),
+    mergeClasses(
+      inputGroupAddonVariants({ zAlign: this.zAlign() }),
+      this.class()
+    )
   );
 
   protected onClick(event: MouseEvent): void {
-    if ((event.target as HTMLElement).closest('button')) {
+    if ((event.target as HTMLElement).closest("button")) {
       return;
     }
 
-    const control = this.elementRef.nativeElement.parentElement?.querySelector('input, textarea') as HTMLElement | null;
+    const control = this.elementRef.nativeElement.parentElement?.querySelector(
+      "input, textarea"
+    ) as HTMLElement | null;
     control?.focus();
   }
 }
 
 @Directive({
-  selector: 'button[z-input-group-button]',
+  exportAs: "zInputGroupButton",
   host: {
-    type: 'button',
-    'data-slot': 'input-group-button',
-    '[attr.data-size]': 'zSize()',
-    '[class]': 'classes()',
+    "[attr.data-size]": "zSize()",
+    "[class]": "classes()",
+    "data-slot": "input-group-button",
+    type: "button",
   },
-  exportAs: 'zInputGroupButton',
+  selector: "button[z-input-group-button]",
 })
 export class ZardInputGroupButtonDirective {
-  readonly class = input<ClassValue>('');
-  readonly zVariant = input<ZardInputGroupButtonVariantVariants>('ghost');
-  readonly zSize = input<ZardInputGroupButtonSizeVariants>('xs');
+  readonly class = input<ClassValue>("");
+  readonly zVariant = input<ZardInputGroupButtonVariantVariants>("ghost");
+  readonly zSize = input<ZardInputGroupButtonSizeVariants>("xs");
 
   protected readonly classes = computed(() =>
-    mergeClasses(inputGroupButtonVariants({ zVariant: this.zVariant(), zSize: this.zSize() }), this.class()),
+    mergeClasses(
+      inputGroupButtonVariants({
+        zSize: this.zSize(),
+        zVariant: this.zVariant(),
+      }),
+      this.class()
+    )
   );
 }
 
 @Component({
-  selector: 'z-input-group-text, span[z-input-group-text]',
-  template: '<ng-content />',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
+  exportAs: "zInputGroupText",
   host: {
-    'data-slot': 'input-group-text',
-    '[class]': 'classes()',
+    "[class]": "classes()",
+    "data-slot": "input-group-text",
   },
-  exportAs: 'zInputGroupText',
+  selector: "z-input-group-text, span[z-input-group-text]",
+  template: "<ng-content />",
 })
 export class ZardInputGroupTextComponent {
-  readonly class = input<ClassValue>('');
+  readonly class = input<ClassValue>("");
 
-  protected readonly classes = computed(() => mergeClasses(inputGroupTextVariants(), this.class()));
+  protected readonly classes = computed(() =>
+    mergeClasses(inputGroupTextVariants(), this.class())
+  );
 }

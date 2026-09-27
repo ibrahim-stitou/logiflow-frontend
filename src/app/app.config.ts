@@ -4,7 +4,6 @@ import {
   provideAppInitializer,
   provideBrowserGlobalErrorListeners,
 } from "@angular/core";
-import { ZardDarkMode } from "@/shared/services/dark-mode";
 import {
   provideRouter,
   withComponentInputBinding,
@@ -12,8 +11,9 @@ import {
 } from "@angular/router";
 import { provideZardCharts } from "@/shared/components/chart/chart-echarts.provider";
 import { provideZard } from "@/shared/core/provider/providezard";
-import { provideLogiflowAuth } from "./core/auth/provide-logiflow-auth";
+import { ZardDarkMode } from "@/shared/services/dark-mode";
 import { routes } from "./app.routes";
+import { provideLogiflowAuth } from "./core/auth/provide-logiflow-auth";
 
 export const appConfig: ApplicationConfig = {
   providers: [

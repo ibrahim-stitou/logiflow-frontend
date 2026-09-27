@@ -5,11 +5,11 @@ export interface DemoAuthConfig {
 }
 
 export interface KeycloakAuthConfig {
-  mode: "keycloak";
   authority: string;
   clientId: string;
-  redirectUrl: string;
+  mode: "keycloak";
   postLogoutRedirectUri: string;
+  redirectUrl: string;
   scope: string;
 }
 

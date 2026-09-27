@@ -1,3 +1,4 @@
+// biome-ignore lint/suspicious/noDeprecatedImports: prix négocié encore en EUR côté API (migration MAD à part).
 import { eurMoney, formatMoney, type Money } from "../core/api/money";
 
 export { formatMoney, type Money };
@@ -151,7 +152,10 @@ export function formatCommandeLabel(
 
 export function commandeLabelFromLookup(
   commandeId: string,
-  commandesById: ReadonlyMap<string, Pick<Commande, "reference" | "dateSouhaitee">>
+  commandesById: ReadonlyMap<
+    string,
+    Pick<Commande, "reference" | "dateSouhaitee">
+  >
 ): string {
   const commande = commandesById.get(commandeId);
   return commande ? formatCommandeLabel(commande) : commandeId;

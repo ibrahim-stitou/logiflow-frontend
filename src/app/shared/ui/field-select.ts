@@ -9,14 +9,15 @@ import {
   signal,
   ViewEncapsulation,
 } from "@angular/core";
-import { NG_VALUE_ACCESSOR, type ControlValueAccessor } from "@angular/forms";
-import type { ClassValue } from "clsx";
+import { type ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { NgIcon } from "@ng-icons/core";
-import {
-  ZardSelectItemComponent,
-} from "@/shared/components/select/select-item.component";
+import type { ClassValue } from "clsx";
 import { ZardSelectComponent } from "@/shared/components/select/select.component";
-import type { ZardSelectPositionVariants, ZardSelectPreferOverlaySideVariants } from "@/shared/components/select/select.variants";
+import type {
+  ZardSelectPositionVariants,
+  ZardSelectPreferOverlaySideVariants,
+} from "@/shared/components/select/select.variants";
+import { ZardSelectItemComponent } from "@/shared/components/select/select-item.component";
 import { mergeClasses } from "@/shared/utils/merge-classes";
 
 /** Sentinel for optional selects (Zard rejects empty string item values). */
@@ -50,8 +51,15 @@ export function withNoneSelectOption(
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  selector: "app-field-select",
   imports: [NgIcon, ZardSelectComponent, ZardSelectItemComponent],
+  providers: [
+    {
+      multi: true,
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => FieldSelectComponent),
+    },
+  ],
+  selector: "app-field-select",
   template: `
     <div class="relative w-full">
       @if (selectedOption()?.icon; as iconName) {
@@ -85,20 +93,14 @@ export function withNoneSelectOption(
       </z-select>
     </div>
   `,
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => FieldSelectComponent),
-      multi: true,
-    },
-  ],
 })
 export class FieldSelectComponent implements ControlValueAccessor {
   readonly inputId = input.required<string>();
   readonly placeholder = input("Choisir…");
   readonly invalid = input<boolean | null>(null);
   readonly position = input<ZardSelectPositionVariants>("popper");
-  readonly preferOverlaySide = input<ZardSelectPreferOverlaySideVariants>("auto");
+  readonly preferOverlaySide =
+    input<ZardSelectPreferOverlaySideVariants>("auto");
   readonly inputClass = input<ClassValue>("");
   readonly options = input<readonly FieldSelectOption[]>([]);
   /** Standalone binding when `[formField]` is not used. */
@@ -111,9 +113,7 @@ export class FieldSelectComponent implements ControlValueAccessor {
   protected readonly selectClasses = computed(() =>
     mergeClasses(
       "w-full [&_[data-slot=select-trigger]]:min-h-11 [&_[data-slot=select-trigger]]:h-auto",
-      this.selectedOption()?.icon
-        ? "[&_[data-slot=select-trigger]]:pl-10"
-        : "",
+      this.selectedOption()?.icon ? "[&_[data-slot=select-trigger]]:pl-10" : "",
       this.inputClass()
     )
   );

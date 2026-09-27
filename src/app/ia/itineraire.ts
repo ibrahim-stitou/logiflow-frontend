@@ -1,6 +1,6 @@
 import type { Dossier } from "../dossiers/dossier";
-import { isValidLocalisation } from "../sites/site-localisation";
 import type { Site } from "../sites/site";
+import { isValidLocalisation } from "../sites/site-localisation";
 
 export interface ItinerairePoint {
   latitude: number;
@@ -33,15 +33,18 @@ export interface ItineraireCalcule {
 
 const SEGMENT_KIND_LABEL: Record<string, string> = {
   CHARGEMENT: "Chargement",
-  ESCALE: "Escale",
   DECHARGEMENT: "Déchargement",
+  ESCALE: "Escale",
 };
 
 /** Ordered geolocated stops from selected dossiers (min. 2 for IA routing). */
 export function buildItinerairePoints(
   dossierIds: readonly string[],
   dossiersById: ReadonlyMap<string, Pick<Dossier, "segments">>,
-  sitesById: ReadonlyMap<string, Pick<Site, "code" | "libelle" | "localisation">>
+  sitesById: ReadonlyMap<
+    string,
+    Pick<Site, "code" | "libelle" | "localisation">
+  >
 ): ItinerairePoint[] {
   const points: ItinerairePoint[] = [];
   let lastSiteId: string | null = null;
@@ -84,7 +87,9 @@ export function buildItinerairePoints(
   return points;
 }
 
-export function canCalculerItineraire(points: readonly ItinerairePoint[]): boolean {
+export function canCalculerItineraire(
+  points: readonly ItinerairePoint[]
+): boolean {
   return points.length >= 2;
 }
 

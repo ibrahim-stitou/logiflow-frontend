@@ -28,7 +28,8 @@ describe("MarchandiseDetailPage", () => {
     http
       .expectOne(
         (req) =>
-          req.url === "/api/v1/marchandises/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+          req.url ===
+          "/api/v1/marchandises/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
       )
       .flush({
         actif: true,

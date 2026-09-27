@@ -608,6 +608,8 @@ export class VoyageDetailPage {
         return `${base} bg-brake/10 text-brake`;
       case "muted":
         return `${base} bg-canvas text-muted`;
+      default:
+        return base;
     }
   }
 
@@ -635,6 +637,8 @@ export class VoyageDetailPage {
         return `${base} bg-primary text-primary-foreground shadow-[0_1px_2px_oklch(0_0_0/0.08),0_4px_12px_color-mix(in_oklch,var(--color-pine)_25%,transparent)]`;
       case "future":
         return `${base} border border-line/80 bg-canvas text-muted`;
+      default:
+        return base;
     }
   }
 

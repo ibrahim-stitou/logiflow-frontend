@@ -71,7 +71,10 @@ function readCorrelationId(
   if (fromHeader && fromHeader.trim().length > 0) {
     return fromHeader.trim();
   }
-  if (typeof body?.correlationId === "string" && body.correlationId.length > 0) {
+  if (
+    typeof body?.correlationId === "string" &&
+    body.correlationId.length > 0
+  ) {
     return body.correlationId;
   }
   return null;
@@ -105,7 +108,10 @@ function validationMessage(violations: readonly string[]): string {
   return `Saisie invalide : ${violations.join(" · ")}.`;
 }
 
-function serverErrorMessage(status: number, correlationId: string | null): string {
+function serverErrorMessage(
+  status: number,
+  correlationId: string | null
+): string {
   const retry =
     "Le serveur a rencontré un problème. Attends quelques secondes, puis réessaie.";
   if (correlationId) {
@@ -130,7 +136,10 @@ function serviceUnavailableMessage(
   return correlationId ? `${base} (réf. ${correlationId})` : base;
 }
 
-function fallbackForStatus(status: number, correlationId: string | null): string {
+function fallbackForStatus(
+  status: number,
+  correlationId: string | null
+): string {
   switch (status) {
     case 400:
       return "Requête invalide. Vérifie les champs saisis puis réessaie.";

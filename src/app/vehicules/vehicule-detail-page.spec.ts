@@ -1,7 +1,9 @@
+import type { HttpRequest } from "@angular/common/http";
 import { provideHttpClient } from "@angular/common/http";
 import {
   HttpTestingController,
   provideHttpClientTesting,
+  type TestRequest,
 } from "@angular/common/http/testing";
 import { TestBed } from "@angular/core/testing";
 import { provideRouter } from "@angular/router";
@@ -16,6 +18,28 @@ const PAGE_VIDE = {
   totalElements: 0,
   totalPages: 0,
 };
+const ESSAIS_MAX = 50;
+
+/**
+ * Attend qu'une requête soit émise : les sections de la page (documents, maintenance) ne sont
+ * rendues, et ne chargent leurs données, qu'une fois le véhicule reçu ; le nombre de cycles
+ * nécessaires varie selon la machine.
+ */
+async function requeteAttendue(
+  http: HttpTestingController,
+  critere: (req: HttpRequest<unknown>) => boolean
+): Promise<TestRequest> {
+  for (let essai = 0; essai < ESSAIS_MAX; essai += 1) {
+    const [trouvee] = http.match(critere);
+    if (trouvee) {
+      return trouvee;
+    }
+    // biome-ignore lint/performance/noAwaitInLoops: attente volontairement séquentielle (un cycle à la fois).
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    TestBed.tick();
+  }
+  return http.expectOne(critere);
+}
 
 describe("VehiculeDetailPage", () => {
   beforeEach(async () => {
@@ -32,57 +56,57 @@ describe("VehiculeDetailPage", () => {
 
   it("renders the vehicule returned by the API", async () => {
     const fixture = TestBed.createComponent(VehiculeDetailPage);
-    fixture.componentRef.setInput("id", "33333333-3333-3333-3333-333333333333");
+    fixture.componentRef.setInput("id", VEHICULE_ID);
     fixture.detectChanges();
 
     const http = TestBed.inject(HttpTestingController);
-    http
-      .expectOne(
-        (req) =>
-          req.url === "/api/v1/vehicules/33333333-3333-3333-3333-333333333333"
+    (
+      await requeteAttendue(
+        http,
+        (req) => req.url === `/api/v1/vehicules/${VEHICULE_ID}`
       )
-      .flush({
-        chargeUtileKg: 9000,
-        heuresMoteur: 12,
-        id: "33333333-3333-3333-3333-333333333333",
-        immatriculation: "AB-123-CD",
-        kilometrage: 40_000,
-        ptacKg: 19_000,
-        statut: "DISPONIBLE",
-        type: "TRACTEUR",
-      });
-    // La section documents n'est rendue (et ne charge ses documents) qu'une fois le véhicule reçu.
-    await Promise.resolve();
-    TestBed.tick();
-    http
-      .expectOne(
+    ).flush({
+      chargeUtileKg: 9000,
+      heuresMoteur: 12,
+      id: VEHICULE_ID,
+      immatriculation: "AB-123-CD",
+      kilometrage: 40_000,
+      ptacKg: 19_000,
+      statut: "DISPONIBLE",
+      type: "TRACTEUR",
+    });
+
+    (
+      await requeteAttendue(
+        http,
+        (req) =>
+          req.url === "/api/v1/scores-sante/dernier" &&
+          req.params.get("vehiculeId") === VEHICULE_ID
+      )
+    ).flush(null);
+
+    (
+      await requeteAttendue(
+        http,
         (req) =>
           req.url === "/api/v1/documents" &&
           req.params.get("typeEntite") === "VEHICULE" &&
-          req.params.get("entiteId") === "33333333-3333-3333-3333-333333333333"
+          req.params.get("entiteId") === VEHICULE_ID
       )
-      .flush([]);
+    ).flush([]);
 
-    http
-      .expectOne(
-        (req) =>
-          req.url === "/api/v1/scores-sante/dernier" &&
-          req.params.get("vehiculeId") ===
-            "33333333-3333-3333-3333-333333333333"
-      )
-      .flush(null);
-
-    // Section maintenance du véhicule (rendue une fois le véhicule reçu).
     for (const url of [
       "/api/v1/maintenance/plans",
       "/api/v1/maintenance/ordres-travail",
       "/api/v1/maintenance/sinistres",
     ]) {
-      http
-        .expectOne(
+      // biome-ignore lint/performance/noAwaitInLoops: requêtes servies l'une après l'autre.
+      (
+        await requeteAttendue(
+          http,
           (req) => req.url === url && req.params.get("enginId") === VEHICULE_ID
         )
-        .flush(PAGE_VIDE);
+      ).flush(PAGE_VIDE);
     }
 
     await fixture.whenStable();

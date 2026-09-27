@@ -42,6 +42,9 @@ describe("VehiculeDetailPage", () => {
         statut: "DISPONIBLE",
         type: "TRACTEUR",
       });
+    // La section documents n'est rendue (et ne charge ses documents) qu'une fois le véhicule reçu.
+    await Promise.resolve();
+    TestBed.tick();
     http
       .expectOne(
         (req) =>
